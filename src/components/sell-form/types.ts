@@ -34,6 +34,9 @@ export interface FormData {
   email: string;
   zip: string;
   loanStatus: string;
+  loanCompany: string;
+  loanBalance: string;
+  loanPayment: string;
   // Next Steps
   nextStep: string;
 }
@@ -64,6 +67,9 @@ export const initialFormData: FormData = {
   email: "",
   zip: "",
   loanStatus: "",
+  loanCompany: "",
+  loanBalance: "",
+  loanPayment: "",
   nextStep: "",
 };
 

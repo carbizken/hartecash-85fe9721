@@ -80,6 +80,9 @@ const SellCarForm = () => {
           email: formData.email || null,
           zip: formData.zip || null,
           loan_status: formData.loanStatus || null,
+          loan_company: formData.loanCompany || null,
+          loan_balance: formData.loanBalance || null,
+          loan_payment: formData.loanPayment || null,
           next_step: formData.nextStep || null,
         })
         .select("token")

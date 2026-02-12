@@ -51,6 +51,34 @@ const StepYourDetails = ({ formData, update }: Props) => (
         ))}
       </div>
     </FormField>
+    {formData.loanStatus === "Loan" && (
+      <>
+        <FormField label="Loan Company">
+          <Input
+            placeholder="e.g. Chase Auto, Capital One"
+            value={formData.loanCompany}
+            onChange={(e) => update("loanCompany", e.target.value)}
+            className="py-3.5 px-4 text-base border-2 border-input focus:border-accent focus:ring-accent/10"
+          />
+        </FormField>
+        <FormField label="Remaining Balance">
+          <Input
+            placeholder="$12,000"
+            value={formData.loanBalance}
+            onChange={(e) => update("loanBalance", e.target.value)}
+            className="py-3.5 px-4 text-base border-2 border-input focus:border-accent focus:ring-accent/10"
+          />
+        </FormField>
+        <FormField label="Monthly Payment">
+          <Input
+            placeholder="$350"
+            value={formData.loanPayment}
+            onChange={(e) => update("loanPayment", e.target.value)}
+            className="py-3.5 px-4 text-base border-2 border-input focus:border-accent focus:ring-accent/10"
+          />
+        </FormField>
+      </>
+    )}
   </>
 );
 

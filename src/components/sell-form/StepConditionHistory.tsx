@@ -88,8 +88,8 @@ const StepConditionHistory = ({ formData, updateArray, update }: Props) => {
   <>
     <Dialog open={showKbb} onOpenChange={setShowKbb}>
       <DialogContent className="max-h-[80vh] overflow-y-auto p-0">
-        <div className="sticky top-0 z-10 bg-primary text-primary-foreground px-6 py-4 rounded-t-lg">
-          <DialogTitle className="text-lg font-bold">Kelley Blue Book® Condition Definitions</DialogTitle>
+        <div className="sticky top-0 z-10 bg-primary text-primary-foreground px-6 py-4 rounded-t-lg text-center">
+          <DialogTitle className="text-2xl font-bold">Kelley Blue Book® Condition Definitions</DialogTitle>
         </div>
         <div className="px-6 pt-2">
         <div className="space-y-5 mt-2">

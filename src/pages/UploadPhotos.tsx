@@ -28,10 +28,9 @@ const UploadPhotos = () => {
     const fetchSubmission = async () => {
       if (!token) { setError("Invalid link."); setLoading(false); return; }
       const { data, error: err } = await supabase
-        .rpc("get_submission_by_token", { _token: token })
-        .maybeSingle();
-      if (err || !data) { setError("Submission not found. Please check your link."); }
-      else { setSubmission(data); }
+        .rpc("get_submission_by_token", { _token: token });
+      if (err || !data || data.length === 0) { setError("Submission not found. Please check your link."); }
+      else { setSubmission(data[0]); }
       setLoading(false);
     };
     fetchSubmission();

@@ -32,8 +32,10 @@ const SellCarForm = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (step > 0) {
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (step > 0 && formRef.current) {
+      const headerHeight = document.querySelector('header')?.getBoundingClientRect().height || 80;
+      const formTop = formRef.current.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: formTop - headerHeight - 8, behavior: "smooth" });
     }
   }, [step]);
 

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import loadingCar from "@/assets/loading-car.svg";
+import loadingCar from "@/assets/car-option-3.jpg";
 
 const UploadSkeleton = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">

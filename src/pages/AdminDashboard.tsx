@@ -807,7 +807,7 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={harteLogo} alt="Harte Auto Group" className="h-10 w-auto" />
             <div>
@@ -824,7 +824,7 @@ const AdminDashboard = () => {
       </header>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 py-6">
         <Tabs defaultValue="submissions">
           <TabsList className="mb-4">
             <TabsTrigger value="submissions">Submissions ({total})</TabsTrigger>

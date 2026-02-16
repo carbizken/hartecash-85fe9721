@@ -202,6 +202,44 @@ export default function PitchDeck() {
     }
   }, [isPresenting]);
 
+  // Set OG meta tags for pitch page
+  useEffect(() => {
+    const ogTags: Record<string, string> = {
+      "og:title": "The Future of Vehicle Acquisition | Harte Auto Group",
+      "og:description": "A full-stack, dealer-branded platform that captures, manages, and converts direct consumer vehicle purchases — end to end.",
+      "og:image": `${window.location.origin}/og-pitch.jpg`,
+      "og:url": `${window.location.origin}/pitch`,
+      "twitter:title": "The Future of Vehicle Acquisition | Harte Auto Group",
+      "twitter:description": "A full-stack, dealer-branded platform for direct consumer vehicle purchases.",
+      "twitter:image": `${window.location.origin}/og-pitch.jpg`,
+    };
+    const originals: Record<string, string | null> = {};
+    Object.entries(ogTags).forEach(([prop, content]) => {
+      const isOg = prop.startsWith("og:");
+      const selector = isOg ? `meta[property="${prop}"]` : `meta[name="${prop}"]`;
+      let el = document.querySelector(selector) as HTMLMetaElement | null;
+      originals[prop] = el?.getAttribute("content") ?? null;
+      if (!el) {
+        el = document.createElement("meta");
+        if (isOg) el.setAttribute("property", prop);
+        else el.setAttribute("name", prop);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    });
+    document.title = "The Future of Vehicle Acquisition | Harte Auto Group";
+    return () => {
+      Object.entries(originals).forEach(([prop, original]) => {
+        const isOg = prop.startsWith("og:");
+        const selector = isOg ? `meta[property="${prop}"]` : `meta[name="${prop}"]`;
+        const el = document.querySelector(selector) as HTMLMetaElement | null;
+        if (el && original !== null) el.setAttribute("content", original);
+        else if (el && original === null) el.remove();
+      });
+      document.title = "Sell Your Car - Get Cash Offer in 2 Minutes | Harte Auto Group";
+    };
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!isPresenting) return;

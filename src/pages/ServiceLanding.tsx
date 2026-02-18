@@ -532,47 +532,42 @@ const ServiceLanding = () => {
                     </div>
                     {/* Messages */}
                     <div className="px-3 py-4 space-y-2.5 min-h-[260px]">
-                      {/* Inbound from dealer */}
-                      <div className="flex justify-start">
-                        <div className="max-w-[85%] bg-[hsl(222,47%,18%)] border border-[hsl(217,33%,22%)] rounded-2xl rounded-tl-sm px-3 py-2.5">
-                          <p className="text-[11px] text-[hsl(210,40%,92%)] leading-relaxed">
-                            Hi Sarah! 👋 Your 2021 Toyota RAV4 is ready for pickup after today's oil change.
-                          </p>
-                          <p className="text-[10px] text-[hsl(215,20%,45%)] mt-1">10:02 AM</p>
-                        </div>
-                      </div>
+                      {/* Service reminder */}
                       <div className="flex justify-start">
                         <div className="max-w-[90%] bg-[hsl(222,47%,18%)] border border-[hsl(217,33%,22%)] rounded-2xl rounded-tl-sm px-3 py-2.5">
                           <p className="text-[11px] text-[hsl(210,40%,92%)] leading-relaxed">
-                            While you're here — did you know your RAV4 could be worth <span className="font-bold text-[hsl(210,80%,65%)]">$24,000–$27,000</span> right now? 🚘💰
+                            Hi Sarah 👋 — reminder that your 2021 Toyota RAV4 is in for service tomorrow, Fri Feb 21 at 9:30 AM at Harte Auto.
+                          </p>
+                          <p className="text-[10px] text-[hsl(215,20%,45%)] mt-1">Thu 4:12 PM</p>
+                        </div>
+                      </div>
+                      {/* Appraisal offer in same thread */}
+                      <div className="flex justify-start">
+                        <div className="max-w-[90%] bg-[hsl(222,47%,18%)] border border-[hsl(217,33%,22%)] rounded-2xl rounded-tl-sm px-3 py-2.5">
+                          <p className="text-[11px] text-[hsl(210,40%,92%)] leading-relaxed">
+                            While you're in — your RAV4 could be worth <span className="font-bold text-[hsl(210,80%,65%)]">$24K–$27K</span> right now. 🚘💰
                           </p>
                           <p className="text-[11px] text-[hsl(210,40%,85%)] leading-relaxed mt-1.5">
-                            Reply <span className="font-bold text-[hsl(160,60%,60%)]">YES</span> to get your free appraisal offer — takes 2 mins, no obligation.
+                            Want a free appraisal during your visit? Tap to opt in — 2 mins, no obligation:
                           </p>
-                          <p className="text-[10px] text-[hsl(215,20%,45%)] mt-1">10:02 AM</p>
-                        </div>
-                      </div>
-                      {/* Customer replies YES */}
-                      <div className="flex justify-end">
-                        <div className="max-w-[60%] bg-[hsl(210,100%,30%)] rounded-2xl rounded-tr-sm px-3 py-2.5">
-                          <p className="text-[11px] text-white font-semibold">YES</p>
-                          <p className="text-[10px] text-blue-200/70 mt-1">10:04 AM</p>
-                        </div>
-                      </div>
-                      {/* Dealer sends link */}
-                      <div className="flex justify-start">
-                        <div className="max-w-[90%] bg-[hsl(222,47%,18%)] border border-[hsl(217,33%,22%)] rounded-2xl rounded-tl-sm px-3 py-2.5">
-                          <p className="text-[11px] text-[hsl(210,40%,92%)] leading-relaxed">
-                            Great! Here's your personal appraisal link 👇
-                          </p>
+                          {/* Personalized deep link */}
                           <div className="mt-2 bg-[hsl(210,100%,20%)]/30 border border-[hsl(210,100%,30%)]/40 rounded-xl px-2.5 py-2">
-                            <p className="text-[10px] text-[hsl(210,80%,70%)] font-bold">hartecash.com/service</p>
-                            <p className="text-[9px] text-[hsl(215,20%,50%)] mt-0.5">Tap to see your offer →</p>
+                            <p className="text-[9px] text-[hsl(210,80%,70%)] font-bold break-all leading-snug">
+                              hartecash.com/service?vin=2T3BFREV5MW123456<br />&date=2026-02-21&time=9%3A30+AM
+                            </p>
+                            <p className="text-[9px] text-[hsl(215,20%,50%)] mt-0.5">Your vehicle & appt are pre-filled ✓</p>
                           </div>
                           <p className="text-[9px] text-[hsl(215,20%,40%)] mt-2 leading-relaxed">
                             Msg&Data rates may apply. Reply STOP to opt out.
                           </p>
-                          <p className="text-[10px] text-[hsl(215,20%,45%)] mt-1">10:04 AM</p>
+                          <p className="text-[10px] text-[hsl(215,20%,45%)] mt-1">Thu 4:12 PM</p>
+                        </div>
+                      </div>
+                      {/* Customer taps link */}
+                      <div className="flex justify-end">
+                        <div className="max-w-[75%] bg-[hsl(160,60%,20%)]/40 border border-[hsl(160,60%,35%)]/40 rounded-2xl rounded-tr-sm px-3 py-2">
+                          <p className="text-[10px] text-[hsl(160,60%,70%)] font-semibold">✓ Link opened — form pre-filled</p>
+                          <p className="text-[9px] text-[hsl(215,20%,45%)] mt-0.5">Fri 8:58 AM</p>
                         </div>
                       </div>
                     </div>

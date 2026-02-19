@@ -9,7 +9,18 @@ import {
   GraduationCap, BarChart3, Repeat, Quote, Linkedin,
 } from "lucide-react";
 import kenPortrait from "@/assets/ken-portrait.png";
+import kenHyundai from "@/assets/ken-hyundai.png";
+import kenInfiniti from "@/assets/ken-infiniti.png";
+import kenNissan from "@/assets/ken-nissan.png";
+import kenLexus from "@/assets/ken-lexus.png";
+import kenMercedes from "@/assets/ken-mercedes.png";
+import kenHonda from "@/assets/ken-honda.png";
+import kenKia from "@/assets/ken-kia.png";
+import kenChevrolet from "@/assets/ken-chevrolet.png";
+import kenToyota from "@/assets/ken-toyota.png";
 import presenterLogo from "@/assets/pitch/pitch-top-logo.png";
+
+const HERO_IMAGES = [kenNissan, kenHyundai, kenInfiniti, kenLexus, kenMercedes, kenHonda, kenKia, kenChevrolet, kenToyota];
 
 /* ─── Slide IDs ─── */
 const SLIDES = ["hero", "stats", "process", "turnarounds", "journey", "leadership", "philosophy", "recognition", "platform", "cta"] as const;
@@ -127,6 +138,12 @@ function MetricCard({ value, prefix, suffix, label }: { value: number; prefix?: 
 
 /* ═══════════════════════════ MAIN ═══════════════════════════ */
 export default function KenPage() {
+  const [heroImgIdx, setHeroImgIdx] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setHeroImgIdx(i => (i + 1) % HERO_IMAGES.length), 4000);
+    return () => clearInterval(timer);
+  }, []);
+
   const [isPresenting, setIsPresenting] = useState(false);
   const [idx, setIdx] = useState(0);
   const [activeSection, setActiveSection] = useState<SlideId>("hero");
@@ -251,7 +268,17 @@ export default function KenPage() {
               <motion.div variants={fadeUp} custom={0} className="shrink-0">
                 <div className="relative">
                   <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-blue-500/25 to-indigo-500/25 blur-2xl" />
-                  <img src={kenPortrait} alt="Ken Criscione" className="relative w-52 sm:w-72 md:w-80 lg:w-[440px] xl:w-[480px] rounded-3xl object-cover shadow-2xl shadow-blue-900/40 border border-white/10" />
+                  <div className="relative w-52 sm:w-72 md:w-80 lg:w-[440px] xl:w-[480px] aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/40 border border-white/10">
+                    {HERO_IMAGES.map((src, i) => (
+                      <img
+                        key={i}
+                        src={src}
+                        alt="Ken Criscione"
+                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out"
+                        style={{ opacity: heroImgIdx === i ? 1 : 0 }}
+                      />
+                    ))}
+                  </div>
                 </div>
               </motion.div>
               {/* Text */}

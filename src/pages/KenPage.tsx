@@ -268,13 +268,13 @@ export default function KenPage() {
               <motion.div variants={fadeUp} custom={0} className="shrink-0">
                 <div className="relative">
                   <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-blue-500/25 to-indigo-500/25 blur-2xl" />
-                  <div className="relative w-52 sm:w-72 md:w-80 lg:w-[440px] xl:w-[480px] aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/40 border border-white/10">
+                  <div className="relative w-52 sm:w-72 md:w-80 lg:w-[440px] xl:w-[480px] rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/40 border border-white/10">
                     {HERO_IMAGES.map((src, i) => (
                       <img
                         key={i}
                         src={src}
                         alt="Ken Criscione"
-                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out"
+                        className={`w-full h-auto rounded-3xl object-contain transition-opacity duration-[1500ms] ease-in-out ${i === 0 ? "relative" : "absolute inset-0"}`}
                         style={{ opacity: heroImgIdx === i ? 1 : 0 }}
                       />
                     ))}

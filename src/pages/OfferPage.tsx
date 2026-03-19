@@ -187,11 +187,21 @@ const OfferPage = () => {
                 transition={{ duration: 0.2 }}
                 className="text-center"
               >
-                <p className="text-xs text-muted-foreground mb-1">Cash Offer for Your {vehicleStr}</p>
-                <p className="text-4xl font-extrabold text-accent tracking-tight">
-                  ${cashOffer.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <p className="text-xs text-muted-foreground mb-1">
+                  {isEstimate ? "Estimated Cash Offer" : "Cash Offer"} for Your {vehicleStr}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">Subject to in-person inspection</p>
+                {isEstimate ? (
+                  <p className="text-4xl font-extrabold text-accent tracking-tight">
+                    ${estimateLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – ${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                  </p>
+                ) : (
+                  <p className="text-4xl font-extrabold text-accent tracking-tight">
+                    ${cashOffer.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  {isEstimate ? "Preliminary estimate • Final offer after review" : "Subject to in-person inspection"}
+                </p>
               </motion.div>
             ) : (
               <motion.div
@@ -202,10 +212,18 @@ const OfferPage = () => {
                 transition={{ duration: 0.2 }}
                 className="text-center"
               >
-                <p className="text-xs text-muted-foreground mb-1">Trade-In Total Value</p>
-                <p className="text-4xl font-extrabold text-success tracking-tight">
-                  ${tradeInValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <p className="text-xs text-muted-foreground mb-1">
+                  {isEstimate ? "Estimated Trade-In Total Value" : "Trade-In Total Value"}
                 </p>
+                {isEstimate ? (
+                  <p className="text-4xl font-extrabold text-success tracking-tight">
+                    ${tradeInValueLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – ${tradeInValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                  </p>
+                ) : (
+                  <p className="text-4xl font-extrabold text-success tracking-tight">
+                    ${tradeInValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
                   <TrendingUp className="w-3 h-3" />
                   Includes ${taxSavings.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sales tax credit

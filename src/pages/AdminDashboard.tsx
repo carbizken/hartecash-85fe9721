@@ -1048,6 +1048,12 @@ const AdminDashboard = () => {
               <ShieldCheck className="w-4 h-4 mr-1" />
               Consent Log
             </TabsTrigger>
+            {canManageAccess && (
+              <TabsTrigger value="offer-settings">
+                <SlidersHorizontal className="w-4 h-4 mr-1" />
+                Offer Settings
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Analytics Dashboard */}

@@ -19,6 +19,9 @@ interface OfferSubmission {
   exterior_color: string | null;
   overall_condition: string | null;
   offered_price: number | null;
+  estimated_offer_low: number | null;
+  estimated_offer_high: number | null;
+  bb_tradein_avg: number | null;
   token: string;
   zip: string | null;
   vin: string | null;
@@ -80,7 +83,7 @@ const OfferPage = () => {
 
   if (loading) return <PortalSkeleton />;
 
-  if (error || !submission || !submission.offered_price) return (
+  if (error || !submission) return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
       <div className="text-center">
         <div className="text-5xl mb-4">😕</div>
@@ -96,13 +99,33 @@ const OfferPage = () => {
   const s = submission;
   const vehicleStr = [s.vehicle_year, s.vehicle_make, s.vehicle_model].filter(Boolean).join(" ");
   const firstName = s.name?.split(" ")[0] || "";
-  const cashOffer = s.offered_price;
+
+  // Use offered_price (staff-set) or fall back to estimated offer
+  const hasOfferedPrice = !!s.offered_price;
+  const hasEstimate = !!s.estimated_offer_high;
+  const cashOffer = s.offered_price || s.estimated_offer_high || 0;
+  const estimateLow = s.estimated_offer_low || 0;
+  const isEstimate = !hasOfferedPrice && hasEstimate;
+
+  if (cashOffer <= 0) return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+      <div className="text-center">
+        <div className="text-5xl mb-4">😕</div>
+        <h1 className="text-xl font-bold text-foreground mb-2">Offer Not Available</h1>
+        <p className="text-muted-foreground">No offer has been made yet.</p>
+        <Link to="/my-submission" className="text-accent underline mt-4 inline-block text-sm">
+          Check your submission
+        </Link>
+      </div>
+    </div>
+  );
 
   const { state, rate: taxRate } = getTaxRateFromZip(s.zip || "");
   const stateName = state ? STATE_NAMES[state] || state : null;
   const taxPercent = (taxRate * 100).toFixed(2);
   const taxSavings = cashOffer * taxRate;
   const tradeInValue = calcTradeInValue(cashOffer, taxRate);
+  const tradeInValueLow = isEstimate ? calcTradeInValue(estimateLow, taxRate) : tradeInValue;
 
   const handlePrint = () => {
     window.print();
@@ -164,11 +187,21 @@ const OfferPage = () => {
                 transition={{ duration: 0.2 }}
                 className="text-center"
               >
-                <p className="text-xs text-muted-foreground mb-1">Cash Offer for Your {vehicleStr}</p>
-                <p className="text-4xl font-extrabold text-accent tracking-tight">
-                  ${cashOffer.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <p className="text-xs text-muted-foreground mb-1">
+                  {isEstimate ? "Estimated Cash Offer" : "Cash Offer"} for Your {vehicleStr}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">Subject to in-person inspection</p>
+                {isEstimate ? (
+                  <p className="text-4xl font-extrabold text-accent tracking-tight">
+                    ${estimateLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – ${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                  </p>
+                ) : (
+                  <p className="text-4xl font-extrabold text-accent tracking-tight">
+                    ${cashOffer.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  {isEstimate ? "Preliminary estimate • Final offer after review" : "Subject to in-person inspection"}
+                </p>
               </motion.div>
             ) : (
               <motion.div
@@ -179,10 +212,18 @@ const OfferPage = () => {
                 transition={{ duration: 0.2 }}
                 className="text-center"
               >
-                <p className="text-xs text-muted-foreground mb-1">Trade-In Total Value</p>
-                <p className="text-4xl font-extrabold text-success tracking-tight">
-                  ${tradeInValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <p className="text-xs text-muted-foreground mb-1">
+                  {isEstimate ? "Estimated Trade-In Total Value" : "Trade-In Total Value"}
                 </p>
+                {isEstimate ? (
+                  <p className="text-4xl font-extrabold text-success tracking-tight">
+                    ${tradeInValueLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – ${tradeInValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                  </p>
+                ) : (
+                  <p className="text-4xl font-extrabold text-success tracking-tight">
+                    ${tradeInValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
                   <TrendingUp className="w-3 h-3" />
                   Includes ${taxSavings.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sales tax credit

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Car, CheckCircle, Circle, Clock,
   DollarSign, Inbox, Search, BadgeDollarSign, CalendarCheck,
-  ClipboardCheck, Handshake, PartyPopper, Printer, type LucideIcon
+  ClipboardCheck, Handshake, PartyPopper, type LucideIcon
 } from "lucide-react";
 import harteLogo from "@/assets/harte-logo.png";
 import { motion } from "framer-motion";
@@ -39,6 +39,9 @@ interface PortalSubmission {
   created_at: string;
   loan_status: string | null;
   token: string;
+  estimated_offer_low: number | null;
+  estimated_offer_high: number | null;
+  bb_tradein_avg: number | null;
 }
 
 interface StageInfo {
@@ -96,52 +99,6 @@ const CustomerPortal = () => {
     };
     fetch();
   }, [token]);
-
-  const handlePrintOffer = () => {
-    if (!submission || !submission.offered_price) return;
-    const s = submission;
-    const vehicleStr = [s.vehicle_year, s.vehicle_make, s.vehicle_model].filter(Boolean).join(" ");
-    const printWindow = window.open("", "_blank", "width=800,height=600");
-    if (!printWindow) return;
-    const html = `<!DOCTYPE html><html><head><title>Cash Offer</title>
-    <style>
-      * { margin:0; padding:0; box-sizing:border-box; }
-      body { font-family: Inter, -apple-system, sans-serif; color:#1a2a3a; background:white; }
-      .header { background:#2a4365; color:white; padding:24px 32px; text-align:center; }
-      .header h1 { font-size:22px; font-weight:700; }
-      .content { padding:32px; max-width:600px; margin:0 auto; }
-      .offer-box { border:3px solid #2a4365; border-radius:12px; padding:24px; text-align:center; margin:24px 0; }
-      .offer-amount { font-size:36px; font-weight:800; color:#2a4365; }
-      .detail { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e2e6ea; font-size:14px; }
-      .detail:last-child { border-bottom:none; }
-      .label { color:#6b7b8d; }
-      .value { font-weight:600; }
-      .footer { text-align:center; margin-top:32px; font-size:12px; color:#6b7b8d; }
-      @page { margin:0.5in; }
-    </style></head><body>
-    <div class="header"><h1>Cash Offer for Your Vehicle</h1></div>
-    <div class="content">
-      <div class="offer-box">
-        <p style="font-size:14px;color:#6b7b8d;margin-bottom:8px;">Our Cash Offer</p>
-        <div class="offer-amount">$${s.offered_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-      </div>
-      <div style="margin-bottom:24px;">
-        <div class="detail"><span class="label">Vehicle</span><span class="value">${vehicleStr}</span></div>
-        <div class="detail"><span class="label">Mileage</span><span class="value">${s.mileage || "N/A"}</span></div>
-        <div class="detail"><span class="label">Color</span><span class="value">${s.exterior_color || "N/A"}</span></div>
-        <div class="detail"><span class="label">Condition</span><span class="value">${s.overall_condition || "N/A"}</span></div>
-        <div class="detail"><span class="label">Customer</span><span class="value">${s.name || "N/A"}</span></div>
-        <div class="detail"><span class="label">Date</span><span class="value">${new Date().toLocaleDateString()}</span></div>
-      </div>
-      <div class="footer">
-        <p>This offer is subject to in-person vehicle inspection and verification of condition.</p>
-        <p style="margin-top:8px;">Harte Auto Group</p>
-      </div>
-    </div></body></html>`;
-    printWindow.document.write(html);
-    printWindow.document.close();
-    setTimeout(() => { printWindow.focus(); printWindow.print(); }, 300);
-  };
 
   if (loading) return <PortalSkeleton />;
 
@@ -204,28 +161,37 @@ const CustomerPortal = () => {
           phone={s.phone || ""}
         />
 
-        {/* Offer Card */}
-        {s.offered_price && (
-          <div className="bg-card rounded-xl p-5 shadow-lg border-2 border-accent/30">
-            <div className="flex items-center gap-2 mb-3">
-              <DollarSign className="w-5 h-5 text-accent" />
-              <h3 className="font-bold text-card-foreground">Your Cash Offer</h3>
-            </div>
-            <p className="text-3xl font-extrabold text-accent">
-              ${s.offered_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">Subject to in-person inspection</p>
-            <div className="flex gap-2 mt-3">
-              <Link to={`/offer/${s.token}`}>
-                <Button size="sm" className="gap-1 bg-accent hover:bg-accent/90 text-accent-foreground">
-                  View Full Offer
-                </Button>
-              </Link>
-              <Button variant="outline" size="sm" onClick={handlePrintOffer}>
-                <Printer className="w-4 h-4 mr-1" /> Print
-              </Button>
-            </div>
-          </div>
+        {/* Get Your Offer CTA — shown when there's an estimate or offered price */}
+        {(s.offered_price || s.estimated_offer_high) && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <Link to={`/offer/${s.token}`}>
+              <div className="bg-gradient-to-r from-accent to-[hsl(210,100%,45%)] rounded-2xl p-6 shadow-xl cursor-pointer hover:shadow-2xl hover:-translate-y-0.5 transition-all">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-accent-foreground/80 text-xs font-semibold uppercase tracking-wider mb-1">
+                      {s.offered_price ? "Your Cash Offer" : "Your Estimated Offer"}
+                    </p>
+                    <p className="text-3xl md:text-4xl font-extrabold text-accent-foreground">
+                      {s.offered_price
+                        ? `$${s.offered_price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+                        : `$${s.estimated_offer_low?.toLocaleString('en-US', { maximumFractionDigits: 0 })} – $${s.estimated_offer_high?.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+                      }
+                    </p>
+                    <p className="text-accent-foreground/70 text-sm mt-1">
+                      Tap to see your full offer with trade-in value →
+                    </p>
+                  </div>
+                  <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <DollarSign className="w-7 h-7 text-accent-foreground" />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
         )}
 
         {/* Completion Checklist (replaces Actions) */}

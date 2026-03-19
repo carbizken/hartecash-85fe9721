@@ -309,6 +309,8 @@ const SellCarForm = () => {
           bb_wholesale_avg: bbSelectedVehicle?.wholesale?.avg || null,
           estimated_offer_low: estimate?.low || null,
           estimated_offer_high: estimate?.high || null,
+          is_hot_lead: estimate?.isHotLead || false,
+          matched_rule_ids: estimate?.matchedRuleIds?.length ? estimate.matchedRuleIds : null,
         } as any);
 
       if (error) throw error;

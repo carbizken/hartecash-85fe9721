@@ -19,6 +19,7 @@ import WhatToBringCard from "@/components/portal/WhatToBringCard";
 import PortalFAQ from "@/components/portal/PortalFAQ";
 import PaymentInfoCard from "@/components/portal/PaymentInfoCard";
 import LoanPayoffCard from "@/components/portal/LoanPayoffCard";
+import CommunicationPreferences from "@/components/portal/CommunicationPreferences";
 
 interface PortalSubmission {
   id: string;
@@ -340,6 +341,8 @@ const CustomerPortal = () => {
               {ScheduleVisitCTA}
 
               <PortalFAQ />
+
+              <CommunicationPreferences token={s.token} email={s.email} phone={s.phone} />
             </div>
           </div>
         </div>
@@ -386,6 +389,8 @@ const CustomerPortal = () => {
           {ScheduleVisitCTA}
 
           <PortalFAQ />
+
+              <CommunicationPreferences token={s.token} email={s.email} phone={s.phone} />
 
           <DealerContactCard />
 

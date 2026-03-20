@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings, Bell, ListChecks, MessageSquareQuote, Star } from "lucide-react";
+import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings, Bell, ListChecks, MessageSquareQuote, Star, BarChart3 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QRCodeSVG } from "qrcode.react";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +24,7 @@ import SiteConfiguration from "@/components/admin/SiteConfiguration";
 import NotificationSettings from "@/components/admin/NotificationSettings";
 import FormConfiguration from "@/components/admin/FormConfiguration";
 import TestimonialManagement from "@/components/admin/TestimonialManagement";
+import ComparisonConfig from "@/components/admin/ComparisonConfig";
 import { Badge } from "@/components/ui/badge";
 
 interface PendingRequest {
@@ -1074,6 +1075,10 @@ const AdminDashboard = () => {
                   <MessageSquareQuote className="w-4 h-4 mr-1" />
                   Testimonials
                 </TabsTrigger>
+                <TabsTrigger value="comparison">
+                  <BarChart3 className="w-4 h-4 mr-1" />
+                  Comparison
+                </TabsTrigger>
               </>
             )}
           </TabsList>
@@ -1452,6 +1457,9 @@ const AdminDashboard = () => {
               </TabsContent>
               <TabsContent value="testimonials">
                 <TestimonialManagement />
+              </TabsContent>
+              <TabsContent value="comparison">
+                <ComparisonConfig />
               </TabsContent>
             </>
           )}

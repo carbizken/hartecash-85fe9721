@@ -278,6 +278,7 @@ const OfferSettings = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Saved", description: "Offer settings updated." });
+      setSavedSettings({ ...settings });
     }
     setSaving(false);
   };

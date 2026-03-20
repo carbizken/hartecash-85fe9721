@@ -74,7 +74,7 @@ const CompetitorComparison = () => {
     <section className="bg-background px-5 py-14" id="compare">
       <div className="max-w-3xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-extrabold text-foreground text-center mb-2">
-          Why Harte Wins
+          Why {shortName} Wins
         </h2>
         <p className="text-center text-muted-foreground mb-8 text-sm">
           See how we stack up against the competition.

@@ -26,6 +26,7 @@ import FormConfiguration from "@/components/admin/FormConfiguration";
 import TestimonialManagement from "@/components/admin/TestimonialManagement";
 import ComparisonConfig from "@/components/admin/ComparisonConfig";
 import VehicleImage from "@/components/sell-form/VehicleImage";
+import FollowUpPanel from "@/components/admin/FollowUpPanel";
 import { Badge } from "@/components/ui/badge";
 
 interface PendingRequest {
@@ -2052,6 +2053,13 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Follow-Up Sequence */}
+              <FollowUpPanel
+                submissionId={selected.id}
+                hasOffer={!!(selected.offered_price || (selected as any).estimated_offer_high)}
+                progressStatus={selected.progress_status}
+              />
 
               {/* Activity Log */}
               <div data-print-section className="bg-muted/40 rounded-lg p-4">

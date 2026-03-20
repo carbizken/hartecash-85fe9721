@@ -114,50 +114,42 @@ interface Submission {
 
 const PAGE_SIZE = 20;
 
+// Consolidated 7-step tracker for visual display
 const PROGRESS_STAGES = [
+  { key: "new", label: "New Lead", dbKeys: ["new"] },
+  { key: "contacted", label: "Contacted", dbKeys: ["contacted"] },
+  { key: "inspection", label: "Inspection", dbKeys: ["inspection_scheduled", "inspection_completed"] },
+  { key: "docs_verified", label: "Docs & Title", dbKeys: ["title_verified", "ownership_verified"] },
+  { key: "appraised", label: "Appraised", dbKeys: ["appraisal_completed", "manager_approval"] },
+  { key: "price_agreed", label: "Price Agreed", dbKeys: ["price_agreed"] },
+  { key: "purchase_complete", label: "Purchased", dbKeys: ["purchase_complete"] },
+  { key: "dead_lead", label: "Dead Lead", dbKeys: ["dead_lead"] },
+];
+
+// Full list of DB status keys for dropdowns (preserves granular control)
+const ALL_STATUS_OPTIONS = [
   { key: "new", label: "New Lead" },
   { key: "contacted", label: "Contacted" },
-  { key: "inspection", label: "Inspection", keys: ["inspection_scheduled", "inspection_completed"] },
-  { key: "docs_verified", label: "Docs & Title", keys: ["title_verified", "ownership_verified"] },
-  { key: "appraised", label: "Appraised", keys: ["appraisal_completed", "manager_approval"] },
+  { key: "inspection_scheduled", label: "Inspection Scheduled" },
+  { key: "inspection_completed", label: "Inspection Completed" },
+  { key: "title_verified", label: "Title Verified" },
+  { key: "ownership_verified", label: "Ownership Verified" },
+  { key: "appraisal_completed", label: "Appraisal Completed" },
+  { key: "manager_approval", label: "Manager Approval" },
   { key: "price_agreed", label: "Price Agreed" },
   { key: "purchase_complete", label: "Purchased" },
   { key: "dead_lead", label: "Dead Lead" },
 ];
 
-// Map any DB progress_status value to its PROGRESS_STAGES index
+// Map any DB status to its consolidated stage index
 const getStageIndex = (dbStatus: string): number => {
-  const idx = PROGRESS_STAGES.findIndex(s => s.key === dbStatus || s.keys?.includes(dbStatus));
+  const idx = PROGRESS_STAGES.findIndex(s => s.dbKeys.includes(dbStatus));
   return idx >= 0 ? idx : 0;
 };
 
-// Map a consolidated stage key to the correct DB status key for saving
-const STAGE_DB_KEYS: Record<string, string> = {
-  new: "new",
-  contacted: "contacted",
-  inspection: "inspection_scheduled",
-  docs_verified: "title_verified",
-  appraised: "appraisal_completed",
-  price_agreed: "price_agreed",
-  purchase_complete: "purchase_complete",
-  dead_lead: "dead_lead",
-};
-
-// Sub-status options for stages with multiple DB keys
-const STAGE_SUB_OPTIONS: Record<string, { key: string; label: string }[]> = {
-  inspection: [
-    { key: "inspection_scheduled", label: "Scheduled" },
-    { key: "inspection_completed", label: "Completed" },
-  ],
-  docs_verified: [
-    { key: "title_verified", label: "Title Verified" },
-    { key: "ownership_verified", label: "Ownership Verified" },
-  ],
-  appraised: [
-    { key: "appraisal_completed", label: "Final Appraisal" },
-    { key: "manager_approval", label: "Manager Approval" },
-  ],
-};
+// Get label for any DB status key
+const getStatusLabel = (dbStatus: string): string =>
+  ALL_STATUS_OPTIONS.find(s => s.key === dbStatus)?.label || dbStatus;
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Admin",

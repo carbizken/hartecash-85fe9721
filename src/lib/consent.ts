@@ -9,12 +9,14 @@ export async function logConsent({
   customerEmail,
   formSource,
   submissionToken,
+  dealershipName,
 }: {
   customerName?: string;
   customerPhone?: string;
   customerEmail?: string;
   formSource: string;
   submissionToken?: string;
+  dealershipName?: string;
 }) {
   try {
     await supabase.from("consent_log" as any).insert({

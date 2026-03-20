@@ -44,6 +44,7 @@ const DEFAULTS: SiteConfig = {
   stats_years_in_business: "78 yrs",
   stats_rating: "4.9",
   stats_reviews_count: "2,400+",
+  enable_animations: false,
 };
 
 let cachedConfig: SiteConfig | null = null;

@@ -1419,6 +1419,13 @@ const AdminDashboard = () => {
               <OfferSettings />
             </TabsContent>
           )}
+
+          {canManageAccess && (
+            <TabsContent value="site-config">
+              <SiteConfiguration />
+            </TabsContent>
+          )}
+          )}
         </Tabs>
       </div>
 

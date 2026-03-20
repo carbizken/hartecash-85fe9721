@@ -32,6 +32,7 @@ interface SiteConfig {
   stats_reviews_count: string;
   review_request_subject: string;
   review_request_message: string;
+  enable_animations: boolean;
 }
 
 const DEFAULT_CONFIG: SiteConfig = {

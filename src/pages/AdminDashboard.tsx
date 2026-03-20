@@ -869,6 +869,19 @@ const AdminDashboard = () => {
     const vehicleStr = [s.vehicle_year, s.vehicle_make, s.vehicle_model].filter(Boolean).join(" ") || "N/A";
     const today = new Date().toLocaleDateString();
 
+    // Convert logo to base64 for the print window
+    const logoSrc = harteLogoFallback;
+    let logoBase64 = "";
+    try {
+      const resp = await fetch(logoSrc);
+      const blob = await resp.blob();
+      logoBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+    } catch { logoBase64 = ""; }
+
     // Helper to fetch signed URLs from a doc folder
     const fetchDocImages = async (folder: string): Promise<string[]> => {
       const urls: string[] = [];
@@ -896,8 +909,8 @@ const AdminDashboard = () => {
     const css = [
       "* { margin: 0; padding: 0; box-sizing: border-box; }",
       "body { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; color: #1a2a3a; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }",
-      ".header { background: #2a4365; color: white; padding: 24px 32px; text-align: center; }",
-      ".header h1 { font-size: 22px; font-weight: 700; }",
+      ".header { background: #2a4365; color: white; padding: 20px 32px; text-align: center; }",
+      ".header img { height: 60px; margin: 0 auto 6px; display: block; }",
       ".header p { font-size: 13px; opacity: 0.8; margin-top: 4px; }",
       ".content { padding: 24px 32px; }",
       ".title { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 2px; }",
@@ -919,7 +932,7 @@ const AdminDashboard = () => {
       images.length > 0 ? `<div class="doc-section"><h2>${title}</h2>${images.map(url => `<img class="doc-img" src="${url}" />`).join("")}</div>` : "";
 
     const html = `<!DOCTYPE html><html><head><title>Check Request</title><style>${css}</style></head><body>
-      <div class="header"><h1>${selected?.vehicle_make ? selected.vehicle_make : "Dealership"}</h1><p>Check Request Form</p></div>
+      <div class="header">${logoBase64 ? `<img src="${logoBase64}" alt="Logo" />` : `<h1 style="font-size:22px;font-weight:700;">Harte Auto Group</h1>`}<p>Check Request Form</p></div>
       <div class="content">
         <p class="title">Check Request</p>
         <table>

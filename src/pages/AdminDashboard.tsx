@@ -446,10 +446,10 @@ const AdminDashboard = () => {
     // Check opt-out status
     if (sub.email || sub.phone) {
       const optEmail = sub.email
-        ? (await supabase.from("opt_outs" as any).select("id").eq("email", sub.email).eq("channel", "email").maybeSingle()).data
+        ? (await supabase.from("opt_outs").select("id").eq("email", sub.email).eq("channel", "email").maybeSingle()).data
         : null;
       const optSms = sub.phone
-        ? (await supabase.from("opt_outs" as any).select("id").eq("phone", sub.phone).eq("channel", "sms").maybeSingle()).data
+        ? (await supabase.from("opt_outs").select("id").eq("phone", sub.phone).eq("channel", "sms").maybeSingle()).data
         : null;
       setOptOutStatus({ email: !!optEmail, sms: !!optSms });
     }
@@ -1042,7 +1042,7 @@ const AdminDashboard = () => {
       {/* Content */}
       <div className="max-w-[1400px] mx-auto px-4 py-6">
         <Tabs defaultValue="submissions">
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 flex flex-wrap h-auto gap-1">
             <TabsTrigger value="submissions">Submissions ({total})</TabsTrigger>
             <TabsTrigger value="appointments">
               <CalendarDays className="w-4 h-4 mr-1" />

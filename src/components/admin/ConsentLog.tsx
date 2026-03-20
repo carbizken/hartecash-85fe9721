@@ -34,7 +34,7 @@ const ConsentLog = () => {
   const fetchRecords = async () => {
     setLoading(true);
     const { data } = await supabase
-      .from("consent_log" as any)
+      .from("consent_log")
       .select("id, created_at, customer_name, customer_phone, customer_email, consent_type, form_source, submission_token")
       .order("created_at", { ascending: false })
       .limit(500);

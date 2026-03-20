@@ -111,6 +111,7 @@ const ServiceLanding = () => {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [vehicleInfo, setVehicleInfo] = useState<VehicleInfo | null>(null);
+  const [bbValues, setBbValues] = useState<BBValues>({ tradein_avg: null, wholesale_avg: null });
   const [vinLoading, setVinLoading] = useState(false);
   const [vinError, setVinError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -126,9 +127,12 @@ const ServiceLanding = () => {
     const trimmedVin = vinParam.trim();
     if (trimmedVin && trimmedVin.length === 17) {
       setVinLoading(true);
-      decodeVin(trimmedVin).then((info) => {
+      lookupVinViaBB(trimmedVin).then(({ vehicle, bbValues: bv }) => {
         setVinLoading(false);
-        if (info) setVehicleInfo(info);
+        if (vehicle) {
+          setVehicleInfo(vehicle);
+          setBbValues(bv);
+        }
       });
     }
   }, [vinParam]);
@@ -143,10 +147,15 @@ const ServiceLanding = () => {
     setVinError("");
     setVinLoading(true);
     setVehicleInfo(null);
-    const info = await decodeVin(trimmedVin);
+    setBbValues({ tradein_avg: null, wholesale_avg: null });
+    const { vehicle, bbValues: bv } = await lookupVinViaBB(trimmedVin);
     setVinLoading(false);
-    if (info) setVehicleInfo(info);
-    else setVinError("Could not decode this VIN. Please check and try again.");
+    if (vehicle) {
+      setVehicleInfo(vehicle);
+      setBbValues(bv);
+    } else {
+      setVinError("Could not decode this VIN. Please check and try again.");
+    }
   };
 
   const handleStep1 = () => {

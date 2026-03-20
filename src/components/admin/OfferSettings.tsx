@@ -197,6 +197,7 @@ const OfferSettings = () => {
         offer_floor: d.offer_floor ?? 500,
         offer_ceiling: d.offer_ceiling ?? null,
         age_tiers: Array.isArray(d.age_tiers) ? d.age_tiers : [],
+        mileage_tiers: Array.isArray(d.mileage_tiers) ? d.mileage_tiers : [],
       } as OfferSettingsRow);
     }
     if (rulesRes.data) {

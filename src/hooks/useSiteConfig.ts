@@ -22,6 +22,7 @@ export interface SiteConfig {
   stats_rating: string;
   stats_reviews_count: string;
   enable_animations: boolean;
+  use_animated_calculating: boolean;
 }
 
 const DEFAULTS: SiteConfig = {

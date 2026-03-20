@@ -1,6 +1,10 @@
 import { Check, X, Minus } from "lucide-react";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 const CompetitorComparison = () => {
+  const { config } = useSiteConfig();
+  const name = config.dealership_name || "Harte Auto Group";
+  const shortName = name.split(" ")[0]; // e.g. "Harte"
   const features = [
     {
       label: "Same-Day Cash Offer",
@@ -38,7 +42,7 @@ const CompetitorComparison = () => {
       private: "partial",
     },
     {
-      label: "8-Day Price Guarantee",
+      label: `${config.price_guarantee_days || 8}-Day Price Guarantee`,
       harte: true,
       carmax: false,
       carvana: false,
@@ -70,7 +74,7 @@ const CompetitorComparison = () => {
     <section className="bg-background px-5 py-14" id="compare">
       <div className="max-w-3xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-extrabold text-foreground text-center mb-2">
-          Why Harte Wins
+          Why {shortName} Wins
         </h2>
         <p className="text-center text-muted-foreground mb-8 text-sm">
           See how we stack up against the competition.
@@ -83,7 +87,7 @@ const CompetitorComparison = () => {
                 <tr className="border-b-2 border-border">
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground w-[40%]">Feature</th>
                   <th className="text-center px-3 py-3 font-bold text-accent w-[15%]">
-                    <span className="block text-xs uppercase tracking-wider">Harte</span>
+                    <span className="block text-xs uppercase tracking-wider">{shortName}</span>
                   </th>
                   <th className="text-center px-3 py-3 font-semibold text-muted-foreground w-[15%]">
                     <span className="block text-xs uppercase tracking-wider">CarMax</span>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { motion, AnimatePresence } from "framer-motion";
 
 const testimonials = [
@@ -30,6 +31,7 @@ const testimonials = [
 ];
 
 const Testimonials = () => {
+  const { config } = useSiteConfig();
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
 
@@ -54,7 +56,7 @@ const Testimonials = () => {
         What Our Customers Say
       </h2>
       <p className="text-center text-sm text-muted-foreground mb-10">
-        Join thousands of happy sellers across Connecticut
+        Join {config.stats_reviews_count || "thousands of"} happy sellers
       </p>
 
       {/* Mobile: carousel */}

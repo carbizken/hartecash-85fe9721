@@ -96,13 +96,6 @@ serve(async (req) => {
       throw new Error(`All models failed. Last: ${lastError}`);
     }
 
-    const aiData = await aiRes.json();
-    const imageDataUrl = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-
-    if (!imageDataUrl) {
-      throw new Error("No image returned from AI");
-    }
-
     // Extract base64 data and upload to storage
     const base64Data = imageDataUrl.replace(/^data:image\/\w+;base64,/, "");
     const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));

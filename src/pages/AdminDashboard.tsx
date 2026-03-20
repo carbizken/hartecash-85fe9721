@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings, Bell, ListChecks } from "lucide-react";
+import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings, Bell, ListChecks, MessageSquareQuote } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QRCodeSVG } from "qrcode.react";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +23,7 @@ import OfferSettings from "@/components/admin/OfferSettings";
 import SiteConfiguration from "@/components/admin/SiteConfiguration";
 import NotificationSettings from "@/components/admin/NotificationSettings";
 import FormConfiguration from "@/components/admin/FormConfiguration";
+import TestimonialManagement from "@/components/admin/TestimonialManagement";
 import { Badge } from "@/components/ui/badge";
 
 interface PendingRequest {
@@ -1069,6 +1070,10 @@ const AdminDashboard = () => {
                   <ListChecks className="w-4 h-4 mr-1" />
                   Form Config
                 </TabsTrigger>
+                <TabsTrigger value="testimonials">
+                  <MessageSquareQuote className="w-4 h-4 mr-1" />
+                  Testimonials
+                </TabsTrigger>
               </>
             )}
           </TabsList>
@@ -1441,9 +1446,14 @@ const AdminDashboard = () => {
             </TabsContent>
           )}
           {canManageAccess && (
-            <TabsContent value="form-config">
-              <FormConfiguration />
-            </TabsContent>
+            <>
+              <TabsContent value="form-config">
+                <FormConfiguration />
+              </TabsContent>
+              <TabsContent value="testimonials">
+                <TestimonialManagement />
+              </TabsContent>
+            </>
           )}
         </Tabs>
       </div>

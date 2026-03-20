@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { logConsent } from "@/lib/consent";
 import { calculateOffer, type OfferEstimate, type OfferSettings, type OfferRule } from "@/lib/offerCalculator";
 import { STEPS, initialFormData } from "./sell-form/types";
+import { useFormConfig, type FormConfig } from "@/hooks/useFormConfig";
 import type { FormData, VehicleInfo, BBVehicle } from "./sell-form/types";
 import StepVehicleInfo from "./sell-form/StepVehicleInfo";
 import StepVehicleBuild from "./sell-form/StepVehicleBuild";

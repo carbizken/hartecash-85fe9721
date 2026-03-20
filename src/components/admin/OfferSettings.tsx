@@ -10,7 +10,46 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
-import { Save, Plus, Trash2, Flame, SlidersHorizontal, Target, Zap, AlertTriangle, DollarSign, Shield, Gauge, Calendar } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Save, Plus, Trash2, Flame, SlidersHorizontal, Target, Zap, AlertTriangle, DollarSign, Shield, Gauge, Calendar, ChevronDown } from "lucide-react";
+
+// ── Collapsible Section wrapper ──
+const Section = ({
+  icon, title, children, defaultOpen = false, className = "",
+  headerRight,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  className?: string;
+  headerRight?: React.ReactNode;
+}) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div className={`bg-card rounded-xl shadow-lg border border-border overflow-hidden ${className}`}>
+        <CollapsibleTrigger asChild>
+          <button className="flex items-center justify-between w-full px-5 py-4 text-left hover:bg-muted/30 transition-colors">
+            <div className="flex items-center gap-2">
+              {icon}
+              <h3 className="font-bold text-card-foreground">{title}</h3>
+            </div>
+            <div className="flex items-center gap-2">
+              {headerRight}
+              <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+            </div>
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="px-5 pb-5">
+            {children}
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+};
 
 // ── Types ──────────────────────────────────────────────────────
 interface DeductionsConfig {

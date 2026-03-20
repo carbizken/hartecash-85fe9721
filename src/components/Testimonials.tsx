@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { motion, AnimatePresence } from "framer-motion";
 
 const testimonials = [

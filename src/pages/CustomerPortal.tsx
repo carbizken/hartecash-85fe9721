@@ -9,7 +9,8 @@ import {
   DollarSign, Inbox, Search, BadgeDollarSign, CalendarCheck,
   ClipboardCheck, Handshake, PartyPopper, type LucideIcon
 } from "lucide-react";
-import harteLogo from "@/assets/harte-logo.png";
+import harteLogoFallback from "@/assets/harte-logo.png";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { motion } from "framer-motion";
 import PortalSkeleton from "@/components/PortalSkeleton";
 import WhatsNextCard from "@/components/portal/WhatsNextCard";

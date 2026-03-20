@@ -445,7 +445,7 @@ const OfferPage = () => {
         </div>
 
         <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-          When you trade in your vehicle toward a new or pre-owned purchase at Harte Auto Group, 
+          When you trade in your vehicle toward a new or pre-owned purchase at {config.dealership_name || "our dealership"}, 
           you receive a <span className="font-semibold text-card-foreground">sales tax credit</span> on 
           the value of your trade.
         </p>

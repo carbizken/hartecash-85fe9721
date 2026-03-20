@@ -60,7 +60,7 @@ function getNextAction(status: string, photosUploaded: boolean, docsUploaded: bo
     return {
       emoji: "🎉",
       title: "Congratulations!",
-      description: "Your vehicle purchase is complete. Thank you for choosing Harte Auto Group!",
+      description: "Your vehicle purchase is complete. Thank you for choosing us!",
       actionLabel: null,
       actionIcon: null,
       linkType: null,

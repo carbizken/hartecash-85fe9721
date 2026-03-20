@@ -36,7 +36,7 @@ const ValueProps = () => {
   return (
     <section className="py-16 px-5 bg-background">
       <h2 className="text-2xl md:text-[28px] lg:text-[34px] font-extrabold text-center mb-12 text-foreground">
-        Why Sell to Harte?
+        Why Sell to {shortName}?
       </h2>
       <div className="grid gap-4 max-w-[500px] lg:max-w-4xl lg:grid-cols-2 xl:grid-cols-3 mx-auto">
         {items.map((item, i) => (

@@ -3,6 +3,7 @@ import FormField from "./FormField";
 import RadioOption from "./RadioOption";
 import type { FormData } from "./types";
 import type { FormConfig } from "@/hooks/useFormConfig";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 interface Props {
   formData: FormData;

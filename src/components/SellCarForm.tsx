@@ -77,10 +77,12 @@ const SellCarForm = () => {
 
   // Determine actual displayed steps based on whether trim selection is needed
   const getDisplaySteps = () => {
-    if (showTrimStep) {
-      return ["Vehicle Info", "Select Your Vehicle", "Vehicle Build", "Condition & History", "Your Details", "Get Your Offer"];
-    }
-    return STEPS;
+    const steps: string[] = ["Vehicle Info"];
+    if (showTrimStep) steps.push("Select Your Vehicle");
+    if (formConfig.step_vehicle_build) steps.push("Vehicle Build");
+    if (formConfig.step_condition_history) steps.push("Condition & History");
+    steps.push("Your Details", "Get Your Offer");
+    return steps;
   };
 
   const displaySteps = getDisplaySteps();

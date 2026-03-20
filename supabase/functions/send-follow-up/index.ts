@@ -247,7 +247,7 @@ Deno.serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Harte Auto Group <onboarding@resend.dev>",
+            from: `${dealerName} <onboarding@resend.dev>`,
             to: [sub.email],
             subject: template.subject,
             html: template.html,

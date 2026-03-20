@@ -12,6 +12,15 @@ import { CalendarDays, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import harteLogo from "@/assets/harte-logo-white.png";
 
+// Harte Auto Group store locations
+const STORE_LOCATIONS = [
+  { value: "hartford", label: "Harte Nissan — Hartford" },
+  { value: "wallingford", label: "Harte Infiniti — Wallingford" },
+  { value: "meriden", label: "Harte Volkswagen — Meriden" },
+  { value: "west_haven", label: "Harte Hyundai — West Haven" },
+  { value: "old_saybrook", label: "Harte Nissan — Old Saybrook" },
+];
+
 // Store hours: Mon-Thu 9AM-7PM, Fri-Sat 9AM-6PM, Sun Closed
 const WEEKDAY_SLOTS = [
   "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
@@ -55,6 +64,7 @@ const ScheduleVisit = () => {
     customer_phone: searchParams.get("phone") || "",
     preferred_date: "",
     preferred_time: "",
+    store_location: searchParams.get("location") || "",
     vehicle_info: searchParams.get("vehicle") || "",
     notes: "",
   });
@@ -92,10 +102,11 @@ const ScheduleVisit = () => {
         customer_phone: form.customer_phone,
         preferred_date: form.preferred_date,
         preferred_time: form.preferred_time,
+        store_location: form.store_location || null,
         vehicle_info: form.vehicle_info || null,
         notes: form.notes || null,
         submission_token: submissionToken || null,
-      });
+      } as any);
 
       if (error) throw error;
 
@@ -158,8 +169,11 @@ const ScheduleVisit = () => {
               <p className="text-muted-foreground">
                 We've received your appointment request for{" "}
                 <strong>{form.preferred_date}</strong> at{" "}
-                <strong>{form.preferred_time}</strong>. Our team will reach out
-                shortly to confirm.
+                <strong>{form.preferred_time}</strong>
+                {form.store_location && (
+                  <> at <strong>{STORE_LOCATIONS.find(l => l.value === form.store_location)?.label || form.store_location}</strong></>
+                )}
+                . Our team will reach out shortly to confirm.
               </p>
             </CardContent>
           </Card>
@@ -275,6 +289,26 @@ const ScheduleVisit = () => {
                     </p>
                   )}
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="store_location">Preferred Location *</Label>
+                <Select
+                  value={form.store_location}
+                  onValueChange={(v) => handleChange("store_location", v)}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a store location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STORE_LOCATIONS.map((loc) => (
+                      <SelectItem key={loc.value} value={loc.value}>
+                        {loc.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

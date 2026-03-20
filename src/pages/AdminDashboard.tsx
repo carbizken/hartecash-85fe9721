@@ -39,6 +39,14 @@ interface PendingRequest {
   created_at: string;
 }
 
+const STORE_LOCATIONS = [
+  { value: "hartford", label: "Harte Nissan — Hartford" },
+  { value: "wallingford", label: "Harte Infiniti — Wallingford" },
+  { value: "meriden", label: "Harte Volkswagen — Meriden" },
+  { value: "west_haven", label: "Harte Hyundai — West Haven" },
+  { value: "old_saybrook", label: "Harte Nissan — Old Saybrook" },
+];
+
 interface Appointment {
   id: string;
   submission_token: string | null;
@@ -51,6 +59,7 @@ interface Appointment {
   notes: string | null;
   status: string;
   created_at: string;
+  store_location: string | null;
 }
 
 interface Submission {
@@ -153,6 +162,7 @@ const AdminDashboard = () => {
     customer_phone: "",
     preferred_date: "",
     preferred_time: "",
+    store_location: "",
     vehicle_info: "",
     notes: "",
     submission_token: "",
@@ -163,6 +173,7 @@ const AdminDashboard = () => {
   const [activityLog, setActivityLog] = useState<{ id: string; action: string; old_value: string | null; new_value: string | null; performed_by: string | null; created_at: string }[]>([]);
   const [duplicateWarnings, setDuplicateWarnings] = useState<Record<string, string[]>>({});
   const [selectedApptTime, setSelectedApptTime] = useState<string | null>(null);
+  const [selectedApptLocation, setSelectedApptLocation] = useState<string | null>(null);
   const [optOutStatus, setOptOutStatus] = useState<{ email: boolean; sms: boolean }>({ email: false, sms: false });
   const [activeSection, setActiveSection] = useState("submissions");
   const navigate = useNavigate();
@@ -269,10 +280,11 @@ const AdminDashboard = () => {
         customer_phone: apptForm.customer_phone,
         preferred_date: apptForm.preferred_date,
         preferred_time: apptForm.preferred_time,
+        store_location: apptForm.store_location || null,
         vehicle_info: apptForm.vehicle_info || null,
         notes: apptForm.notes || null,
         submission_token: apptForm.submission_token || null,
-      });
+      } as any);
       if (error) throw error;
 
       // If linked to a submission, update its status and appointment info
@@ -305,7 +317,7 @@ const AdminDashboard = () => {
 
       toast({ title: "Appointment created", description: `Scheduled for ${apptForm.preferred_date} at ${apptForm.preferred_time}.` });
       setShowCreateAppt(false);
-      setApptForm({ customer_name: "", customer_email: "", customer_phone: "", preferred_date: "", preferred_time: "", vehicle_info: "", notes: "", submission_token: "" });
+      setApptForm({ customer_name: "", customer_email: "", customer_phone: "", preferred_date: "", preferred_time: "", store_location: "", vehicle_info: "", notes: "", submission_token: "" });
       fetchAppointments();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -441,6 +453,7 @@ const AdminDashboard = () => {
     setDocs([]);
     setActivityLog([]);
     setSelectedApptTime(null);
+    setSelectedApptLocation(null);
     setOptOutStatus({ email: false, sms: false });
     fetchActivityLog(sub.id);
     checkDuplicates(sub);
@@ -460,12 +473,13 @@ const AdminDashboard = () => {
     if (sub.appointment_set) {
       const { data: apptData } = await supabase
         .from("appointments")
-        .select("preferred_time")
+        .select("preferred_time, store_location")
         .eq("submission_token", sub.token)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (apptData?.preferred_time) setSelectedApptTime(apptData.preferred_time);
+      if ((apptData as any)?.store_location) setSelectedApptLocation((apptData as any).store_location);
     }
     // Fetch photos
     const { data } = await supabase.storage
@@ -1295,6 +1309,7 @@ const AdminDashboard = () => {
                         <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Time</th>
                         <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Customer</th>
                         <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Vehicle</th>
+                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Location</th>
                         <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Status</th>
                         <th className="text-right px-3 py-2 font-semibold text-muted-foreground">Actions</th>
                       </tr>
@@ -1309,6 +1324,7 @@ const AdminDashboard = () => {
                             <div className="text-xs text-muted-foreground">{appt.customer_email}</div>
                           </td>
                           <td className="px-3 py-2 text-sm">{appt.vehicle_info || "—"}</td>
+                          <td className="px-3 py-2 text-sm">{STORE_LOCATIONS.find(l => l.value === appt.store_location)?.label || appt.store_location || "—"}</td>
                           <td className="px-3 py-2">
                             <Badge variant={appt.status === "Confirmed" ? "default" : appt.status === "Completed" ? "secondary" : "outline"} className="text-xs">
                               {appt.status}
@@ -1974,6 +1990,11 @@ const AdminDashboard = () => {
                       {new Date(selected.appointment_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
                       {selectedApptTime && <span className="ml-1">at {selectedApptTime}</span>}
                     </p>
+                    {selectedApptLocation && (
+                      <p className="text-sm text-muted-foreground">
+                        📍 {STORE_LOCATIONS.find(l => l.value === selectedApptLocation)?.label || selectedApptLocation}
+                      </p>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
@@ -1984,6 +2005,7 @@ const AdminDashboard = () => {
                           customer_phone: selected.phone || "",
                           preferred_date: "",
                           preferred_time: "",
+                          store_location: "",
                           vehicle_info: [selected.vehicle_year, selected.vehicle_make, selected.vehicle_model].filter(Boolean).join(" "),
                           notes: "",
                           submission_token: selected.token,
@@ -2005,6 +2027,7 @@ const AdminDashboard = () => {
                         customer_phone: selected.phone || "",
                         preferred_date: "",
                         preferred_time: "",
+                        store_location: "",
                         vehicle_info: [selected.vehicle_year, selected.vehicle_make, selected.vehicle_model].filter(Boolean).join(" "),
                         notes: "",
                         submission_token: selected.token,
@@ -2221,6 +2244,15 @@ const AdminDashboard = () => {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">Linking will update the customer's status to "Inspection Scheduled".</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Store Location</Label>
+              <Select value={apptForm.store_location} onValueChange={(v) => setApptForm(p => ({ ...p, store_location: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
+                <SelectContent>
+                  {STORE_LOCATIONS.map(loc => <SelectItem key={loc.value} value={loc.value}>{loc.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Vehicle Info</Label>

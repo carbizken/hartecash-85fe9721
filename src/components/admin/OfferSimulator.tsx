@@ -2,18 +2,46 @@ import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calculator, TrendingDown, TrendingUp, Minus } from "lucide-react";
-import { calculateOffer, type OfferSettings, type OfferRule } from "@/lib/offerCalculator";
+import { Switch } from "@/components/ui/switch";
+import { Calculator, TrendingDown, TrendingUp, Minus, ArrowRight } from "lucide-react";
+import { calculateOffer, type OfferSettings, type OfferRule, type OfferEstimate } from "@/lib/offerCalculator";
 import type { FormData, BBVehicle } from "@/components/sell-form/types";
 
 interface Props {
   settings: OfferSettings;
+  savedSettings: OfferSettings | null;
   rules: OfferRule[];
 }
 
 const CONDITIONS = ["excellent", "good", "fair", "rough"] as const;
 
-const OfferSimulator = ({ settings, rules }: Props) => {
+function buildTestData(baseValue: number, year: string, make: string, model: string, mileage: string, condition: string, accidents: string, exteriorItems: number, mechanicalItems: number, drivable: string, smokedIn: string) {
+  const bbVehicle: BBVehicle = {
+    uvc: "SIM", vin: "", year, make, model,
+    series: "", style: "", class_name: "", msrp: 0, price_includes: "",
+    add_deduct_list: [],
+    wholesale: { xclean: baseValue, clean: baseValue, avg: baseValue, rough: baseValue },
+    tradein: { clean: baseValue, avg: baseValue, rough: baseValue },
+    retail: { xclean: baseValue, clean: baseValue, avg: baseValue, rough: baseValue },
+  };
+  const formData: FormData = {
+    plate: "", state: "", vin: "", mileage,
+    bbUvc: "", bbSelectedAddDeducts: [],
+    exteriorColor: "", drivetrain: "", modifications: "",
+    overallCondition: condition,
+    exteriorDamage: Array.from({ length: exteriorItems }, (_, i) => `item_${i}`),
+    windshieldDamage: "", moonroof: "",
+    interiorDamage: [], techIssues: [], engineIssues: [],
+    mechanicalIssues: Array.from({ length: mechanicalItems }, (_, i) => `item_${i}`),
+    drivable, accidents, smokedIn, tiresReplaced: "yes", numKeys: "2",
+    name: "", phone: "", email: "", zip: "",
+    loanStatus: "", loanCompany: "", loanBalance: "", loanPayment: "",
+    nextStep: "",
+  };
+  return { bbVehicle, formData };
+}
+
+const OfferSimulator = ({ settings, savedSettings, rules }: Props) => {
   const [baseValue, setBaseValue] = useState(18000);
   const [year, setYear] = useState("2018");
   const [mileage, setMileage] = useState("85000");
@@ -25,60 +53,46 @@ const OfferSimulator = ({ settings, rules }: Props) => {
   const [mechanicalItems, setMechanicalItems] = useState(0);
   const [drivable, setDrivable] = useState("yes");
   const [smokedIn, setSmokedIn] = useState("no");
+  const [compareMode, setCompareMode] = useState(false);
 
-  const result = useMemo(() => {
-    // Build a minimal BBVehicle with the base value placed at every tier
-    const bbVehicle: BBVehicle = {
-      uvc: "SIM", vin: "", year, make, model,
-      series: "", style: "", class_name: "", msrp: 0, price_includes: "",
-      add_deduct_list: [],
-      wholesale: { xclean: baseValue, clean: baseValue, avg: baseValue, rough: baseValue },
-      tradein: { clean: baseValue, avg: baseValue, rough: baseValue },
-      retail: { xclean: baseValue, clean: baseValue, avg: baseValue, rough: baseValue },
-    };
-
-    const formData: FormData = {
-      plate: "", state: "", vin: "", mileage,
-      bbUvc: "", bbSelectedAddDeducts: [],
-      exteriorColor: "", drivetrain: "", modifications: "",
-      overallCondition: condition,
-      exteriorDamage: Array.from({ length: exteriorItems }, (_, i) => `item_${i}`),
-      windshieldDamage: "", moonroof: "",
-      interiorDamage: [], techIssues: [], engineIssues: [],
-      mechanicalIssues: Array.from({ length: mechanicalItems }, (_, i) => `item_${i}`),
-      drivable, accidents, smokedIn, tiresReplaced: "yes", numKeys: "2",
-      name: "", phone: "", email: "", zip: "",
-      loanStatus: "", loanCompany: "", loanBalance: "", loanPayment: "",
-      nextStep: "",
-    };
-
-    return calculateOffer(bbVehicle, formData, [], settings, rules);
-  }, [baseValue, year, make, model, mileage, condition, accidents, exteriorItems, mechanicalItems, drivable, smokedIn, settings, rules]);
-
-  const currentYear = new Date().getFullYear();
-  const vehicleAge = currentYear - Number(year);
-
-  // Find matching age tier
-  const matchedAgeTier = (settings.age_tiers || []).find(
-    t => vehicleAge >= t.min_years && vehicleAge <= t.max_years
+  const { bbVehicle, formData } = useMemo(
+    () => buildTestData(baseValue, year, make, model, mileage, condition, accidents, exteriorItems, mechanicalItems, drivable, smokedIn),
+    [baseValue, year, make, model, mileage, condition, accidents, exteriorItems, mechanicalItems, drivable, smokedIn]
   );
 
-  // Find matching mileage tier
-  const mileageNum = parseInt(mileage.replace(/[^0-9]/g, "")) || 0;
-  const matchedMileageTier = (settings.mileage_tiers || []).find(
-    t => mileageNum >= t.min_miles && mileageNum <= t.max_miles
+  const result = useMemo(
+    () => calculateOffer(bbVehicle, formData, [], settings, rules),
+    [bbVehicle, formData, settings, rules]
   );
+
+  const savedResult = useMemo(
+    () => savedSettings ? calculateOffer(bbVehicle, formData, [], savedSettings, rules) : null,
+    [bbVehicle, formData, savedSettings, rules]
+  );
+
+  const hasUnsavedChanges = savedSettings && JSON.stringify(settings) !== JSON.stringify(savedSettings);
 
   return (
     <div className="bg-card rounded-xl p-5 shadow-lg border border-border border-l-4 border-l-primary/50">
-      <div className="flex items-center gap-2 mb-4">
-        <Calculator className="w-5 h-5 text-primary" />
-        <h3 className="font-bold text-card-foreground">Offer Simulator</h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Calculator className="w-5 h-5 text-primary" />
+          <h3 className="font-bold text-card-foreground">Offer Simulator</h3>
+        </div>
+        {hasUnsavedChanges && (
+          <div className="flex items-center gap-2">
+            <Label htmlFor="compare-toggle" className="text-xs font-medium text-muted-foreground cursor-pointer">What-If Compare</Label>
+            <Switch id="compare-toggle" checked={compareMode} onCheckedChange={setCompareMode} />
+          </div>
+        )}
       </div>
       <p className="text-sm text-muted-foreground mb-5">
-        Enter a hypothetical vehicle to preview how your current settings calculate an offer — changes apply in real-time before saving.
+        {compareMode
+          ? "Comparing your unsaved changes (right) against the currently saved settings (left)."
+          : "Enter a hypothetical vehicle to preview how your current settings calculate an offer — changes apply in real-time before saving."}
       </p>
 
+      {/* Inputs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
         <div>
           <Label className="text-xs font-semibold">Base BB Value ($)</Label>
@@ -151,56 +165,101 @@ const OfferSimulator = ({ settings, rules }: Props) => {
         </div>
       </div>
 
-      {/* Result */}
-      {result ? (
-        <div className="bg-muted/40 rounded-lg p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-card-foreground">Estimated Offer Range</span>
-            <span className="text-xl font-bold text-primary">
-              ${result.low.toLocaleString()} – ${result.high.toLocaleString()}
-            </span>
+      {/* Results */}
+      {compareMode && savedResult && result ? (
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-start">
+          <ResultCard label="Saved Settings" result={savedResult} condition={condition} settings={savedSettings!} mileage={mileage} year={year} variant="muted" />
+          <div className="hidden md:flex items-center justify-center pt-10">
+            <ArrowRight className="w-6 h-6 text-muted-foreground" />
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <Stat label="Base Value" value={`$${result.baseValue.toLocaleString()}`} />
-            <Stat label={`Condition (${condition})`} value={`×${settings.condition_multipliers?.[condition as keyof typeof settings.condition_multipliers] ?? 1}`} icon={settings.condition_multipliers?.[condition as keyof typeof settings.condition_multipliers] >= 1 ? "up" : "down"} />
-            <Stat label="Deductions" value={`−$${result.totalDeductions.toLocaleString()}`} icon="down" />
-            <Stat label="Recon Cost" value={`−$${result.reconCost.toLocaleString()}`} icon="down" />
-          </div>
-
-          {(matchedAgeTier || matchedMileageTier || result.matchedRuleIds.length > 0) && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {matchedAgeTier && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                  Age: {vehicleAge}yr → {matchedAgeTier.adjustment_pct > 0 ? "+" : ""}{matchedAgeTier.adjustment_pct}%
-                </span>
-              )}
-              {matchedMileageTier && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                  Mileage: {mileageNum.toLocaleString()}mi → {matchedMileageTier.adjustment_flat > 0 ? "+" : ""}${matchedMileageTier.adjustment_flat.toLocaleString()}
-                </span>
-              )}
-              {result.matchedRuleIds.length > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 text-accent text-xs font-medium">
-                  {result.matchedRuleIds.length} rule(s) matched
-                </span>
-              )}
-              {result.isHotLead && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-xs font-medium">
-                  🔥 Hot Lead
-                </span>
-              )}
-            </div>
-          )}
-
-          {settings.global_adjustment_pct !== 0 && (
-            <p className="text-xs text-muted-foreground">Global adjustment: {settings.global_adjustment_pct > 0 ? "+" : ""}{settings.global_adjustment_pct}%</p>
-          )}
+          <ResultCard label="Unsaved Changes" result={result} condition={condition} settings={settings} mileage={mileage} year={year} variant="primary" delta={result.high - savedResult.high} />
         </div>
+      ) : result ? (
+        <ResultCard label="Estimated Offer" result={result} condition={condition} settings={settings} mileage={mileage} year={year} variant="primary" />
       ) : (
         <div className="bg-muted/40 rounded-lg p-4 text-sm text-muted-foreground text-center">
           Enter a base value above $0 to see a simulated offer.
         </div>
+      )}
+    </div>
+  );
+};
+
+// ── Result Card ──
+const ResultCard = ({
+  label, result, condition, settings, mileage, year, variant, delta,
+}: {
+  label: string;
+  result: OfferEstimate;
+  condition: string;
+  settings: OfferSettings;
+  mileage: string;
+  year: string;
+  variant: "primary" | "muted";
+  delta?: number;
+}) => {
+  const currentYear = new Date().getFullYear();
+  const vehicleAge = currentYear - Number(year);
+  const mileageNum = parseInt(mileage.replace(/[^0-9]/g, "")) || 0;
+
+  const matchedAgeTier = (settings.age_tiers || []).find(
+    t => vehicleAge >= t.min_years && vehicleAge <= t.max_years
+  );
+  const matchedMileageTier = (settings.mileage_tiers || []).find(
+    t => mileageNum >= t.min_miles && mileageNum <= t.max_miles
+  );
+
+  const condMult = settings.condition_multipliers?.[condition as keyof typeof settings.condition_multipliers] ?? 1;
+  const borderClass = variant === "primary" ? "border-primary/30" : "border-border";
+
+  return (
+    <div className={`rounded-lg border ${borderClass} bg-muted/40 p-4 space-y-3`}>
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+        {delta !== undefined && delta !== 0 && (
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${delta > 0 ? "bg-green-500/10 text-green-600" : "bg-destructive/10 text-destructive"}`}>
+            {delta > 0 ? "+" : ""}${delta.toLocaleString()}
+          </span>
+        )}
+      </div>
+      <div className="text-xl font-bold text-primary">
+        ${result.low.toLocaleString()} – ${result.high.toLocaleString()}
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <Stat label="Base Value" value={`$${result.baseValue.toLocaleString()}`} />
+        <Stat label={`Condition`} value={`×${condMult}`} icon={condMult >= 1 ? "up" : "down"} />
+        <Stat label="Deductions" value={`−$${result.totalDeductions.toLocaleString()}`} icon="down" />
+        <Stat label="Recon Cost" value={`−$${result.reconCost.toLocaleString()}`} icon="down" />
+      </div>
+
+      {(matchedAgeTier || matchedMileageTier || result.matchedRuleIds.length > 0) && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {matchedAgeTier && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+              Age {vehicleAge}yr: {matchedAgeTier.adjustment_pct > 0 ? "+" : ""}{matchedAgeTier.adjustment_pct}%
+            </span>
+          )}
+          {matchedMileageTier && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+              {mileageNum.toLocaleString()}mi: {matchedMileageTier.adjustment_flat > 0 ? "+" : ""}${matchedMileageTier.adjustment_flat.toLocaleString()}
+            </span>
+          )}
+          {result.matchedRuleIds.length > 0 && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-accent/10 text-accent text-xs font-medium">
+              {result.matchedRuleIds.length} rule(s)
+            </span>
+          )}
+          {result.isHotLead && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-xs font-medium">
+              🔥 Hot
+            </span>
+          )}
+        </div>
+      )}
+
+      {settings.global_adjustment_pct !== 0 && (
+        <p className="text-xs text-muted-foreground">Global: {settings.global_adjustment_pct > 0 ? "+" : ""}{settings.global_adjustment_pct}%</p>
       )}
     </div>
   );

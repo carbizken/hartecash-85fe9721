@@ -25,7 +25,11 @@ const stepVariants = {
   exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
 };
 
-const SellCarForm = () => {
+interface SellCarFormProps {
+  leadSource?: string;
+}
+
+const SellCarForm = ({ leadSource = "inventory" }: SellCarFormProps) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -299,7 +303,7 @@ const SellCarForm = () => {
           loan_balance: formData.loanBalance || null,
           loan_payment: formData.loanPayment || null,
           next_step: "photos", // default — they'll choose on offer page
-          lead_source: "inventory",
+          lead_source: leadSource,
           bb_tradein_avg: bbSelectedVehicle?.tradein?.avg || null,
           bb_wholesale_avg: bbSelectedVehicle?.wholesale?.avg || null,
           estimated_offer_low: estimate?.low || null,

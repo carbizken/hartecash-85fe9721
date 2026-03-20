@@ -1070,6 +1070,10 @@ const AdminDashboard = () => {
                   <ListChecks className="w-4 h-4 mr-1" />
                   Form Config
                 </TabsTrigger>
+                <TabsTrigger value="testimonials">
+                  <MessageSquareQuote className="w-4 h-4 mr-1" />
+                  Testimonials
+                </TabsTrigger>
               </>
             )}
           </TabsList>

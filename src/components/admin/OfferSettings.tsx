@@ -601,7 +601,7 @@ const OfferSettings = () => {
       </Button>
 
       {/* ── Offer Simulator ── */}
-      <OfferSimulator settings={settings} rules={rules} />
+      <OfferSimulator settings={settings} savedSettings={savedSettings} rules={rules} />
 
       {/* ── Section 5: Criteria-Based Rules ── */}
       <Section

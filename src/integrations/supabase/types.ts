@@ -147,6 +147,7 @@ export type Database = {
       offer_rules: {
         Row: {
           adjustment_pct: number
+          adjustment_type: string
           created_at: string
           criteria: Json
           dealership_id: string
@@ -159,6 +160,7 @@ export type Database = {
         }
         Insert: {
           adjustment_pct?: number
+          adjustment_type?: string
           created_at?: string
           criteria?: Json
           dealership_id?: string
@@ -171,6 +173,7 @@ export type Database = {
         }
         Update: {
           adjustment_pct?: number
+          adjustment_type?: string
           created_at?: string
           criteria?: Json
           dealership_id?: string
@@ -186,29 +189,44 @@ export type Database = {
       offer_settings: {
         Row: {
           bb_value_basis: string
+          condition_multipliers: Json
           created_at: string
           dealership_id: string
+          deduction_amounts: Json
           deductions_config: Json
           global_adjustment_pct: number
           id: string
+          offer_ceiling: number | null
+          offer_floor: number
+          recon_cost: number
           updated_at: string
         }
         Insert: {
           bb_value_basis?: string
+          condition_multipliers?: Json
           created_at?: string
           dealership_id?: string
+          deduction_amounts?: Json
           deductions_config?: Json
           global_adjustment_pct?: number
           id?: string
+          offer_ceiling?: number | null
+          offer_floor?: number
+          recon_cost?: number
           updated_at?: string
         }
         Update: {
           bb_value_basis?: string
+          condition_multipliers?: Json
           created_at?: string
           dealership_id?: string
+          deduction_amounts?: Json
           deductions_config?: Json
           global_adjustment_pct?: number
           id?: string
+          offer_ceiling?: number | null
+          offer_floor?: number
+          recon_cost?: number
           updated_at?: string
         }
         Relationships: []

@@ -135,7 +135,7 @@ function getEmailTemplate(touch: number, sub: SubmissionData, siteUrl: string, d
   return templates[touch] || templates[1];
 }
 
-function getSmsTemplate(touch: number, sub: SubmissionData, siteUrl: string) {
+function getSmsTemplate(touch: number, sub: SubmissionData, siteUrl: string, dealerName = "Our Dealership") {
   const firstName = sub.name?.split(" ")[0] || "";
   const vehicle = [sub.vehicle_year, sub.vehicle_make, sub.vehicle_model].filter(Boolean).join(" ");
   const offerStr = sub.offered_price

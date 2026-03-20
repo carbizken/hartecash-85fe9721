@@ -25,7 +25,11 @@ const stepVariants = {
   exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
 };
 
-const SellCarForm = () => {
+interface SellCarFormProps {
+  leadSource?: string;
+}
+
+const SellCarForm = ({ leadSource = "inventory" }: SellCarFormProps) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);

@@ -162,6 +162,7 @@ const AdminDashboard = () => {
   const [activityLog, setActivityLog] = useState<{ id: string; action: string; old_value: string | null; new_value: string | null; performed_by: string | null; created_at: string }[]>([]);
   const [duplicateWarnings, setDuplicateWarnings] = useState<Record<string, string[]>>({});
   const [selectedApptTime, setSelectedApptTime] = useState<string | null>(null);
+  const [optOutStatus, setOptOutStatus] = useState<{ email: boolean; sms: boolean }>({ email: false, sms: false });
   const navigate = useNavigate();
   const { toast } = useToast();
 

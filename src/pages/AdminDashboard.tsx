@@ -786,7 +786,7 @@ const AdminDashboard = () => {
           ? new Date(s.appointment_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
           : "No appointment yet") +
       '</p></div>' +
-      '<div class="section"><div class="section-title">Deal Progress</div>' + progressHtml + "</div>" +
+      '<div class="section"><div class="section-title">Acquisition Tracker</div>' + progressHtml + "</div>" +
       priceSection +
       notesHtml +
       photosHtml +

@@ -133,7 +133,7 @@ const AvatarCropDialog = ({ userId, currentUrl, onUploaded }: Props) => {
 
       <button
         onClick={() => inputRef.current?.click()}
-        className="relative group w-10 h-10 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0 hover:ring-2 hover:ring-primary/40 transition-shadow"
+        className="relative group w-14 h-14 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0 hover:ring-2 hover:ring-primary/40 transition-shadow"
         title="Upload photo"
       >
         {currentUrl ? (

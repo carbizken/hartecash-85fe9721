@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings } from "lucide-react";
+import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings, Bell } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QRCodeSVG } from "qrcode.react";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +21,7 @@ import DashboardAnalytics from "@/components/admin/DashboardAnalytics";
 import ConsentLog from "@/components/admin/ConsentLog";
 import OfferSettings from "@/components/admin/OfferSettings";
 import SiteConfiguration from "@/components/admin/SiteConfiguration";
+import NotificationSettings from "@/components/admin/NotificationSettings";
 import { Badge } from "@/components/ui/badge";
 
 interface PendingRequest {
@@ -1059,6 +1060,10 @@ const AdminDashboard = () => {
                   <Settings className="w-4 h-4 mr-1" />
                   Site Config
                 </TabsTrigger>
+                <TabsTrigger value="notifications">
+                  <Bell className="w-4 h-4 mr-1" />
+                  Notifications
+                </TabsTrigger>
               </>
             )}
           </TabsList>
@@ -1423,6 +1428,11 @@ const AdminDashboard = () => {
           {canManageAccess && (
             <TabsContent value="site-config">
               <SiteConfiguration />
+            </TabsContent>
+          )}
+          {canManageAccess && (
+            <TabsContent value="notifications">
+              <NotificationSettings />
             </TabsContent>
           )}
         </Tabs>

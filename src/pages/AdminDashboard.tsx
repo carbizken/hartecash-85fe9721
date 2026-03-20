@@ -1790,6 +1790,55 @@ const AdminDashboard = () => {
                 );
               })()}
 
+              {/* Request Review - only for purchase_complete */}
+              {selected.progress_status === "purchase_complete" && selected.email && (
+                <div data-print-section className="bg-success/5 border border-success/20 rounded-lg p-4">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">
+                    <Star className="w-4 h-4 inline mr-1" />Request Customer Review
+                  </h3>
+                  {(selected as any).review_requested ? (
+                    <div className="flex items-center gap-2 text-sm text-success">
+                      <Check className="w-4 h-4" />
+                      <span className="font-medium">Review request sent{(selected as any).review_requested_at ? ` on ${new Date((selected as any).review_requested_at).toLocaleDateString()}` : ""}</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Send an email asking the customer to leave a review about their experience.</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-success/40 text-success hover:bg-success/10"
+                        onClick={async () => {
+                          const { data: sessionData } = await supabase.auth.getSession();
+                          const accessToken = sessionData?.session?.access_token;
+                          if (!accessToken) {
+                            toast({ title: "Error", description: "You must be logged in.", variant: "destructive" });
+                            return;
+                          }
+                          toast({ title: "Sending...", description: "Sending review request email..." });
+                          try {
+                            const res = await supabase.functions.invoke("send-review-request", {
+                              body: { submission_id: selected.id, submission_token: selected.token },
+                            });
+                            if (res.error || res.data?.error) {
+                              toast({ title: "Failed", description: res.data?.error || "Could not send email.", variant: "destructive" });
+                            } else {
+                              toast({ title: "Sent! ⭐", description: "Review request email sent to the customer." });
+                              setSelected({ ...selected, review_requested: true, review_requested_at: new Date().toISOString() } as any);
+                              fetchSubmissions();
+                            }
+                          } catch {
+                            toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        <Mail className="w-4 h-4 mr-1" /> Send Review Request
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Internal Notes */}
               <div data-print-section className="bg-muted/40 rounded-lg p-4">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">

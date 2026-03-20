@@ -352,22 +352,63 @@ const SiteConfiguration = () => {
       </Section>
 
       {/* Animations */}
-      <Section icon={Sparkles} title="Animations">
-        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
-          <div>
-            <Label className="text-sm font-semibold">Scroll Reveal Animations</Label>
-            <p className="text-xs text-muted-foreground mt-0.5">Enable scroll-triggered entrance animations on landing page sections like the comparison table.</p>
+      <Section icon={Sparkles} title="Animations & Transitions">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
+            <div>
+              <Label className="text-sm font-semibold">Scroll Reveal Animations</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">Enable scroll-triggered entrance animations on landing page sections like the comparison table.</p>
+            </div>
+            <Switch
+              checked={config.enable_animations}
+              onCheckedChange={v => {
+                setConfig(prev => {
+                  const next = { ...prev, enable_animations: v };
+                  setHasChanges(JSON.stringify(next) !== JSON.stringify(savedConfig));
+                  return next;
+                });
+              }}
+            />
           </div>
-          <Switch
-            checked={config.enable_animations}
-            onCheckedChange={v => {
-              setConfig(prev => {
-                const next = { ...prev, enable_animations: v };
-                setHasChanges(JSON.stringify(next) !== JSON.stringify(savedConfig));
-                return next;
-              });
-            }}
-          />
+
+          <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
+            <div className="flex-1">
+              <Label className="text-sm font-semibold">Animated Offer Calculation Screen</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Show a step-by-step animated loading screen while calculating the customer's offer, instead of the default ghost car loader.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+                    <Eye className="w-3.5 h-3.5" />
+                    Preview
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl p-0 overflow-hidden h-[500px]">
+                  <div className="w-full h-full">
+                    <CalculatingOffer
+                      vehicleYear="2023"
+                      vehicleMake="Toyota"
+                      vehicleModel="Camry SE"
+                      previewMode
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Switch
+                checked={config.use_animated_calculating}
+                onCheckedChange={v => {
+                  setConfig(prev => {
+                    const next = { ...prev, use_animated_calculating: v };
+                    setHasChanges(JSON.stringify(next) !== JSON.stringify(savedConfig));
+                    return next;
+                  });
+                }}
+              />
+            </div>
+          </div>
         </div>
       </Section>
 

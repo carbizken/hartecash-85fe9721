@@ -68,6 +68,7 @@ interface OfferSettingsRow {
   recon_cost: number;
   offer_floor: number;
   offer_ceiling: number | null;
+  age_tiers: AgeTier[];
 }
 
 interface OfferRule {

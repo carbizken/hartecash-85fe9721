@@ -44,6 +44,12 @@ interface DeductionAmounts {
   missing_keys_0: number;
 }
 
+interface AgeTier {
+  min_years: number;
+  max_years: number;
+  adjustment_pct: number;
+}
+
 interface ConditionMultipliers {
   excellent: number;
   good: number;

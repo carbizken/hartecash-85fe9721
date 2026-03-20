@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { UserRound, CalendarCheck, FileText } from "lucide-react";
+import { UserRound, CalendarCheck, FileText, ArrowLeftRight } from "lucide-react";
 import harteLogo from "@/assets/harte-logo.png";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 
@@ -23,6 +23,7 @@ const SiteHeader = () => {
 
           <nav className="hidden lg:flex items-center gap-8 text-sm font-semibold text-card-foreground">
             <a href="#compare" className="hover:text-accent transition-colors">Why {dealerName.split(" ")[0]}</a>
+            <Link to="/trade" className="hover:text-accent transition-colors">Trade-In</Link>
             <Link to="/schedule" className="hover:text-accent transition-colors">Schedule a Visit</Link>
             <Link to="/my-submission" className="hover:text-accent transition-colors">View My Offer</Link>
           </nav>
@@ -38,6 +39,14 @@ const SiteHeader = () => {
 
             {open && (
               <div className="absolute right-0 top-full mt-1 w-56 bg-card rounded-xl shadow-lg border border-border py-2 z-50">
+                <Link
+                  to="/trade"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-card-foreground hover:bg-muted transition-colors"
+                  onClick={() => setOpen(false)}
+                >
+                  <ArrowLeftRight className="w-4 h-4 text-accent" />
+                  Trade-In
+                </Link>
                 <Link
                   to="/my-submission"
                   className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-card-foreground hover:bg-muted transition-colors"

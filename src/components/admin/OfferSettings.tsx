@@ -214,6 +214,7 @@ const OfferSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<OfferSettingsRow | null>(null);
+  const [savedSettings, setSavedSettings] = useState<OfferSettingsRow | null>(null);
   const [rules, setRules] = useState<OfferRule[]>([]);
   const [showRuleDialog, setShowRuleDialog] = useState(false);
   const [editingRule, setEditingRule] = useState<Partial<OfferRule> | null>(null);
@@ -230,6 +231,16 @@ const OfferSettings = () => {
     if (settingsRes.data) {
       const d = settingsRes.data as any;
       setSettings({
+        ...d,
+        deduction_amounts: d.deduction_amounts || DEFAULT_DEDUCTION_AMOUNTS,
+        condition_multipliers: d.condition_multipliers || DEFAULT_CONDITION_MULTIPLIERS,
+        recon_cost: d.recon_cost ?? 0,
+        offer_floor: d.offer_floor ?? 500,
+        offer_ceiling: d.offer_ceiling ?? null,
+        age_tiers: Array.isArray(d.age_tiers) ? d.age_tiers : [],
+        mileage_tiers: Array.isArray(d.mileage_tiers) ? d.mileage_tiers : [],
+      } as OfferSettingsRow);
+      setSavedSettings({
         ...d,
         deduction_amounts: d.deduction_amounts || DEFAULT_DEDUCTION_AMOUNTS,
         condition_multipliers: d.condition_multipliers || DEFAULT_CONDITION_MULTIPLIERS,
@@ -267,6 +278,7 @@ const OfferSettings = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Saved", description: "Offer settings updated." });
+      setSavedSettings({ ...settings });
     }
     setSaving(false);
   };
@@ -589,7 +601,7 @@ const OfferSettings = () => {
       </Button>
 
       {/* ── Offer Simulator ── */}
-      <OfferSimulator settings={settings} rules={rules} />
+      <OfferSimulator settings={settings} savedSettings={savedSettings} rules={rules} />
 
       {/* ── Section 5: Criteria-Based Rules ── */}
       <Section

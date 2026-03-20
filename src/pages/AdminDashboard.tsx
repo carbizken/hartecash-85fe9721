@@ -155,6 +155,7 @@ const AdminDashboard = () => {
   const [total, setTotal] = useState(0);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [apptLocationFilter, setApptLocationFilter] = useState<string>("all");
   const [showCreateAppt, setShowCreateAppt] = useState(false);
   const [apptForm, setApptForm] = useState({
     customer_name: "",
@@ -1291,14 +1292,33 @@ const AdminDashboard = () => {
           {/* Appointments */}
           {activeSection === "appointments" && (
             <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <h2 className="text-lg font-semibold text-card-foreground">Scheduled Appointments</h2>
-              <Button size="sm" onClick={() => setShowCreateAppt(true)}>
-                <Plus className="w-4 h-4 mr-1" /> New Appointment
-              </Button>
+              <div className="flex items-center gap-2">
+                <Select value={apptLocationFilter} onValueChange={setApptLocationFilter}>
+                  <SelectTrigger className="w-[220px] h-9 text-sm">
+                    <SelectValue placeholder="All Locations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Locations</SelectItem>
+                    {STORE_LOCATIONS.map(loc => (
+                      <SelectItem key={loc.value} value={loc.value}>{loc.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="sm" onClick={() => setShowCreateAppt(true)}>
+                  <Plus className="w-4 h-4 mr-1" /> New Appointment
+                </Button>
+              </div>
             </div>
-            {appointments.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">No appointments scheduled yet.</div>
+            {(() => {
+              const filteredAppointments = apptLocationFilter === "all"
+                ? appointments
+                : appointments.filter(a => a.store_location === apptLocationFilter);
+              return filteredAppointments.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                {appointments.length === 0 ? "No appointments scheduled yet." : "No appointments at this location."}
+              </div>
             ) : (
               <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
                 <div className="overflow-x-auto">
@@ -1315,7 +1335,7 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {appointments.map((appt) => (
+                      {filteredAppointments.map((appt) => (
                         <tr key={appt.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                           <td className="px-3 py-2 text-sm">{new Date(appt.preferred_date + "T12:00:00").toLocaleDateString()}</td>
                           <td className="px-3 py-2 text-sm">{appt.preferred_time}</td>
@@ -1347,7 +1367,8 @@ const AdminDashboard = () => {
                   </table>
                 </div>
               </div>
-            )}
+            );
+            })()}
             </div>
           )}
 

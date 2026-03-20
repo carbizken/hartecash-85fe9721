@@ -439,8 +439,20 @@ const AdminDashboard = () => {
     setDocs([]);
     setActivityLog([]);
     setSelectedApptTime(null);
+    setOptOutStatus({ email: false, sms: false });
     fetchActivityLog(sub.id);
     checkDuplicates(sub);
+
+    // Check opt-out status
+    if (sub.email || sub.phone) {
+      const optEmail = sub.email
+        ? (await supabase.from("opt_outs" as any).select("id").eq("email", sub.email).eq("channel", "email").maybeSingle()).data
+        : null;
+      const optSms = sub.phone
+        ? (await supabase.from("opt_outs" as any).select("id").eq("phone", sub.phone).eq("channel", "sms").maybeSingle()).data
+        : null;
+      setOptOutStatus({ email: !!optEmail, sms: !!optSms });
+    }
 
     // Fetch linked appointment time
     if (sub.appointment_set) {

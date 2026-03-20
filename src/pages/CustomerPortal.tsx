@@ -9,7 +9,8 @@ import {
   DollarSign, Inbox, Search, BadgeDollarSign, CalendarCheck,
   ClipboardCheck, Handshake, PartyPopper, type LucideIcon
 } from "lucide-react";
-import harteLogo from "@/assets/harte-logo.png";
+import harteLogoFallback from "@/assets/harte-logo.png";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { motion } from "framer-motion";
 import PortalSkeleton from "@/components/PortalSkeleton";
 import WhatsNextCard from "@/components/portal/WhatsNextCard";
@@ -61,7 +62,7 @@ const STAGE_CONFIG: Record<string, StageInfo> = {
   inspection_scheduled: { label: "Inspection Scheduled", icon: CalendarCheck, helperText: "Your in-person inspection is booked. Bring your vehicle and we'll take a look!" },
   inspection_completed: { label: "Inspection Complete", icon: ClipboardCheck, helperText: "We've inspected your vehicle and are finalizing the details." },
   price_agreed: { label: "Final Offer Accepted", icon: Handshake, helperText: "We've agreed on a price! We're preparing everything for the purchase." },
-  purchase_complete: { label: "Purchase Complete 🎉", icon: PartyPopper, helperText: "Congratulations! The deal is done. Thank you for choosing Harte Auto Group!" },
+  purchase_complete: { label: "Purchase Complete 🎉", icon: PartyPopper, helperText: "Congratulations! The deal is done. Thank you for choosing us!" },
 };
 
 const STAGE_MAPPING: Record<string, string> = {
@@ -87,6 +88,7 @@ const LOAN_STATUS_LABELS: Record<string, string> = {
 
 const CustomerPortal = () => {
   const { token } = useParams<{ token: string }>();
+  const { config } = useSiteConfig();
   const [submission, setSubmission] = useState<PortalSubmission | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -286,7 +288,7 @@ const CustomerPortal = () => {
             Back to my submissions
           </Link>
           <div className="flex items-center gap-3">
-            <img src={harteLogo} alt="Harte" className="h-12 w-auto" />
+            <img src={config.logo_url || harteLogoFallback} alt={config.dealership_name || "Dealership"} className="h-12 w-auto" />
             <div className="flex-1">
               <h1 className="font-bold text-lg lg:text-xl">{vehicleStr || "My Submission"}</h1>
               {firstName && (

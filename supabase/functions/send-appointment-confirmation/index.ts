@@ -101,6 +101,18 @@ Deno.serve(async (req) => {
 
     const firstName = sanitize(customer_name?.split(" ")[0]) || "friend";
 
+    // Fetch dealership name
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+    const { data: siteConfig } = await adminClient
+      .from("site_config")
+      .select("dealership_name")
+      .eq("dealership_id", "default")
+      .maybeSingle();
+    const dealerName = siteConfig?.dealership_name || "Our Dealership";
+
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -108,14 +120,14 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Harte Auto <onboarding@resend.dev>",
+        from: `${dealerName} <onboarding@resend.dev>`,
         to: [customer_email],
         subject: `🚗 You've Got a Date With Us — ${formattedDate} at ${sanitize(preferred_time)}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #003366 0%, #004488 100%); padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
               <h1 style="color: white; margin: 0; font-size: 26px;">It's a Date! 🎉</h1>
-              <p style="color: #b0c4de; margin: 8px 0 0; font-size: 14px;">Your appointment at Harte Auto is locked in</p>
+              <p style="color: #b0c4de; margin: 8px 0 0; font-size: 14px;">Your appointment is locked in</p>
             </div>
             
             <div style="padding: 30px; background: #f9f9f9; border-radius: 0 0 8px 8px;">
@@ -141,7 +153,7 @@ Deno.serve(async (req) => {
               <p style="margin-top: 25px;">See you soon! 🙌</p>
               
               <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; font-size: 12px;">
-                <strong>Harte Auto Group</strong><br/>
+                <strong>${dealerName}</strong><br/>
                 Where selling your car is almost as fun as buying one. <em>Almost.</em>
               </div>
             </div>

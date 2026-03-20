@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Harte Auto <onboarding@resend.dev>",
+            from: "Vehicle Purchase Program <onboarding@resend.dev>",
             to: [staffEmail],
             subject: `New Appointment Request — ${sanitize(customer_name)}`,
             html: `

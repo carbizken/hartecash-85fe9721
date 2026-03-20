@@ -3,6 +3,7 @@ import FormField from "./FormField";
 import RadioOption from "./RadioOption";
 import type { FormData } from "./types";
 import type { FormConfig } from "@/hooks/useFormConfig";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 interface Props {
   formData: FormData;
@@ -11,6 +12,8 @@ interface Props {
 }
 
 const StepFinalize = ({ formData, update, formConfig }: Props) => {
+  const { config } = useSiteConfig();
+  const dealerName = config.dealership_name || "our dealership";
   const showLoanSection = !formConfig || formConfig.q_loan_details;
   const showLoanFields = showLoanSection && (formData.loanStatus === "Sell" || formData.loanStatus === "Trade-In");
   const showLeaseFields = showLoanSection && formData.loanStatus === "Lease Buyout";
@@ -151,7 +154,7 @@ const StepFinalize = ({ formData, update, formConfig }: Props) => {
 
       <div className="p-3 bg-muted/50 border border-border rounded-lg mb-2">
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          By submitting this form, you consent to receive autodialed calls, texts (SMS/MMS), and emails from Harte Auto Group at the phone number and email provided regarding your vehicle submission, offer, and appointment. Consent is not a condition of purchase. Msg & data rates may apply. Msg frequency varies. Reply STOP to opt out. See our{" "}
+          By submitting this form, you consent to receive autodialed calls, texts (SMS/MMS), and emails from {dealerName} at the phone number and email provided regarding your vehicle submission, offer, and appointment. Consent is not a condition of purchase. Msg & data rates may apply. Msg frequency varies. Reply STOP to opt out. See our{" "}
           <a href="/privacy#sms-consent" target="_blank" rel="noopener noreferrer" className="underline text-primary hover:no-underline">Privacy Policy</a>{" "}
           and{" "}
           <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline text-primary hover:no-underline">Terms of Service</a>.

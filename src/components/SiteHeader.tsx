@@ -13,7 +13,7 @@ const SiteHeader = () => {
   const hide = () => { timeout.current = setTimeout(() => setOpen(false), 200); };
 
   const logoSrc = config.logo_url || harteLogo;
-  const dealerName = config.dealership_name || "Harte Auto Group";
+  const dealerName = config.dealership_name || "Our Dealership";
 
   return (
     <header className="bg-card sticky top-0 z-50 shadow-md">

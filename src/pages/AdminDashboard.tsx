@@ -14,8 +14,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
-import harteLogo from "@/assets/harte-logo.png";
-import harteLogoWhite from "@/assets/harte-logo-white.png";
+import harteLogoFallback from "@/assets/harte-logo.png";
+import harteLogoWhiteFallback from "@/assets/harte-logo-white.png";
 import StaffManagement from "@/components/admin/StaffManagement";
 import StaffFileUpload from "@/components/admin/StaffFileUpload";
 import DashboardAnalytics from "@/components/admin/DashboardAnalytics";
@@ -825,7 +825,7 @@ const AdminDashboard = () => {
       images.length > 0 ? `<div class="doc-section"><h2>${title}</h2>${images.map(url => `<img class="doc-img" src="${url}" />`).join("")}</div>` : "";
 
     const html = `<!DOCTYPE html><html><head><title>Check Request</title><style>${css}</style></head><body>
-      <div class="header"><h1>Harte Auto Group</h1><p>Check Request Form</p></div>
+      <div class="header"><h1>${selected?.vehicle_make ? selected.vehicle_make : "Dealership"}</h1><p>Check Request Form</p></div>
       <div class="content">
         <p class="title">Check Request</p>
         <table>
@@ -935,7 +935,7 @@ const AdminDashboard = () => {
       images.length > 0 ? `<div class="doc-section"><h2>${title}</h2>${images.map(url => `<img class="doc-img" src="${url}" />`).join("")}</div>` : "";
 
     const html = `<!DOCTYPE html><html><head><title>Customer Documents – ${s.name || vehicleStr}</title><style>${css}</style></head><body>
-      <div class="header"><h1>Harte Auto Group</h1><p>Customer Documents — ${s.name || ""} — ${vehicleStr}</p></div>
+      <div class="header"><h1>Customer Documents</h1><p>${s.name || ""} — ${vehicleStr}</p></div>
       ${makeDocSection("Driver's License", dlImages)}
       ${makeDocSection("Registration", regImages)}
       ${makeDocSection("Title", titleImages)}
@@ -1027,7 +1027,7 @@ const AdminDashboard = () => {
         <div className="px-4 py-1 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <SidebarTrigger className="text-white/80 hover:text-white hover:bg-white/10 -ml-1" />
-            <img src={harteLogoWhite} alt="Harte Auto Group" className="h-20 w-auto" />
+            <img src={harteLogoWhiteFallback} alt="Dashboard" className="h-20 w-auto" />
             <div>
               <span className="text-lg font-bold">Dashboard</span>
               <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-white/20 text-white/90 font-medium">

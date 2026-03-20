@@ -41,7 +41,7 @@ function getUnsubscribeFooter(siteUrl: string, token: string) {
   return `<p style="color: #999; font-size: 11px; margin-top: 16px;">Don't want these emails? <a href="${url}" style="color: #2563eb; text-decoration: underline;">Unsubscribe</a></p>`;
 }
 
-function getEmailTemplate(touch: number, sub: SubmissionData, siteUrl: string) {
+function getEmailTemplate(touch: number, sub: SubmissionData, siteUrl: string, dealerName = "Our Dealership") {
   const firstName = sub.name?.split(" ")[0] || "there";
   const vehicle = [sub.vehicle_year, sub.vehicle_make, sub.vehicle_model].filter(Boolean).join(" ");
   const offerStr = sub.offered_price
@@ -72,7 +72,7 @@ function getEmailTemplate(touch: number, sub: SubmissionData, siteUrl: string) {
             </div>
             <p style="color: #666; font-size: 14px;">Your offer is guaranteed for a limited time. Don't let it expire!</p>
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-            <p style="color: #999; font-size: 12px;">Harte Auto Group • <a href="${portalUrl}" style="color: #2563eb;">View your portal</a></p>
+            <p style="color: #999; font-size: 12px;">${dealerName} • <a href="${portalUrl}" style="color: #2563eb;">View your portal</a></p>
             ${unsubFooter}
           </div>
         </div>
@@ -99,7 +99,7 @@ function getEmailTemplate(touch: number, sub: SubmissionData, siteUrl: string) {
               <a href="${scheduleUrl}" style="background: #0a2647; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Schedule Your Visit →</a>
             </div>
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-            <p style="color: #999; font-size: 12px;">Harte Auto Group • <a href="${portalUrl}" style="color: #2563eb;">View your portal</a></p>
+            <p style="color: #999; font-size: 12px;">${dealerName} • <a href="${portalUrl}" style="color: #2563eb;">View your portal</a></p>
             ${unsubFooter}
           </div>
         </div>
@@ -124,7 +124,7 @@ function getEmailTemplate(touch: number, sub: SubmissionData, siteUrl: string) {
             </div>
             <p style="color: #666; font-size: 14px;">Questions? Reply to this email or call us — we're happy to help.</p>
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-            <p style="color: #999; font-size: 12px;">Harte Auto Group • <a href="${portalUrl}" style="color: #2563eb;">View your portal</a></p>
+            <p style="color: #999; font-size: 12px;">${dealerName} • <a href="${portalUrl}" style="color: #2563eb;">View your portal</a></p>
             ${unsubFooter}
           </div>
         </div>
@@ -135,7 +135,7 @@ function getEmailTemplate(touch: number, sub: SubmissionData, siteUrl: string) {
   return templates[touch] || templates[1];
 }
 
-function getSmsTemplate(touch: number, sub: SubmissionData, siteUrl: string) {
+function getSmsTemplate(touch: number, sub: SubmissionData, siteUrl: string, dealerName = "Our Dealership") {
   const firstName = sub.name?.split(" ")[0] || "";
   const vehicle = [sub.vehicle_year, sub.vehicle_make, sub.vehicle_model].filter(Boolean).join(" ");
   const offerStr = sub.offered_price
@@ -147,9 +147,9 @@ function getSmsTemplate(touch: number, sub: SubmissionData, siteUrl: string) {
   const offerUrl = `${siteUrl}/offer/${sub.token}`;
 
   const templates: Record<number, string> = {
-    1: `Harte Auto Group: Hey ${firstName}, your ${offerStr ? offerStr + " " : ""}cash offer for your ${vehicle} is ready! View it here: ${offerUrl} Reply STOP to opt out.`,
-    2: `Harte Auto Group: ${firstName}, upload your ${vehicle} photos to fast-track your deal & get paid sooner: ${siteUrl}/upload/${sub.token} Reply STOP to opt out.`,
-    3: `Harte Auto Group: ⏰ ${firstName}, your ${vehicle} offer expires soon! Schedule your visit now to lock in your price: ${siteUrl}/schedule?token=${sub.token} Reply STOP to opt out.`,
+    1: `${dealerName}: Hey ${firstName}, your ${offerStr ? offerStr + " " : ""}cash offer for your ${vehicle} is ready! View it here: ${offerUrl} Reply STOP to opt out.`,
+    2: `${dealerName}: ${firstName}, upload your ${vehicle} photos to fast-track your deal & get paid sooner: ${siteUrl}/upload/${sub.token} Reply STOP to opt out.`,
+    3: `${dealerName}: ⏰ ${firstName}, your ${vehicle} offer expires soon! Schedule your visit now to lock in your price: ${siteUrl}/schedule?token=${sub.token} Reply STOP to opt out.`,
   };
 
   return templates[touch] || templates[1];
@@ -224,6 +224,14 @@ Deno.serve(async (req) => {
     const twilioToken = Deno.env.get("TWILIO_AUTH_TOKEN");
     const twilioPhone = Deno.env.get("TWILIO_PHONE_NUMBER");
 
+    // Fetch dealership name from site_config
+    const { data: siteConfig } = await supabase
+      .from("site_config")
+      .select("dealership_name")
+      .eq("dealership_id", "default")
+      .maybeSingle();
+    const dealerName = siteConfig?.dealership_name || "Our Dealership";
+
     const results: { email?: string; sms?: string } = {};
 
     // Send email (unless opted out)
@@ -231,7 +239,7 @@ Deno.serve(async (req) => {
       results.email = "opted_out";
     } else if (resendKey && sub.email) {
       try {
-        const template = getEmailTemplate(touch_number, sub as SubmissionData, siteUrl);
+        const template = getEmailTemplate(touch_number, sub as SubmissionData, siteUrl, dealerName);
         const emailRes = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -239,7 +247,7 @@ Deno.serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Harte Auto Group <onboarding@resend.dev>",
+            from: `${dealerName} <onboarding@resend.dev>`,
             to: [sub.email],
             subject: template.subject,
             html: template.html,
@@ -278,7 +286,7 @@ Deno.serve(async (req) => {
       results.sms = "opted_out";
     } else if (twilioSid && twilioToken && twilioPhone && sub.phone) {
       try {
-        const smsBody = getSmsTemplate(touch_number, sub as SubmissionData, siteUrl);
+        const smsBody = getSmsTemplate(touch_number, sub as SubmissionData, siteUrl, dealerName);
         const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
         const smsRes = await fetch(twilioUrl, {
           method: "POST",

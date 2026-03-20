@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import InspectionDisclosure from "@/components/portal/InspectionDisclosure";
 import WhatToExpect from "@/components/portal/WhatToExpect";
-import harteLogo from "@/assets/harte-logo-white.png";
+import harteLogoFallback from "@/assets/harte-logo-white.png";
 import PortalSkeleton from "@/components/PortalSkeleton";
 import CalculatingOffer from "@/components/CalculatingOffer";
 import { getTaxRateFromZip, calcTradeInValue, STATE_NAMES } from "@/lib/salesTax";
@@ -445,7 +445,7 @@ const OfferPage = () => {
         </div>
 
         <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-          When you trade in your vehicle toward a new or pre-owned purchase at Harte Auto Group, 
+          When you trade in your vehicle toward a new or pre-owned purchase at {config.dealership_name || "our dealership"}, 
           you receive a <span className="font-semibold text-card-foreground">sales tax credit</span> on 
           the value of your trade.
         </p>
@@ -598,7 +598,7 @@ const OfferPage = () => {
       {/* Header bar */}
       <div className="flex items-center justify-between border-b-2 border-primary pb-3 mb-4">
         <div className="flex items-center gap-3">
-          <img src={harteLogo} alt="Harte Auto Group" className="h-9 w-auto brightness-0" />
+          <img src={config.logo_url || config.logo_white_url || harteLogoFallback} alt={config.dealership_name || "Dealership"} className="h-9 w-auto brightness-0" />
           <div>
             <p className="text-[10px] text-muted-foreground leading-tight">Vehicle Purchase Program</p>
             <p className="text-[10px] text-muted-foreground">
@@ -848,7 +848,7 @@ const OfferPage = () => {
 
       {/* Footer */}
       <div className="border-t border-border pt-2 flex items-center justify-between text-[9px] text-muted-foreground">
-        <p>Offer valid subject to in-person inspection · {config.dealership_name || "Harte Auto Group"}</p>
+        <p>Offer valid subject to in-person inspection · {config.dealership_name || "Our Dealership"}</p>
         <p>{config.phone} · {config.address}</p>
       </div>
     </div>
@@ -867,7 +867,7 @@ const OfferPage = () => {
             Back to portal
           </Link>
           <div className="flex items-center gap-3">
-            <img src={harteLogo} alt="Harte Auto Group" className="h-10 w-auto" />
+            <img src={config.logo_white_url || harteLogoFallback} alt={config.dealership_name || "Dealership"} className="h-10 w-auto" />
             <div className="flex-1">
               <h1 className="font-bold text-lg lg:text-xl">Your Offer</h1>
               {firstName && <p className="text-sm opacity-80">{firstName}, here's your personalized offer</p>}

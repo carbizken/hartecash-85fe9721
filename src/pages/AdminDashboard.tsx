@@ -1155,8 +1155,9 @@ const AdminDashboard = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="__all__">All sources</SelectItem>
-                        <SelectItem value="inventory">Inventory</SelectItem>
-                        <SelectItem value="service">Service</SelectItem>
+                        <SelectItem value="inventory">Off Street Purchase</SelectItem>
+                        <SelectItem value="service">Service Drive</SelectItem>
+                        <SelectItem value="in_store_trade">In-Store Trade</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

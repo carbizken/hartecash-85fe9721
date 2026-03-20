@@ -1198,6 +1198,7 @@ const AdminDashboard = () => {
                         <SelectItem value="__all__">All sources</SelectItem>
                         <SelectItem value="inventory">Off Street Purchase</SelectItem>
                         <SelectItem value="service">Service Drive</SelectItem>
+                        <SelectItem value="trade">Trade-In</SelectItem>
                         <SelectItem value="in_store_trade">In-Store Trade</SelectItem>
                       </SelectContent>
                     </Select>

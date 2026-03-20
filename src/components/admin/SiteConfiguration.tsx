@@ -54,6 +54,8 @@ const DEFAULT_CONFIG: SiteConfig = {
   stats_years_in_business: "78 yrs",
   stats_rating: "4.9",
   stats_reviews_count: "2,400+",
+  review_request_subject: "We'd Love Your Feedback!",
+  review_request_message: "Thank you for choosing us! We hope you had a great experience selling your vehicle. Would you take a moment to share your feedback? Your review helps other car owners make the right choice.",
 };
 
 interface SectionProps {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +22,7 @@ import PaymentInfoCard from "@/components/portal/PaymentInfoCard";
 import LoanPayoffCard from "@/components/portal/LoanPayoffCard";
 import CommunicationPreferences from "@/components/portal/CommunicationPreferences";
 import InspectionDisclosure from "@/components/portal/InspectionDisclosure";
+import WhatToExpect from "@/components/portal/WhatToExpect";
 
 interface PortalSubmission {
   id: string;
@@ -338,7 +340,10 @@ const CustomerPortal = () => {
               )}
 
               {currentStageIdx >= CUSTOMER_VISIBLE_STAGES.indexOf("offer_made") && !isComplete && (
-                <WhatToBringCard />
+                <>
+                  <WhatToBringCard />
+                  <WhatToExpect />
+                </>
               )}
 
               {ScheduleVisitCTA}
@@ -386,7 +391,10 @@ const CustomerPortal = () => {
           )}
 
           {currentStageIdx >= CUSTOMER_VISIBLE_STAGES.indexOf("offer_made") && !isComplete && (
-            <WhatToBringCard />
+            <>
+              <WhatToBringCard />
+              <WhatToExpect />
+            </>
           )}
 
           {ScheduleVisitCTA}

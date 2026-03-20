@@ -1990,6 +1990,11 @@ const AdminDashboard = () => {
                       {new Date(selected.appointment_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
                       {selectedApptTime && <span className="ml-1">at {selectedApptTime}</span>}
                     </p>
+                    {selectedApptLocation && (
+                      <p className="text-sm text-muted-foreground">
+                        📍 {STORE_LOCATIONS.find(l => l.value === selectedApptLocation)?.label || selectedApptLocation}
+                      </p>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"

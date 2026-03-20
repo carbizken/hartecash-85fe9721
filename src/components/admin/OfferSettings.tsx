@@ -189,6 +189,7 @@ const OfferSettings = () => {
         recon_cost: d.recon_cost ?? 0,
         offer_floor: d.offer_floor ?? 500,
         offer_ceiling: d.offer_ceiling ?? null,
+        age_tiers: Array.isArray(d.age_tiers) ? d.age_tiers : [],
       } as OfferSettingsRow);
     }
     if (rulesRes.data) {

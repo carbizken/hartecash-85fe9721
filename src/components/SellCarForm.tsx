@@ -35,6 +35,7 @@ const SellCarForm = () => {
   const [honeypot, setHoneypot] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { formConfig } = useFormConfig();
 
   // Black Book state
   const [bbVehicles, setBbVehicles] = useState<BBVehicle[]>([]);

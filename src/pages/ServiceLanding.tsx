@@ -17,6 +17,7 @@ interface VehicleInfo {
   make: string;
   model: string;
   trim?: string;
+  style?: string;
 }
 
 interface BBValues {
@@ -24,24 +25,35 @@ interface BBValues {
   wholesale_avg: number | null;
 }
 
-const lookupVinViaBB = async (vin: string): Promise<{ vehicle: VehicleInfo | null; bbValues: BBValues }> => {
+interface BBOption {
+  uoc: string;
+  name: string;
+  auto: string; // Y=auto-selected, N=not, M=matched
+}
+
+const lookupVinViaBB = async (vin: string): Promise<{ vehicle: VehicleInfo | null; bbValues: BBValues; options: BBOption[] }> => {
   try {
     const { data, error } = await supabase.functions.invoke("bb-lookup", {
       body: { lookup_type: "vin", vin, state: "CT" },
     });
     if (error || data?.error || !data?.vehicles?.length) {
-      return { vehicle: null, bbValues: { tradein_avg: null, wholesale_avg: null } };
+      return { vehicle: null, bbValues: { tradein_avg: null, wholesale_avg: null }, options: [] };
     }
     const v = data.vehicles[0];
     return {
-      vehicle: { year: v.year, make: v.make, model: v.model, trim: v.series || "" },
+      vehicle: { year: v.year, make: v.make, model: v.model, trim: v.series || "", style: v.style || "" },
       bbValues: {
-        tradein_avg: v.adjusted_tradein_avg ?? v.base_tradein_avg ?? null,
-        wholesale_avg: v.adjusted_wholesale_avg ?? v.base_wholesale_avg ?? null,
+        tradein_avg: v.tradein?.avg ?? null,
+        wholesale_avg: v.wholesale?.avg ?? null,
       },
+      options: (v.add_deduct_list || []).map((ad: any) => ({
+        uoc: ad.uoc,
+        name: ad.name,
+        auto: ad.auto,
+      })),
     };
   } catch {
-    return { vehicle: null, bbValues: { tradein_avg: null, wholesale_avg: null } };
+    return { vehicle: null, bbValues: { tradein_avg: null, wholesale_avg: null }, options: [] };
   }
 };
 

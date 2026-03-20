@@ -473,12 +473,13 @@ const AdminDashboard = () => {
     if (sub.appointment_set) {
       const { data: apptData } = await supabase
         .from("appointments")
-        .select("preferred_time")
+        .select("preferred_time, store_location")
         .eq("submission_token", sub.token)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (apptData?.preferred_time) setSelectedApptTime(apptData.preferred_time);
+      if ((apptData as any)?.store_location) setSelectedApptLocation((apptData as any).store_location);
     }
     // Fetch photos
     const { data } = await supabase.storage

@@ -154,7 +154,35 @@ const ServiceLinkGen = () => {
       setRows(parsed);
       toast({ title: `${parsed.length} link${parsed.length > 1 ? "s" : ""} generated from file` });
     };
-    reader.readAsArrayBuffer(file);
+
+    if (isCSV) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const text = evt.target?.result as string;
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        const json = lines.map(line => {
+          const cells: string[] = [];
+          let current = '';
+          let inQuotes = false;
+          for (const char of line) {
+            if (char === '"') { inQuotes = !inQuotes; }
+            else if (char === ',' && !inQuotes) { cells.push(current); current = ''; }
+            else { current += char; }
+          }
+          cells.push(current);
+          return cells;
+        });
+        processRows(json);
+      };
+      reader.readAsText(file);
+    } else {
+      readXlsxFile(file).then((rows: any[][]) => {
+        const json = rows.map(row => row.map(cell => cell != null ? String(cell) : null));
+        processRows(json);
+      }).catch(() => {
+        toast({ title: "Failed to read file", variant: "destructive" });
+      });
+    }
     e.target.value = "";
   }, []);
 

@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings, Bell, ListChecks, MessageSquareQuote, Star, BarChart3, Send } from "lucide-react";
+import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings, Bell, ListChecks, MessageSquareQuote, Star, BarChart3, Send, PanelLeftClose, PanelLeft } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QRCodeSVG } from "qrcode.react";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import harteLogo from "@/assets/harte-logo.png";
@@ -163,6 +164,7 @@ const AdminDashboard = () => {
   const [duplicateWarnings, setDuplicateWarnings] = useState<Record<string, string[]>>({});
   const [selectedApptTime, setSelectedApptTime] = useState<string | null>(null);
   const [optOutStatus, setOptOutStatus] = useState<{ email: boolean; sms: boolean }>({ email: false, sms: false });
+  const [activeSection, setActiveSection] = useState("submissions");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -1009,12 +1011,23 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
-      {/* Header */}
+    <SidebarProvider>
+    <div className="min-h-screen bg-background transition-colors duration-300 flex w-full">
+      <AdminSidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        canManageAccess={canManageAccess}
+        submissionCount={total}
+        appointmentCount={appointments.length}
+        pendingRequestCount={pendingRequests.length}
+      />
+
+      <div className="flex-1 flex flex-col min-w-0">
       <header className="sticky top-0 z-50 bg-gradient-to-r from-[hsl(210,100%,15%)] via-[hsl(210,100%,20%)] to-[hsl(220,80%,18%)] text-white shadow-lg">
-        <div className="max-w-[1400px] mx-auto px-4 py-1 flex items-center justify-between">
+        <div className="px-4 py-1 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={harteLogoWhite} alt="Harte Auto Group" className="h-28 w-auto" />
+            <SidebarTrigger className="text-white/80 hover:text-white hover:bg-white/10 -ml-1" />
+            <img src={harteLogoWhite} alt="Harte Auto Group" className="h-20 w-auto" />
             <div>
               <span className="text-lg font-bold">Dashboard</span>
               <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-white/20 text-white/90 font-medium">
@@ -1023,13 +1036,7 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setDarkMode(!darkMode)}
-              className="text-white/80 hover:text-white hover:bg-white/10"
-              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)} className="text-white/80 hover:text-white hover:bg-white/10" title={darkMode ? "Switch to light mode" : "Switch to dark mode"}>
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white/80 hover:text-white hover:bg-white/10">
@@ -1039,76 +1046,15 @@ const AdminDashboard = () => {
         </div>
       </header>
 
-      {/* Content */}
-      <div className="max-w-[1400px] mx-auto px-4 py-6">
-        <Tabs defaultValue="submissions">
-          <TabsList className="mb-4 flex flex-wrap h-auto gap-1">
-            <TabsTrigger value="submissions">Submissions ({total})</TabsTrigger>
-            <TabsTrigger value="appointments">
-              <CalendarDays className="w-4 h-4 mr-1" />
-              Appointments ({appointments.length})
-            </TabsTrigger>
-            {canManageAccess && (
-              <>
-                <TabsTrigger value="staff">
-                  <Users className="w-4 h-4 mr-1" />
-                  Staff
-                </TabsTrigger>
-                <TabsTrigger value="requests" className="relative">
-                  <Users className="w-4 h-4 mr-1" />
-                  Access Requests
-                  {pendingRequests.length > 0 && (
-                    <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
-                      {pendingRequests.length}
-                    </span>
-                  )}
-                </TabsTrigger>
-              </>
-            )}
-            <TabsTrigger value="consent">
-              <ShieldCheck className="w-4 h-4 mr-1" />
-              Consent Log
-            </TabsTrigger>
-            {canManageAccess && (
-              <>
-                <TabsTrigger value="offer-settings">
-                  <SlidersHorizontal className="w-4 h-4 mr-1" />
-                  Offer Settings
-                </TabsTrigger>
-                <TabsTrigger value="site-config">
-                  <Settings className="w-4 h-4 mr-1" />
-                  Site Config
-                </TabsTrigger>
-                <TabsTrigger value="notifications">
-                  <Bell className="w-4 h-4 mr-1" />
-                  Notifications
-                </TabsTrigger>
-                <TabsTrigger value="form-config">
-                  <ListChecks className="w-4 h-4 mr-1" />
-                  Form Config
-                </TabsTrigger>
-                <TabsTrigger value="testimonials">
-                  <MessageSquareQuote className="w-4 h-4 mr-1" />
-                  Testimonials
-                </TabsTrigger>
-                <TabsTrigger value="comparison">
-                  <BarChart3 className="w-4 h-4 mr-1" />
-                  Comparison
-                </TabsTrigger>
-                <TabsTrigger value="follow-ups">
-                  <Send className="w-4 h-4 mr-1" />
-                  Follow-Ups
-                </TabsTrigger>
-              </>
-            )}
-          </TabsList>
+      <div className="flex-1 px-4 py-6 overflow-auto">
+        <div className="max-w-[1400px] mx-auto">
 
-          {/* Analytics Dashboard */}
-          <div className="mb-6">
-            <DashboardAnalytics />
-          </div>
+          {activeSection === "submissions" && (
+            <div className="mb-6"><DashboardAnalytics /></div>
+          )}
 
-          <TabsContent value="submissions">
+          {activeSection === "submissions" && (
+            <div>
             <div className="mb-4 flex items-center justify-between gap-3">
               <div className="relative flex-1 max-w-xs">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -1325,9 +1271,12 @@ const AdminDashboard = () => {
                 )}
               </>
             )}
-          </TabsContent>
+          </div>
+          )}
 
-          <TabsContent value="appointments">
+          {/* Appointments */}
+          {activeSection === "appointments" && (
+            <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-card-foreground">Scheduled Appointments</h2>
               <Button size="sm" onClick={() => setShowCreateAppt(true)}>
@@ -1342,50 +1291,39 @@ const AdminDashboard = () => {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border bg-muted/50">
-                        <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Date & Time</th>
-                        <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Customer</th>
-                        <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Contact</th>
-                        <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Vehicle</th>
-                        <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
-                        <th className="text-right px-4 py-3 font-semibold text-muted-foreground">Actions</th>
+                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Date</th>
+                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Time</th>
+                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Customer</th>
+                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Vehicle</th>
+                        <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Status</th>
+                        <th className="text-right px-3 py-2 font-semibold text-muted-foreground">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {appointments.map((appt) => (
                         <tr key={appt.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="font-medium text-card-foreground">{new Date(appt.preferred_date + "T12:00:00").toLocaleDateString()}</div>
-                            <div className="text-xs text-muted-foreground">{appt.preferred_time}</div>
+                          <td className="px-3 py-2 text-sm">{new Date(appt.preferred_date + "T12:00:00").toLocaleDateString()}</td>
+                          <td className="px-3 py-2 text-sm">{appt.preferred_time}</td>
+                          <td className="px-3 py-2">
+                            <div className="font-medium text-sm">{appt.customer_name}</div>
+                            <div className="text-xs text-muted-foreground">{appt.customer_email}</div>
                           </td>
-                          <td className="px-4 py-3 font-medium text-card-foreground">{appt.customer_name}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-1 text-muted-foreground text-xs"><Mail className="w-3 h-3" />{appt.customer_email}</div>
-                            <div className="flex items-center gap-1 text-muted-foreground text-xs"><Phone className="w-3 h-3" />{formatPhone(appt.customer_phone)}</div>
+                          <td className="px-3 py-2 text-sm">{appt.vehicle_info || "—"}</td>
+                          <td className="px-3 py-2">
+                            <Badge variant={appt.status === "Confirmed" ? "default" : appt.status === "Completed" ? "secondary" : "outline"} className="text-xs">
+                              {appt.status}
+                            </Badge>
                           </td>
-                          <td className="px-4 py-3 text-muted-foreground">{appt.vehicle_info || "—"}</td>
-                          <td className="px-4 py-3">
-                            <Select value={appt.status} onValueChange={(v) => handleUpdateApptStatus(appt.id, v)}>
-                              <SelectTrigger className="w-32 h-7 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="confirmed">Confirmed</SelectItem>
-                                <SelectItem value="completed">Completed</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
-                                <SelectItem value="no_show">No Show</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            {appt.submission_token && (
-                              <Button variant="ghost" size="sm" onClick={() => {
-                                const sub = submissions.find(s => s.token === appt.submission_token);
-                                if (sub) handleView(sub);
-                              }}>
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                            )}
+                          <td className="px-3 py-2 text-right">
+                            <div className="flex justify-end gap-1">
+                              {appt.status === "pending" && (
+                                <Button size="sm" variant="outline" onClick={() => handleUpdateApptStatus(appt.id, "Confirmed")}>Confirm</Button>
+                              )}
+                              {appt.status === "Confirmed" && (
+                                <Button size="sm" variant="outline" onClick={() => handleUpdateApptStatus(appt.id, "Completed")}>Complete</Button>
+                              )}
+                              <Button size="sm" variant="ghost" onClick={() => handleUpdateApptStatus(appt.id, "Cancelled")} className="text-destructive">Cancel</Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1394,14 +1332,20 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
-          </TabsContent>
+            </div>
+          )}
 
-          <TabsContent value="staff">
-            <h2 className="text-lg font-semibold text-card-foreground mb-4">Staff Members</h2>
-            <StaffManagement />
-          </TabsContent>
+          {/* Staff */}
+          {activeSection === "staff" && (
+            <div>
+              <h2 className="text-lg font-semibold text-card-foreground mb-4">Staff Members</h2>
+              <StaffManagement />
+            </div>
+          )}
 
-          <TabsContent value="requests">
+          {/* Access Requests */}
+          {activeSection === "requests" && (
+            <div>
             {pendingRequests.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">No pending access requests.</div>
             ) : (
@@ -1449,45 +1393,35 @@ const AdminDashboard = () => {
                 </table>
               </div>
             )}
-          </TabsContent>
-
-          <TabsContent value="consent">
-            <ConsentLog />
-          </TabsContent>
-
-          {canManageAccess && (
-            <TabsContent value="offer-settings">
-              <OfferSettings />
-            </TabsContent>
+            </div>
           )}
 
-          {canManageAccess && (
-            <TabsContent value="site-config">
-              <SiteConfiguration />
-            </TabsContent>
-          )}
-          {canManageAccess && (
-            <TabsContent value="notifications">
-              <NotificationSettings />
-            </TabsContent>
-          )}
-          {canManageAccess && (
-            <>
-              <TabsContent value="form-config">
-                <FormConfiguration />
-              </TabsContent>
-              <TabsContent value="testimonials">
-                <TestimonialManagement />
-              </TabsContent>
-              <TabsContent value="comparison">
-                <ComparisonConfig />
-              </TabsContent>
-              <TabsContent value="follow-ups">
-                <FollowUpLog />
-              </TabsContent>
-            </>
-          )}
-        </Tabs>
+          {/* Consent Log */}
+          {activeSection === "consent" && <ConsentLog />}
+
+          {/* Offer Settings */}
+          {activeSection === "offer-settings" && canManageAccess && <OfferSettings />}
+
+          {/* Site Config */}
+          {activeSection === "site-config" && canManageAccess && <SiteConfiguration />}
+
+          {/* Notifications */}
+          {activeSection === "notifications" && canManageAccess && <NotificationSettings />}
+
+          {/* Form Config */}
+          {activeSection === "form-config" && canManageAccess && <FormConfiguration />}
+
+          {/* Testimonials */}
+          {activeSection === "testimonials" && canManageAccess && <TestimonialManagement />}
+
+          {/* Comparison */}
+          {activeSection === "comparison" && canManageAccess && <ComparisonConfig />}
+
+          {/* Follow-Ups */}
+          {activeSection === "follow-ups" && <FollowUpLog />}
+
+        </div>
+      </div>
       </div>
 
       {/* Detail Modal */}
@@ -2303,6 +2237,7 @@ const AdminDashboard = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </SidebarProvider>
   );
 };
 

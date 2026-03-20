@@ -870,7 +870,7 @@ const AdminDashboard = () => {
     const today = new Date().toLocaleDateString();
 
     // Convert logo to base64 for the print window
-    const logoSrc = siteConfig?.logo_url || harteLogoFallback;
+    const logoSrc = harteLogoFallback;
     let logoBase64 = "";
     try {
       const resp = await fetch(logoSrc);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ const ComparisonConfig = () => {
   const [features, setFeatures] = useState<ComparisonFeature[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -106,6 +108,34 @@ const ComparisonConfig = () => {
   const serializeValue = (v: boolean | string) =>
     v === true ? "true" : v === "partial" ? "partial" : "false";
 
+  const handleDragStart = (idx: number) => {
+    setDragIdx(idx);
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    setDragOverIdx(idx);
+  };
+
+  const handleDrop = (idx: number) => {
+    if (dragIdx === null || dragIdx === idx) {
+      setDragIdx(null);
+      setDragOverIdx(null);
+      return;
+    }
+    const updated = [...features];
+    const [moved] = updated.splice(dragIdx, 1);
+    updated.splice(idx, 0, moved);
+    setFeatures(updated);
+    setDragIdx(null);
+    setDragOverIdx(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIdx(null);
+    setDragOverIdx(null);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground">
@@ -180,10 +210,17 @@ const ComparisonConfig = () => {
         {features.map((f, fIdx) => (
           <div
             key={fIdx}
-            className="grid gap-2 items-center bg-card border border-border rounded-lg px-2 py-1.5"
+            draggable
+            onDragStart={() => handleDragStart(fIdx)}
+            onDragOver={(e) => handleDragOver(e, fIdx)}
+            onDrop={() => handleDrop(fIdx)}
+            onDragEnd={handleDragEnd}
+            className={`grid gap-2 items-center bg-card border rounded-lg px-2 py-1.5 transition-all ${
+              dragIdx === fIdx ? "opacity-40 border-accent" : dragOverIdx === fIdx ? "border-accent border-2 shadow-md" : "border-border"
+            }`}
             style={{ gridTemplateColumns: `24px 1fr repeat(${columns.length + 1}, 90px) 32px` }}
           >
-            <GripVertical className="w-4 h-4 text-muted-foreground" />
+            <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab active:cursor-grabbing" />
             <Input
               value={f.label}
               onChange={e => updateFeatureLabel(fIdx, e.target.value)}

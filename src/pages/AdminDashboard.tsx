@@ -1042,7 +1042,7 @@ const AdminDashboard = () => {
       {/* Content */}
       <div className="max-w-[1400px] mx-auto px-4 py-6">
         <Tabs defaultValue="submissions">
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 flex flex-wrap h-auto gap-1">
             <TabsTrigger value="submissions">Submissions ({total})</TabsTrigger>
             <TabsTrigger value="appointments">
               <CalendarDays className="w-4 h-4 mr-1" />

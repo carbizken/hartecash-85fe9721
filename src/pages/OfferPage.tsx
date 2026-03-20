@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, DollarSign, ArrowDown, TrendingUp, ShieldCheck, Info, Printer, CheckCircle, AlertTriangle, Search, Camera, FileText, ArrowRight } from "lucide-react";
@@ -6,8 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import harteLogo from "@/assets/harte-logo-white.png";
 import PortalSkeleton from "@/components/PortalSkeleton";
+import CalculatingOffer from "@/components/CalculatingOffer";
 import { getTaxRateFromZip, calcTradeInValue, STATE_NAMES } from "@/lib/salesTax";
 import VehicleImage from "@/components/sell-form/VehicleImage";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 interface OfferSubmission {
   id: string;

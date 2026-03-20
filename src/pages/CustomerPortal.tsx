@@ -62,7 +62,7 @@ const STAGE_CONFIG: Record<string, StageInfo> = {
   inspection_scheduled: { label: "Inspection Scheduled", icon: CalendarCheck, helperText: "Your in-person inspection is booked. Bring your vehicle and we'll take a look!" },
   inspection_completed: { label: "Inspection Complete", icon: ClipboardCheck, helperText: "We've inspected your vehicle and are finalizing the details." },
   price_agreed: { label: "Final Offer Accepted", icon: Handshake, helperText: "We've agreed on a price! We're preparing everything for the purchase." },
-  purchase_complete: { label: "Purchase Complete 🎉", icon: PartyPopper, helperText: "Congratulations! The deal is done. Thank you for choosing Harte Auto Group!" },
+  purchase_complete: { label: "Purchase Complete 🎉", icon: PartyPopper, helperText: "Congratulations! The deal is done. Thank you for choosing us!" },
 };
 
 const STAGE_MAPPING: Record<string, string> = {

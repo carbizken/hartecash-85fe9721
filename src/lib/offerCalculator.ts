@@ -55,6 +55,12 @@ export interface AgeTier {
   adjustment_pct: number;
 }
 
+export interface MileageTier {
+  min_miles: number;
+  max_miles: number;
+  adjustment_flat: number;
+}
+
 export interface OfferSettings {
   bb_value_basis: string;
   global_adjustment_pct: number;
@@ -65,6 +71,7 @@ export interface OfferSettings {
   offer_floor: number;
   offer_ceiling: number | null;
   age_tiers: AgeTier[];
+  mileage_tiers: MileageTier[];
 }
 
 export interface OfferRule {

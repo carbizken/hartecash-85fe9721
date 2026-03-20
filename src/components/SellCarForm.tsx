@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Shield, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CalculatingOffer from "@/components/CalculatingOffer";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -30,9 +32,12 @@ const SellCarForm = () => {
   const [vehicleInfo, setVehicleInfo] = useState<VehicleInfo | null>(null);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [submitting, setSubmitting] = useState(false);
+  const [showCalculating, setShowCalculating] = useState(false);
+  const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [honeypot, setHoneypot] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { config } = useSiteConfig();
   const { formConfig } = useFormConfig();
 
   // Black Book state
@@ -315,13 +320,24 @@ const SellCarForm = () => {
         submissionToken: generatedToken,
       });
 
-      // Redirect to personalized offer page
-      navigate(`/offer/${generatedToken}`);
+      // Show calculating animation if enabled, otherwise navigate directly
+      if (config.use_animated_calculating) {
+        setPendingToken(generatedToken);
+        setShowCalculating(true);
+      } else {
+        navigate(`/offer/${generatedToken}`);
+      }
     } catch (err) {
       toast({ title: "Submission failed", description: "Something went wrong. Please try again.", variant: "destructive" });
     }
     setSubmitting(false);
   };
+
+  const handleCalculatingComplete = useCallback(() => {
+    if (pendingToken) {
+      navigate(`/offer/${pendingToken}`);
+    }
+  }, [pendingToken, navigate]);
 
   const currentStepName = displaySteps[step];
 
@@ -353,6 +369,19 @@ const SellCarForm = () => {
         return null;
     }
   };
+
+  if (showCalculating) {
+    return (
+      <div className="fixed inset-0 z-50">
+        <CalculatingOffer
+          vehicleYear={vehicleInfo?.year}
+          vehicleMake={vehicleInfo?.make}
+          vehicleModel={vehicleInfo?.model}
+          onComplete={handleCalculatingComplete}
+        />
+      </div>
+    );
+  }
 
   return (
     <div ref={formRef} className="bg-card rounded-2xl shadow-xl mx-auto -mt-10 mb-10 p-6 md:p-8 relative z-10 max-w-lg w-[calc(100%-40px)]">

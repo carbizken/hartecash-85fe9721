@@ -267,7 +267,7 @@ export default function NotificationSettings() {
             </div>
             <div className="flex gap-2">
               <Input
-                placeholder="+15551234567"
+                placeholder="(555) 123-4567"
                 value={newPhone}
                 onChange={e => setNewPhone(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && addPhone()}

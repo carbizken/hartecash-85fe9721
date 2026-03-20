@@ -650,6 +650,7 @@ const OfferPage = () => {
                   {TabSwitcher}
                   {OfferDisplay}
                   {TradeInBounce}
+                  {GuaranteeBadge}
                 </div>
 
                 {/* Vehicle Summary */}

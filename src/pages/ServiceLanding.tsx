@@ -377,20 +377,72 @@ const ServiceLanding = () => {
 
                   {vehicleInfo && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                      className="p-4 bg-[hsl(160,84%,39%)]/10 border border-[hsl(160,84%,39%)]/30 rounded-xl"
+                      className="p-4 bg-[hsl(160,84%,39%)]/10 border border-[hsl(160,84%,39%)]/30 rounded-xl space-y-3"
                     >
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2">
                         <CheckCircle className="w-5 h-5 text-success" />
                         <span className="text-sm font-bold">Vehicle Found</span>
                       </div>
-                      <p className="text-lg font-semibold">
-                        {vehicleInfo.year} {vehicleInfo.make} {vehicleInfo.model}
-                        {vehicleInfo.trim && <span className="text-sm font-normal text-[hsl(215,20%,65%)]"> {vehicleInfo.trim}</span>}
-                      </p>
+
+                      <div>
+                        <p className="text-lg font-semibold">
+                          {vehicleInfo.year} {vehicleInfo.make} {vehicleInfo.model}
+                        </p>
+                        {(vehicleInfo.trim || vehicleInfo.style) && (
+                          <p className="text-sm text-[hsl(215,20%,65%)]">
+                            {vehicleInfo.trim}{vehicleInfo.trim && vehicleInfo.style ? " • " : ""}{vehicleInfo.style}
+                          </p>
+                        )}
+                      </div>
+
                       {bbValues.tradein_avg && (
-                        <p className="text-sm mt-1 text-[hsl(160,60%,70%)]">
+                        <p className="text-sm text-[hsl(160,60%,70%)]">
                           Estimated value: <span className="font-bold">${bbValues.tradein_avg.toLocaleString()}</span>
                         </p>
+                      )}
+
+                      {bbOptions.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold text-[hsl(215,20%,65%)] mb-1.5 uppercase tracking-wider">Factory Options Detected</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {bbOptions
+                              .filter(o => o.auto !== "N")
+                              .slice(0, 12)
+                              .map((opt) => (
+                                <span
+                                  key={opt.uoc}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[hsl(210,100%,25%)]/20 border border-[hsl(210,100%,25%)]/30 text-[hsl(210,80%,70%)]"
+                                >
+                                  <CheckCircle className="w-3 h-3" />
+                                  {opt.name}
+                                </span>
+                              ))}
+                            {bbOptions.filter(o => o.auto !== "N").length > 12 && (
+                              <span className="px-2 py-0.5 rounded-full text-[11px] text-[hsl(215,20%,55%)]">
+                                +{bbOptions.filter(o => o.auto !== "N").length - 12} more
+                              </span>
+                            )}
+                          </div>
+                          {bbOptions.filter(o => o.auto === "N").length > 0 && (
+                            <details className="mt-2">
+                              <summary className="text-[11px] text-[hsl(215,20%,50%)] cursor-pointer hover:text-[hsl(215,20%,65%)] transition-colors">
+                                View {bbOptions.filter(o => o.auto === "N").length} available add-ons
+                              </summary>
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                {bbOptions
+                                  .filter(o => o.auto === "N")
+                                  .map((opt) => (
+                                    <span
+                                      key={opt.uoc}
+                                      className="px-2 py-0.5 rounded-full text-[11px] bg-[hsl(222,47%,12%)] border border-[hsl(217,33%,22%)] text-[hsl(215,20%,55%)]"
+                                    >
+                                      {opt.name}
+                                    </span>
+                                  ))}
+                              </div>
+                            </details>
+                          )}
+                        </div>
                       )}
                     </motion.div>
                   )}

@@ -286,7 +286,7 @@ Deno.serve(async (req) => {
       results.sms = "opted_out";
     } else if (twilioSid && twilioToken && twilioPhone && sub.phone) {
       try {
-        const smsBody = getSmsTemplate(touch_number, sub as SubmissionData, siteUrl);
+        const smsBody = getSmsTemplate(touch_number, sub as SubmissionData, siteUrl, dealerName);
         const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
         const smsRes = await fetch(twilioUrl, {
           method: "POST",

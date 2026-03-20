@@ -686,6 +686,23 @@ const OfferSettings = () => {
         {saving ? "Saving…" : "Save All Settings"}
       </Button>
 
+      {/* ── Offer Simulator ── */}
+      <OfferSimulator
+        settings={{
+          bb_value_basis: settings.bb_value_basis,
+          global_adjustment_pct: settings.global_adjustment_pct,
+          deductions_config: settings.deductions_config,
+          deduction_amounts: settings.deduction_amounts,
+          condition_multipliers: settings.condition_multipliers,
+          recon_cost: settings.recon_cost,
+          offer_floor: settings.offer_floor,
+          offer_ceiling: settings.offer_ceiling,
+          age_tiers: settings.age_tiers,
+          mileage_tiers: settings.mileage_tiers,
+        }}
+        rules={rules}
+      />
+
       {/* ── Section 5: Criteria-Based Rules ── */}
       <div className="bg-card rounded-xl p-5 shadow-lg border border-border">
         <div className="flex items-center justify-between mb-4">

@@ -1155,8 +1155,9 @@ const AdminDashboard = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="__all__">All sources</SelectItem>
-                        <SelectItem value="inventory">Inventory</SelectItem>
-                        <SelectItem value="service">Service</SelectItem>
+                        <SelectItem value="inventory">Off Street Purchase</SelectItem>
+                        <SelectItem value="service">Service Drive</SelectItem>
+                        <SelectItem value="in_store_trade">In-Store Trade</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1249,8 +1250,8 @@ const AdminDashboard = () => {
                               </span>
                             </td>
                             <td className="px-3 py-3">
-                              <Badge variant={sub.lead_source === "service" ? "secondary" : "outline"} className="text-xs">
-                                {sub.lead_source === "service" ? "Service" : "Inventory"}
+                              <Badge variant={sub.lead_source === "service" ? "secondary" : sub.lead_source === "in_store_trade" ? "default" : "outline"} className="text-xs">
+                                {sub.lead_source === "service" ? "Service" : sub.lead_source === "in_store_trade" ? "In-Store" : "Off Street"}
                               </Badge>
                             </td>
                             <td className="px-3 py-3">
@@ -1679,6 +1680,29 @@ const AdminDashboard = () => {
                   <DetailRow label="Loan Balance" value={(selected as any).loan_balance} />
                   <DetailRow label="Loan Payment" value={(selected as any).loan_payment} />
                   <DetailRow label="Next Step" value={selected.next_step} />
+                  <div className="flex items-center justify-between col-span-2 mt-1">
+                    <span className="text-xs text-muted-foreground">Lead Source</span>
+                    <Select
+                      value={selected.lead_source}
+                      onValueChange={async (val) => {
+                        const { error } = await supabase.from("submissions").update({ lead_source: val }).eq("id", selected.id);
+                        if (!error) {
+                          setSelected({ ...selected, lead_source: val });
+                          setSubmissions(prev => prev.map(s => s.id === selected.id ? { ...s, lead_source: val } : s));
+                          toast({ title: "Lead source updated" });
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="h-7 text-xs w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="inventory">Off Street Purchase</SelectItem>
+                        <SelectItem value="service">Service Drive</SelectItem>
+                        <SelectItem value="in_store_trade">In-Store Trade</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 

@@ -796,6 +796,8 @@ const OfferPage = () => {
 
           {PrintQR}
 
+          <WhatToExpect />
+
           <p className="text-center text-xs text-muted-foreground">
             <InspectionDisclosure /> • 🔒 Your information is kept secure
           </p>

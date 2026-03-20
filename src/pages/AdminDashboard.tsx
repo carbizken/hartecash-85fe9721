@@ -2237,6 +2237,7 @@ const AdminDashboard = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </SidebarProvider>
   );
 };
 

@@ -19,6 +19,7 @@ import WhatToBringCard from "@/components/portal/WhatToBringCard";
 import PortalFAQ from "@/components/portal/PortalFAQ";
 import PaymentInfoCard from "@/components/portal/PaymentInfoCard";
 import LoanPayoffCard from "@/components/portal/LoanPayoffCard";
+import CommunicationPreferences from "@/components/portal/CommunicationPreferences";
 
 interface PortalSubmission {
   id: string;

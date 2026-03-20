@@ -9,6 +9,7 @@ import { Trash2, Shield, Info, Phone, Save, UserPlus } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import AvatarCropDialog from "./AvatarCropDialog";
 
 interface StaffMember {
   user_id: string;

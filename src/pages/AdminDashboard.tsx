@@ -1425,7 +1425,6 @@ const AdminDashboard = () => {
               <SiteConfiguration />
             </TabsContent>
           )}
-          )}
         </Tabs>
       </div>
 

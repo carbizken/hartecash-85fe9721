@@ -147,6 +147,36 @@ export type Database = {
         }
         Relationships: []
       }
+      dealership_locations: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          state: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          state?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          state?: string
+        }
+        Relationships: []
+      }
       follow_ups: {
         Row: {
           channel: string

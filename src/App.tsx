@@ -58,6 +58,7 @@ const App = () => (
               <Route path="/review/:token" element={<ReviewPage />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/trade" element={<TradeLanding />} />
+              <Route path="/deal/:token" element={<DealAccepted />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

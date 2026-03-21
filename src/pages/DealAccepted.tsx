@@ -176,15 +176,35 @@ const DealAccepted = () => {
             </div>
           )}
           <div className="flex-1 text-center md:text-left">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">
-              {isEstimate ? "Estimated Offer" : "Your Locked-In Price"}
-            </p>
-            <p className="text-3xl md:text-4xl font-extrabold text-accent tracking-tight">
-              {isEstimate
-                ? `$${estimateLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – $${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
-                : `$${cashOffer.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-              }
-            </p>
+            {showTradeIn ? (
+              <>
+                <div className="inline-flex items-center gap-1.5 bg-success/10 text-success text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  Trade-In Value
+                </div>
+                <p className="text-3xl md:text-4xl font-extrabold text-success tracking-tight">
+                  {isEstimate
+                    ? `$${tradeInValueLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – $${tradeInValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                    : `$${tradeInValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  }
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Includes {(taxRate * 100).toFixed(2)}% sales tax credit
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">
+                  {isEstimate ? "Estimated Offer" : "Your Locked-In Price"}
+                </p>
+                <p className="text-3xl md:text-4xl font-extrabold text-accent tracking-tight">
+                  {isEstimate
+                    ? `$${estimateLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – $${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                    : `$${cashOffer.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  }
+                </p>
+              </>
+            )}
             <p className="font-semibold text-card-foreground mt-1">{vehicleStr}</p>
             {s.mileage && (
               <p className="text-sm text-muted-foreground">{Number(s.mileage).toLocaleString()} miles · {s.overall_condition || "—"} condition</p>

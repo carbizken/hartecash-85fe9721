@@ -26,6 +26,7 @@ import NotificationSettings from "@/components/admin/NotificationSettings";
 import FormConfiguration from "@/components/admin/FormConfiguration";
 import TestimonialManagement from "@/components/admin/TestimonialManagement";
 import ComparisonConfig from "@/components/admin/ComparisonConfig";
+import LocationManagement from "@/components/admin/LocationManagement";
 import VehicleImage from "@/components/sell-form/VehicleImage";
 import FollowUpPanel from "@/components/admin/FollowUpPanel";
 import FollowUpLog from "@/components/admin/FollowUpLog";
@@ -1634,6 +1635,9 @@ const AdminDashboard = () => {
 
           {/* Comparison */}
           {activeSection === "comparison" && canManageAccess && <ComparisonConfig />}
+
+          {/* Locations */}
+          {activeSection === "locations" && canManageAccess && <LocationManagement />}
 
           {/* Follow-Ups */}
           {activeSection === "follow-ups" && <FollowUpLog />}

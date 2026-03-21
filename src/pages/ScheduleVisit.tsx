@@ -105,6 +105,17 @@ const ScheduleVisit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate select fields that can't use native required
+    if (!form.preferred_time && !selectedDateIsSunday) {
+      toast({ title: "Please select a preferred time", variant: "destructive" });
+      return;
+    }
+    if (!form.store_location) {
+      toast({ title: "Please select a store location", variant: "destructive" });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -277,9 +288,8 @@ const ScheduleVisit = () => {
                     </p>
                   ) : (
                     <Select
-                      value={form.preferred_time}
+                      value={form.preferred_time || undefined}
                       onValueChange={(v) => handleChange("preferred_time", v)}
-                      required
                       disabled={!form.preferred_date}
                     >
                       <SelectTrigger>
@@ -307,9 +317,8 @@ const ScheduleVisit = () => {
               <div className="space-y-2">
                 <Label htmlFor="store_location">Preferred Location *</Label>
                 <Select
-                  value={form.store_location}
+                  value={form.store_location || undefined}
                   onValueChange={(v) => handleChange("store_location", v)}
-                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a store location" />

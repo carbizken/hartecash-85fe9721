@@ -290,7 +290,6 @@ const ScheduleVisit = () => {
                     <Select
                       value={form.preferred_time}
                       onValueChange={(v) => handleChange("preferred_time", v)}
-                      required
                       disabled={!form.preferred_date}
                     >
                       <SelectTrigger>

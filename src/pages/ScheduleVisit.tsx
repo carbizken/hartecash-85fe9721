@@ -182,7 +182,7 @@ const ScheduleVisit = () => {
                 <strong>{form.preferred_date}</strong> at{" "}
                 <strong>{form.preferred_time}</strong>
                 {form.store_location && (
-                  <> at <strong>{STORE_LOCATIONS.find(l => l.value === form.store_location)?.label || form.store_location}</strong></>
+                  <> at <strong>{locations.find(l => l.id === form.store_location)?.name || form.store_location}</strong></>
                 )}
                 . Our team will reach out shortly to confirm.
               </p>

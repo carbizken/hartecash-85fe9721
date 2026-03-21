@@ -95,7 +95,8 @@ const DealAccepted = () => {
   const isTradeIn = searchParams.get("mode") === "trade";
 
   // Trade-in value calculation
-  const taxRate = s.zip ? getTaxRateFromZip(s.zip) : 0;
+  const taxInfo = s.zip ? getTaxRateFromZip(s.zip) : { state: null, rate: 0 };
+  const taxRate = taxInfo.rate;
   const tradeInValue = calcTradeInValue(cashOffer, taxRate);
   const tradeInValueLow = isEstimate ? calcTradeInValue(estimateLow, taxRate) : tradeInValue;
   const showTradeIn = isTradeIn && taxRate > 0;

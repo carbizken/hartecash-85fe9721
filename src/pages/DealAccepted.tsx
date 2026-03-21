@@ -92,6 +92,13 @@ const DealAccepted = () => {
   const cashOffer = s.offered_price || s.estimated_offer_high || 0;
   const estimateLow = s.estimated_offer_low || 0;
   const isEstimate = !s.offered_price && !!s.estimated_offer_high;
+  const isTradeIn = searchParams.get("mode") === "trade";
+
+  // Trade-in value calculation
+  const taxRate = s.zip ? getTaxRateFromZip(s.zip) : 0;
+  const tradeInValue = calcTradeInValue(cashOffer, taxRate);
+  const tradeInValueLow = isEstimate ? calcTradeInValue(estimateLow, taxRate) : tradeInValue;
+  const showTradeIn = isTradeIn && taxRate > 0;
 
   const guaranteeDays = config.price_guarantee_days || 8;
   const createdDate = s.created_at ? new Date(s.created_at) : null;

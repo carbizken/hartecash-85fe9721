@@ -1,9 +1,31 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
+
+interface DealerLocation {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+}
 
 const SiteFooter = () => {
   const { config } = useSiteConfig();
   const dealerName = config.dealership_name || "Our Dealership";
+  const [locations, setLocations] = useState<DealerLocation[]>([]);
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      const { data } = await supabase
+        .from("dealership_locations" as any)
+        .select("id, name, city, state")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (data) setLocations(data as unknown as DealerLocation[]);
+    };
+    fetchLocations();
+  }, []);
 
   return (
     <footer className="bg-[hsl(220,13%,18%)] text-primary-foreground py-10 lg:py-14 px-5">
@@ -28,16 +50,16 @@ const SiteFooter = () => {
               </a>
             )}
           </div>
-          <div className="mt-4 pt-3 border-t border-white/10">
-            <h5 className="text-xs font-bold uppercase tracking-wider opacity-50 mb-2">Our Locations</h5>
-            <div className="text-xs opacity-50 leading-relaxed space-y-0.5">
-              <p>Harte Nissan — Hartford, CT</p>
-              <p>Harte Infiniti — Hartford, CT</p>
-              <p>George Harte Nissan — West Haven, CT</p>
-              <p>George Harte Infiniti — Wallingford, CT</p>
-              <p>Harte Hyundai — Old Saybrook, CT</p>
+          {locations.length > 0 && (
+            <div className="mt-4 pt-3 border-t border-white/10">
+              <h5 className="text-xs font-bold uppercase tracking-wider opacity-50 mb-2">Our Locations</h5>
+              <div className="text-xs opacity-50 leading-relaxed space-y-0.5">
+                {locations.map((loc) => (
+                  <p key={loc.id}>{loc.name} — {loc.city}, {loc.state}</p>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <div className="mt-6 lg:mt-0">
           <h4 className="text-sm font-bold uppercase tracking-wider opacity-70 mb-3">Quick Links</h4>

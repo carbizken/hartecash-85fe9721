@@ -105,6 +105,17 @@ const ScheduleVisit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate select fields that can't use native required
+    if (!form.preferred_time && !selectedDateIsSunday) {
+      toast({ title: "Please select a preferred time", variant: "destructive" });
+      return;
+    }
+    if (!form.store_location) {
+      toast({ title: "Please select a store location", variant: "destructive" });
+      return;
+    }
+
     setSubmitting(true);
 
     try {

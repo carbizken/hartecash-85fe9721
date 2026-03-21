@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { CalendarDays, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import harteLogo from "@/assets/harte-logo-white.png";
@@ -287,22 +287,17 @@ const ScheduleVisit = () => {
                       We are closed on Sundays. Please select another date.
                     </p>
                   ) : (
-                    <Select
-                      value={form.preferred_time || undefined}
-                      onValueChange={(v) => handleChange("preferred_time", v)}
+                    <select
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={form.preferred_time}
+                      onChange={(e) => handleChange("preferred_time", e.target.value)}
                       disabled={!form.preferred_date}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder={form.preferred_date ? "Select a time" : "Pick a date first"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableSlots.map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {t}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <option value="">{form.preferred_date ? "Select a time" : "Pick a date first"}</option>
+                      {availableSlots.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
                   )}
                   {form.preferred_date && !selectedDateIsSunday && (
                     <p className="text-xs text-muted-foreground">
@@ -316,22 +311,19 @@ const ScheduleVisit = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="store_location">Preferred Location *</Label>
-                <Select
-                  value={form.store_location || undefined}
-                  onValueChange={(v) => handleChange("store_location", v)}
+                <select
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  value={form.store_location}
+                  onChange={(e) => handleChange("store_location", e.target.value)}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a store location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locations.map((loc) => (
-                      <SelectItem key={loc.id} value={loc.id}>
-                        {loc.name} — {loc.city}, {loc.state}
-                        {loc.show_in_scheduling && loc.address && ` (${loc.address})`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <option value="">Select a store location</option>
+                  {locations.map((loc) => (
+                    <option key={loc.id} value={loc.id}>
+                      {loc.name} — {loc.city}, {loc.state}
+                      {loc.show_in_scheduling && loc.address ? ` (${loc.address})` : ""}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="space-y-2">

@@ -17,6 +17,8 @@ interface DealerLocation {
   name: string;
   city: string;
   state: string;
+  address: string | null;
+  show_in_scheduling: boolean;
 }
 
 // Store hours: Mon-Thu 9AM-7PM, Fri-Sat 9AM-6PM, Sun Closed

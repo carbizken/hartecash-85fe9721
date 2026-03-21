@@ -58,10 +58,8 @@ const ScheduleVisit = () => {
   const submissionToken = searchParams.get("token") || "";
   const { toast } = useToast();
   const [locations, setLocations] = useState<DealerLocation[]>([]);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const fetchLocations = async () => {
       const { data } = await supabase
         .from("dealership_locations" as any)

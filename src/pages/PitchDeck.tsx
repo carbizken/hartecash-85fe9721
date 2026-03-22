@@ -364,30 +364,65 @@ export default function PitchDeck() {
               ))}
             </motion.div>
 
-            {/* Acquisition Channel Cards */}
-            <motion.div variants={fadeUp} custom={4} className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {/* ── 3-Prong Selector ── */}
+            <motion.div variants={fadeUp} custom={4} className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto">
               <ChannelCard
-                icon={Link2}
+                icon={Car}
                 title="Off Street"
                 desc="Direct consumer acquisition — customers sell their car to you from home, no trade required."
-                active
+                active={activeProng === "off-street"}
                 iconColor="bg-blue-500/20 text-blue-400"
+                onClick={() => {
+                  setActiveProng("off-street");
+                  const marketSection = document.getElementById("market");
+                  if (marketSection) marketSection.scrollIntoView({ behavior: "smooth" });
+                }}
               />
               <ChannelCard
                 icon={Layers}
                 title="Service Drive"
                 desc="Capture vehicles from customers already in your service lane — a goldmine of trade opportunities."
+                active={activeProng === "service"}
                 iconColor="bg-emerald-500/20 text-emerald-400"
+                onClick={() => {
+                  setActiveProng("service");
+                  setTimeout(() => {
+                    const el = document.getElementById("prong-content");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }, 100);
+                }}
               />
               <ChannelCard
-                icon={Repeat}
+                icon={Handshake}
                 title="In-Store Trade"
                 desc="Shoppers at your lot — or heading in — submit their trade info before they arrive or after they leave."
+                active={activeProng === "trade"}
                 iconColor="bg-amber-500/20 text-amber-400"
+                onClick={() => {
+                  setActiveProng("trade");
+                  setTimeout(() => {
+                    const el = document.getElementById("prong-content");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }, 100);
+                }}
               />
             </motion.div>
           </motion.div>
         </Section>
+
+        {/* ── Inline Prong Content ── */}
+        <div id="prong-content">
+          {activeProng === "service" && (
+            <ServiceDriveInlineContent onBackToTop={scrollToHero} />
+          )}
+          {activeProng === "trade" && (
+            <TradePitchInlineContent onBackToTop={scrollToHero} />
+          )}
+        </div>
+
+        {/* ── Off Street Content (default) ── */}
+        {activeProng === "off-street" && (
+        <>
 
         {/* ═══ 2 — MARKET ═══ */}
         <Section id="market" dark isPresenting={isPresenting} currentSlide={current} key={isPresenting ? current : "market"}>

@@ -223,6 +223,9 @@ export default function PitchDeck() {
   const [idx, setIdx] = useState(0);
   const current = SLIDES[idx];
 
+  const next = useCallback(() => setIdx(i => Math.min(i + 1, SLIDES.length - 1)), []);
+  const prev = useCallback(() => setIdx(i => Math.max(i - 1, 0)), []);
+
   const scrollToHero = useCallback(() => {
     heroRef.current?.scrollIntoView({ behavior: "smooth" });
     setActiveProng("off-street");

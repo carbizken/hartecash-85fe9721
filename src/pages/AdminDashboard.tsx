@@ -558,6 +558,8 @@ const AdminDashboard = () => {
 
   const DOC_TYPE_LABELS: Record<string, string> = {
     drivers_license: "Driver's License",
+    drivers_license_front: "Driver's License (Front)",
+    drivers_license_back: "Driver's License (Back)",
     registration: "Registration",
     title_inquiry: "Title Inquiry",
     title: "Title",

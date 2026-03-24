@@ -37,6 +37,7 @@ type CategoryUploads = Record<string, { file?: File; preview?: string; uploaded?
 
 const UploadPhotos = () => {
   const { token } = useParams<{ token: string }>();
+  const { config } = useSiteConfig();
   const [submission, setSubmission] = useState<SubmissionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

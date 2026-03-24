@@ -668,9 +668,10 @@ const OfferPage = () => {
   });
 
   // Engine issues
-  const noEngine = !condition?.engine_issues || condition.engine_issues.length === 0 || (condition.engine_issues.length === 1 && condition.engine_issues[0] === "none");
+  const engItems = condition?.engine_issues?.filter(v => v !== "none") || [];
+  const noEngine = engItems.length === 0;
   conditionItems.push({
-    label: noEngine ? "Engine Issues: None" : `Engine Issues: ${condition!.engine_issues!.filter(v => v !== "none").join(", ")}`,
+    label: noEngine ? "Engine Issues: None" : `Engine Issues: ${engItems.length} issue${engItems.length > 1 ? "s" : ""}`,
     status: noEngine ? "good" : "warn",
     icon: <Settings2 className="w-3.5 h-3.5" />,
     field: "engine_issues",

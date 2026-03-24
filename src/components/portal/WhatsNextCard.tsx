@@ -111,8 +111,8 @@ function getNextAction(status: string, photosUploaded: boolean, docsUploaded: bo
   };
 }
 
-const WhatsNextCard = ({ mappedStatus, photosUploaded, docsUploaded, token, vehicleStr, name, email, phone }: WhatsNextProps) => {
-  const action = getNextAction(mappedStatus, photosUploaded, docsUploaded);
+const WhatsNextCard = ({ mappedStatus, photosUploaded, docsUploaded, appointmentSet, token, vehicleStr, name, email, phone }: WhatsNextProps) => {
+  const action = getNextAction(mappedStatus, photosUploaded, docsUploaded, appointmentSet);
   const ActionIcon = action.actionIcon;
 
   const getLink = () => {

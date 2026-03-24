@@ -223,6 +223,7 @@ const CustomerPortal = () => {
     mappedStatus,
     photosUploaded: s.photos_uploaded,
     docsUploaded: s.docs_uploaded,
+    appointmentSet: s.appointment_set,
     token: s.token,
     vehicleStr,
     name: s.name || "",

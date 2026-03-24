@@ -296,6 +296,17 @@ const AdminDashboard = () => {
       navigate("/admin/login");
     } else {
       setUserRole(roleData.role);
+      // Fetch display name for audit trail
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      if (profileData?.display_name) {
+        setUserName(profileData.display_name);
+      } else {
+        setUserName(session.user.email || "");
+      }
     }
   };
 

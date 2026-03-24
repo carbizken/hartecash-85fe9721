@@ -2596,7 +2596,7 @@ const AdminDashboard = () => {
               <Select value={apptForm.store_location} onValueChange={(v) => setApptForm(p => ({ ...p, store_location: v }))}>
                 <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
                 <SelectContent>
-                  {STORE_LOCATIONS.map(loc => <SelectItem key={loc.value} value={loc.value}>{loc.label}</SelectItem>)}
+                  {dealerLocations.map(loc => <SelectItem key={loc.id} value={loc.id}>{loc.name} — {loc.city}, {loc.state}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

@@ -26,6 +26,7 @@ interface SubmissionInfo {
 
 const UploadDocs = () => {
   const { token } = useParams<{ token: string }>();
+  const { config } = useSiteConfig();
   const [submission, setSubmission] = useState<SubmissionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

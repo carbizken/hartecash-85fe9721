@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Save, Loader2, ChevronDown, Building2, Palette, Type, BarChart3, Upload, Star, Sparkles, Eye } from "lucide-react";
+import { Save, Loader2, ChevronDown, Building2, Palette, Type, BarChart3, Upload, Star, Sparkles, Eye, ScanLine } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CalculatingOffer from "@/components/CalculatingOffer";
 
@@ -36,6 +36,7 @@ interface SiteConfig {
   review_request_message: string;
   enable_animations: boolean;
   use_animated_calculating: boolean;
+  enable_dl_ocr: boolean;
 }
 
 const DEFAULT_CONFIG: SiteConfig = {
@@ -63,6 +64,7 @@ const DEFAULT_CONFIG: SiteConfig = {
   review_request_message: "Thank you for choosing us! We hope you had a great experience selling your vehicle. Would you take a moment to share your feedback? Your review helps other car owners make the right choice.",
   enable_animations: false,
   use_animated_calculating: false,
+  enable_dl_ocr: false,
 };
 
 interface SectionProps {
@@ -408,6 +410,30 @@ const SiteConfiguration = () => {
                 }}
               />
             </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* AI & Automation */}
+      <Section icon={ScanLine} title="AI & Automation">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
+            <div className="flex-1 mr-3">
+              <Label className="text-sm font-semibold">Driver's License OCR Auto-Fill</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                When a driver's license photo is uploaded (by customer or staff), use AI to extract the customer's name and address and auto-fill empty fields on their record.
+              </p>
+            </div>
+            <Switch
+              checked={config.enable_dl_ocr}
+              onCheckedChange={v => {
+                setConfig(prev => {
+                  const next = { ...prev, enable_dl_ocr: v };
+                  setHasChanges(JSON.stringify(next) !== JSON.stringify(savedConfig));
+                  return next;
+                });
+              }}
+            />
           </div>
         </div>
       </Section>

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings, Bell, ListChecks, MessageSquareQuote, Star, BarChart3, Send, PanelLeftClose, PanelLeft, CalendarClock } from "lucide-react";
+import { LogOut, Search, Trash2, Eye, ChevronLeft, ChevronRight, UserCheck, UserX, Users, Check, Circle, DollarSign, StickyNote, XCircle, Save, Printer, FileText, QrCode, ExternalLink, ClipboardCheck, Upload, CalendarDays, Plus, Phone, Mail, AlertTriangle, Clock, History, Moon, Sun, ShieldCheck, SlidersHorizontal, Settings, Bell, ListChecks, MessageSquareQuote, Star, BarChart3, Send, PanelLeftClose, PanelLeft, CalendarClock, CheckCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QRCodeSVG } from "qrcode.react";
 import { Textarea } from "@/components/ui/textarea";
@@ -1311,29 +1311,37 @@ const AdminDashboard = () => {
                               </Badge>
                             </td>
                             <td className="px-3 py-3">
-                              <Select
-                                value={sub.progress_status}
-                                onValueChange={(val) => handleInlineStatusChange(sub, val)}
-                              >
-                                <SelectTrigger className={`w-44 h-7 text-xs font-medium ${
-                                  sub.progress_status === "purchase_complete" ? "border-success/50 text-success" :
-                                  sub.progress_status === "dead_lead" ? "border-destructive/50 text-destructive" :
-                                  sub.progress_status === "new" ? "border-muted text-muted-foreground" :
-                                  "border-accent/50 text-accent"
-                                }`}>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {ALL_STATUS_OPTIONS.map(s => {
-                                    const isApprovalStage = ["manager_approval", "price_agreed", "purchase_complete"].includes(s.key);
-                                    return (
-                                      <SelectItem key={s.key} value={s.key} disabled={isApprovalStage && !canApprove}>
-                                        {s.label}{isApprovalStage && !canApprove ? " 🔒" : ""}
-                                      </SelectItem>
-                                    );
-                                  })}
-                                </SelectContent>
-                              </Select>
+                              <div className="flex flex-col gap-1">
+                                <Select
+                                  value={sub.progress_status}
+                                  onValueChange={(val) => handleInlineStatusChange(sub, val)}
+                                >
+                                  <SelectTrigger className={`w-44 h-7 text-xs font-medium ${
+                                    sub.progress_status === "purchase_complete" ? "border-success/50 text-success" :
+                                    sub.progress_status === "dead_lead" ? "border-destructive/50 text-destructive" :
+                                    sub.progress_status === "new" ? "border-muted text-muted-foreground" :
+                                    "border-accent/50 text-accent"
+                                  }`}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {ALL_STATUS_OPTIONS.map(s => {
+                                      const isApprovalStage = ["manager_approval", "price_agreed", "purchase_complete"].includes(s.key);
+                                      return (
+                                        <SelectItem key={s.key} value={s.key} disabled={isApprovalStage && !canApprove}>
+                                          {s.label}{isApprovalStage && !canApprove ? " 🔒" : ""}
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                                {sub.progress_status !== "new" && sub.progress_status !== "dead_lead" && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success">
+                                    <CheckCircle className="w-3 h-3" />
+                                    Offer Accepted
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-2 py-3 text-center">
                               {(() => {
@@ -1866,6 +1874,19 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Customer Accepted Offer Badge */}
+              {selected.progress_status !== "new" && selected.progress_status !== "dead_lead" && (
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-success/10 border border-success/20">
+                  <CheckCircle className="w-5 h-5 text-success" />
+                  <span className="font-bold text-success text-sm">Customer Accepted Offer</span>
+                  {selected.status_updated_at && (
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      {new Date(selected.status_updated_at).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Acquisition Tracker — Horizontal Progress Bar */}
               <div data-print-section className="bg-muted/40 rounded-lg p-4">

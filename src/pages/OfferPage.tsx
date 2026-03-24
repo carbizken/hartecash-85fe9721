@@ -1093,6 +1093,22 @@ const OfferPage = () => {
 
   const portalUrl = `${window.location.origin}/my-submission/${token}`;
 
+  // Resolve location UUID to human-readable label
+  const getLocationLabel = (loc: string | null): string | null => {
+    if (!loc) return null;
+    const found = dealerLocations.find(l => l.id === loc || l.name.toLowerCase().replace(/\s+/g, "_") === loc);
+    if (found) return `${found.name} — ${found.city}, ${found.state}`;
+    return loc;
+  };
+
+  const getLocationAddress = (loc: string | null): string | null => {
+    if (!loc) return null;
+    const found = dealerLocations.find(l => l.id === loc || l.name.toLowerCase().replace(/\s+/g, "_") === loc);
+    if (found?.address) return `${found.address}, ${found.city}, ${found.state}`;
+    if (found) return `${found.city}, ${found.state}`;
+    return null;
+  };
+
   const PrintLayout = (
     <div className="hidden print:block print-offer-layout">
       {/* Premium Header */}

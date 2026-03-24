@@ -699,7 +699,7 @@ const AdminDashboard = () => {
         action: "Status Changed",
         old_value: getStatusLabel(oldStatus),
         new_value: getStatusLabel(newStatus),
-        performed_by: userRole,
+        performed_by: auditLabel,
       });
       // Deal Completed notification
       if (oldStatus !== "purchase_complete" && newStatus === "purchase_complete") {
@@ -2592,7 +2592,7 @@ const AdminDashboard = () => {
                           action: "Status Changed",
                           old_value: getStatusLabel(oldSub.progress_status),
                           new_value: getStatusLabel(selected.progress_status),
-                          performed_by: userRole,
+                          performed_by: auditLabel,
                         });
                       }
                       if (oldSub && oldSub.offered_price !== selected.offered_price) {
@@ -2601,7 +2601,7 @@ const AdminDashboard = () => {
                           action: "Price Updated",
                           old_value: oldSub.offered_price ? `$${oldSub.offered_price.toLocaleString()}` : "None",
                           new_value: selected.offered_price ? `$${selected.offered_price.toLocaleString()}` : "None",
-                          performed_by: userRole,
+                          performed_by: auditLabel,
                         });
                       }
                       // ── Notification triggers ──

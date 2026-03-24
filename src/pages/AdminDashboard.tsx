@@ -244,6 +244,8 @@ const AdminDashboard = () => {
   const canApprove = ["admin", "gsm_gm"].includes(userRole);
   const canDelete = userRole === "admin";
   const canManageAccess = userRole === "admin";
+  const canUpdateStatus = true; // all staff
+
   const auditLabel = userName
     ? `${userName} — ${ROLE_LABELS[userRole] || userRole}`
     : ROLE_LABELS[userRole] || userRole;

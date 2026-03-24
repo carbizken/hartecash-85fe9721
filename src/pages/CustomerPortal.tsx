@@ -19,10 +19,9 @@ import WhatToExpect from "@/components/portal/WhatToExpect";
 import ProgressSteps, { mapStatusToStepIndex } from "@/components/portal/ProgressSteps";
 import PortalOfferCard from "@/components/portal/PortalOfferCard";
 import PortalVehicleSummary from "@/components/portal/PortalVehicleSummary";
-import ConditionReport, { type ConditionData } from "@/components/portal/ConditionReport";
-import { recalculateFromSubmission, type SubmissionCondition } from "@/lib/recalculateOffer";
-import type { OfferSettings, OfferRule } from "@/lib/offerCalculator";
-import { useToast } from "@/hooks/use-toast";
+interface ConditionData {
+  drivetrain: string | null;
+}
 
 interface PortalSubmission {
   id: string;
@@ -62,12 +61,8 @@ const STAGE_MAPPING: Record<string, string> = {
 const CustomerPortal = () => {
   const { token } = useParams<{ token: string }>();
   const { config } = useSiteConfig();
-  const { toast } = useToast();
   const [submission, setSubmission] = useState<PortalSubmission | null>(null);
   const [condition, setCondition] = useState<ConditionData | null>(null);
-  const [offerSettings, setOfferSettings] = useState<OfferSettings | null>(null);
-  const [offerRules, setOfferRules] = useState<OfferRule[]>([]);
-  const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -81,95 +76,17 @@ const CustomerPortal = () => {
       setSubmission(data[0] as unknown as PortalSubmission);
       setLoading(false);
 
-      // Fetch condition details + offer config in parallel
-      const [condRes, settingsRes, rulesRes] = await Promise.all([
-        supabase
-          .from("submissions")
-          .select("accidents, drivable, exterior_damage, interior_damage, mechanical_issues, engine_issues, tech_issues, smoked_in, tires_replaced, num_keys, windshield_damage, modifications, drivetrain")
-          .eq("token", token)
-          .maybeSingle(),
-        supabase.from("offer_settings" as any).select("*").eq("dealership_id", "default").maybeSingle(),
-        supabase.from("offer_rules" as any).select("*").eq("dealership_id", "default").eq("is_active", true),
-      ]);
-      if (condRes.data) setCondition(condRes.data as ConditionData);
-      if (settingsRes.data) setOfferSettings(settingsRes.data as unknown as OfferSettings);
-      if (rulesRes.data) setOfferRules(rulesRes.data as unknown as OfferRule[]);
+      // Fetch drivetrain for vehicle summary
+      const { data: condData } = await supabase
+        .from("submissions")
+        .select("drivetrain")
+        .eq("token", token)
+        .maybeSingle();
+      if (condData) setCondition(condData as ConditionData);
     };
     fetchData();
   }, [token]);
 
-  /* ─── Inline edit handler: update field + recalculate ─── */
-  const handleFieldUpdate = async (field: string, value: string | string[]) => {
-    if (!submission || !condition) return;
-
-    const newCondition = { ...condition, [field]: value };
-    setCondition(newCondition);
-
-    const newSubmission = { ...submission };
-    if (field === "overall_condition") newSubmission.overall_condition = value as string;
-    if (field === "mileage") newSubmission.mileage = value as string;
-    if (field === "exterior_color") newSubmission.exterior_color = value as string;
-
-    // Recalculate offer if we have bb data and no manual offered_price
-    if (submission.bb_tradein_avg && !submission.offered_price) {
-      const subCond: SubmissionCondition = {
-        overall_condition: field === "overall_condition" ? (value as string) : newSubmission.overall_condition,
-        mileage: field === "mileage" ? (value as string) : newSubmission.mileage,
-        vehicle_year: newSubmission.vehicle_year,
-        vehicle_make: newSubmission.vehicle_make,
-        vehicle_model: newSubmission.vehicle_model,
-        accidents: field === "accidents" ? (value as string) : newCondition.accidents,
-        exterior_damage: field === "exterior_damage" ? (value as string[]) : newCondition.exterior_damage,
-        interior_damage: field === "interior_damage" ? (value as string[]) : newCondition.interior_damage,
-        mechanical_issues: field === "mechanical_issues" ? (value as string[]) : newCondition.mechanical_issues,
-        engine_issues: field === "engine_issues" ? (value as string[]) : newCondition.engine_issues,
-        tech_issues: field === "tech_issues" ? (value as string[]) : newCondition.tech_issues,
-        windshield_damage: field === "windshield_damage" ? (value as string) : newCondition.windshield_damage,
-        smoked_in: field === "smoked_in" ? (value as string) : newCondition.smoked_in,
-        tires_replaced: field === "tires_replaced" ? (value as string) : newCondition.tires_replaced,
-        num_keys: field === "num_keys" ? (value as string) : newCondition.num_keys,
-        drivable: field === "drivable" ? (value as string) : newCondition.drivable,
-      };
-
-      const newEstimate = recalculateFromSubmission(
-        submission.bb_tradein_avg,
-        subCond,
-        offerSettings,
-        offerRules
-      );
-
-      if (newEstimate) {
-        newSubmission.estimated_offer_low = newEstimate.low;
-        newSubmission.estimated_offer_high = newEstimate.high;
-      }
-    }
-
-    setSubmission(newSubmission);
-
-    // Save to database
-    setSaving(true);
-    try {
-      const updateData: Record<string, any> = { [field]: value };
-      if (newSubmission.estimated_offer_low !== submission.estimated_offer_low ||
-          newSubmission.estimated_offer_high !== submission.estimated_offer_high) {
-        updateData.estimated_offer_low = newSubmission.estimated_offer_low;
-        updateData.estimated_offer_high = newSubmission.estimated_offer_high;
-      }
-
-      await supabase
-        .from("submissions")
-        .update(updateData as any)
-        .eq("token", token!);
-
-      toast({
-        title: "Updated",
-        description: "Your answer has been updated and your offer recalculated.",
-      });
-    } catch {
-      toast({ title: "Update failed", description: "Please try again.", variant: "destructive" });
-    }
-    setSaving(false);
-  };
 
   if (loading) return <PortalSkeleton />;
 
@@ -196,8 +113,6 @@ const CustomerPortal = () => {
   const stepIdx = mapStatusToStepIndex(mappedStatus);
   const isComplete = mappedStatus === "purchase_complete";
 
-  // Can edit only if no manual offered_price (not accepted) and has BB data
-  const canEdit = !s.offered_price && !!s.bb_tradein_avg;
 
   const scheduleLink = `/schedule?token=${s.token}&vehicle=${encodeURIComponent(vehicleStr)}&name=${encodeURIComponent(s.name || "")}&email=${encodeURIComponent(s.email || "")}&phone=${encodeURIComponent(s.phone || "")}`;
 
@@ -244,8 +159,7 @@ const CustomerPortal = () => {
     exteriorColor: s.exterior_color,
     overallCondition: s.overall_condition,
     drivetrain: condition?.drivetrain || null,
-    canEdit,
-    onFieldUpdate: canEdit ? (field: string, value: string) => handleFieldUpdate(field, value) : undefined,
+    canEdit: false,
   };
 
   return (
@@ -281,13 +195,6 @@ const CustomerPortal = () => {
               <div className="sticky top-6 space-y-5">
                 <PortalOfferCard {...offerCardProps} />
                 <PortalVehicleSummary {...vehicleSummaryProps} />
-                <ConditionReport
-                  condition={condition}
-                  vehicleStr={vehicleStr}
-                  canEdit={canEdit}
-                  onFieldUpdate={canEdit ? handleFieldUpdate : undefined}
-                  saving={saving}
-                />
                 <DealerContactCard />
                 {SubmittedFooter}
               </div>
@@ -321,13 +228,6 @@ const CustomerPortal = () => {
           <CompletionChecklist {...checklistProps} />
           <VehiclePhotos token={s.token} photosUploaded={s.photos_uploaded} />
           <PortalVehicleSummary {...vehicleSummaryProps} />
-          <ConditionReport
-            condition={condition}
-            vehicleStr={vehicleStr}
-            canEdit={canEdit}
-            onFieldUpdate={canEdit ? handleFieldUpdate : undefined}
-            saving={saving}
-          />
           <PaymentInfoCard />
           {s.loan_status && ["has_loan", "lease"].includes(s.loan_status) && <LoanPayoffCard />}
           {stepIdx >= 2 && !isComplete && (

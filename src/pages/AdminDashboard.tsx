@@ -1875,6 +1875,19 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
+              {/* Customer Accepted Offer Badge */}
+              {selected.progress_status !== "new" && selected.progress_status !== "dead_lead" && (
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-success/10 border border-success/20">
+                  <CheckCircle className="w-5 h-5 text-success" />
+                  <span className="font-bold text-success text-sm">Customer Accepted Offer</span>
+                  {selected.status_updated_at && (
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      {new Date(selected.status_updated_at).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {/* Acquisition Tracker — Horizontal Progress Bar */}
               <div data-print-section className="bg-muted/40 rounded-lg p-4">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Acquisition Tracker</h3>

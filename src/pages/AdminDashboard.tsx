@@ -457,7 +457,7 @@ const AdminDashboard = () => {
         const linkedSub = submissions.find(s => s.token === rescheduleAppt.submission_token);
         if (linkedSub) {
           // Fetch location name
-          const loc = locations.find(l => l.id === (rescheduleAppt.store_location || ""));
+          const loc = dealerLocations.find(l => l.id === (rescheduleAppt.store_location || ""));
           supabase.functions.invoke("send-notification", {
             body: {
               trigger_key: "customer_appointment_rescheduled",

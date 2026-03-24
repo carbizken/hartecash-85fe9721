@@ -7,6 +7,7 @@ interface WhatsNextProps {
   mappedStatus: string;
   photosUploaded: boolean;
   docsUploaded: boolean;
+  appointmentSet: boolean;
   token: string;
   vehicleStr: string;
   name: string;
@@ -24,32 +25,56 @@ interface NextAction {
   urgent?: boolean;
 }
 
-function getNextAction(status: string, photosUploaded: boolean, docsUploaded: boolean): NextAction {
+function getNextAction(status: string, photosUploaded: boolean, docsUploaded: boolean, appointmentSet: boolean): NextAction {
+  // Priority 1: Schedule inspection if not yet set
+  if (!appointmentSet && ["offer_made", "contacted", "price_agreed", "new"].includes(status)) {
+    return {
+      emoji: "📅",
+      title: "Schedule Your Inspection",
+      description: "Book your dealership visit so we can complete a quick inspection and hand you a check. It only takes a minute!",
+      actionLabel: "Schedule My Visit",
+      actionIcon: CalendarCheck,
+      linkType: "schedule",
+      urgent: true,
+    };
+  }
+
+  // Priority 2: Upload photos (encourage pre-appointment uploads)
   if (!photosUploaded) {
+    const hasAppt = appointmentSet;
     return {
       emoji: "📸",
-      title: "Upload Photos & Documents",
-      description: "Uploading photos and documents will speed up the process and get you a check faster.",
+      title: hasAppt ? "Save Time at Your Appointment" : "Upload Your Photos",
+      description: hasAppt
+        ? "Upload photos of your vehicle now to streamline your visit — less waiting, faster check."
+        : "Adding photos helps us prepare everything ahead of time so your visit goes smoothly.",
       actionLabel: "Upload Photos",
       actionIcon: Camera,
       linkType: "upload",
     };
   }
+
+  // Priority 3: Upload docs
   if (!docsUploaded) {
+    const hasAppt = appointmentSet;
     return {
       emoji: "📄",
-      title: "Upload Your Documents",
-      description: "We need your registration, title, and driver's license to move forward.",
+      title: hasAppt ? "Get Ahead — Upload Documents Now" : "Upload Your Documents",
+      description: hasAppt
+        ? "Submit your registration, title, and license before your appointment to save time and skip the paperwork at the dealership."
+        : "We need your registration, title, and driver's license to move forward.",
       actionLabel: "Upload Documents",
       actionIcon: FileText,
       linkType: "docs",
     };
   }
-  if (["offer_made", "contacted", "price_agreed"].includes(status)) {
+
+  // Everything done but no appointment yet
+  if (!appointmentSet && ["offer_made", "contacted", "price_agreed"].includes(status)) {
     return {
       emoji: "📅",
-      title: "Visit Us for Your Final Inspection",
-      description: "Everything's ready on your end! Schedule your dealership visit so we can complete a quick inspection and hand you a check.",
+      title: "You're All Set — Just Book Your Visit!",
+      description: "Photos and documents are uploaded. Schedule your dealership visit so we can complete a quick inspection and hand you a check.",
       actionLabel: "Schedule My Visit",
       actionIcon: CalendarCheck,
       linkType: "schedule",
@@ -86,8 +111,8 @@ function getNextAction(status: string, photosUploaded: boolean, docsUploaded: bo
   };
 }
 
-const WhatsNextCard = ({ mappedStatus, photosUploaded, docsUploaded, token, vehicleStr, name, email, phone }: WhatsNextProps) => {
-  const action = getNextAction(mappedStatus, photosUploaded, docsUploaded);
+const WhatsNextCard = ({ mappedStatus, photosUploaded, docsUploaded, appointmentSet, token, vehicleStr, name, email, phone }: WhatsNextProps) => {
+  const action = getNextAction(mappedStatus, photosUploaded, docsUploaded, appointmentSet);
   const ActionIcon = action.actionIcon;
 
   const getLink = () => {

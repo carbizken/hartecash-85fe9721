@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Inbox, CalendarDays, Users, ShieldCheck, SlidersHorizontal,
-  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin, Car
+  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin, Car, ScrollText
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -51,6 +51,7 @@ const AdminSidebar = ({
   const complianceItems = [
     { key: "consent", label: "Consent Log", icon: ShieldCheck },
     { key: "follow-ups", label: "Follow-Ups", icon: Send },
+    { key: "notification-log", label: "Notification Log", icon: ScrollText },
   ];
 
   const configItems = canManageAccess

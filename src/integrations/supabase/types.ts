@@ -326,6 +326,50 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_log: {
+        Row: {
+          channel: string
+          created_at: string
+          dealership_id: string
+          error_message: string | null
+          id: string
+          recipient: string
+          status: string
+          submission_id: string | null
+          trigger_key: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          dealership_id?: string
+          error_message?: string | null
+          id?: string
+          recipient: string
+          status?: string
+          submission_id?: string | null
+          trigger_key: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          dealership_id?: string
+          error_message?: string | null
+          id?: string
+          recipient?: string
+          status?: string
+          submission_id?: string | null
+          trigger_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_log_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           appointment_channels: string[]

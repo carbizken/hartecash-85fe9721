@@ -261,6 +261,22 @@ Deno.serve(async (req) => {
 
     const results: { email?: string; sms?: string } = {};
 
+    // Helper to log notification
+    const logNotification = async (channel: string, recipient: string, status: string, errorMsg?: string) => {
+      try {
+        await supabase.from("notification_log").insert({
+          trigger_key,
+          channel,
+          recipient,
+          status,
+          error_message: errorMsg || null,
+          submission_id: submission_id || null,
+        });
+      } catch (e) {
+        console.error("Failed to log notification:", e);
+      }
+    };
+
     // Send emails
     if (channels.includes("email") && emailRecipients.length > 0) {
       const resendKey = Deno.env.get("RESEND_API_KEY");
@@ -282,10 +298,17 @@ Deno.serve(async (req) => {
           });
           const emailData = await emailRes.json();
           console.log("Email response:", JSON.stringify(emailData));
+          const emailStatus = emailRes.ok ? "sent" : "failed";
           results.email = emailRes.ok ? "sent" : `failed: ${JSON.stringify(emailData)}`;
+          for (const addr of emailRecipients) {
+            await logNotification("email", addr, emailStatus, emailRes.ok ? undefined : JSON.stringify(emailData));
+          }
         } catch (e) {
           console.error("Email error:", e);
           results.email = "error";
+          for (const addr of emailRecipients) {
+            await logNotification("email", addr, "error", String(e));
+          }
         }
       } else {
         results.email = "skipped: no RESEND_API_KEY";
@@ -320,10 +343,13 @@ Deno.serve(async (req) => {
             });
             const smsData = await smsRes.json();
             console.log("SMS response:", JSON.stringify(smsData));
+            const smsStatus = smsRes.ok ? "sent" : "failed";
             results.sms = smsRes.ok ? "sent" : `failed: ${JSON.stringify(smsData)}`;
+            await logNotification("sms", phone, smsStatus, smsRes.ok ? undefined : JSON.stringify(smsData));
           } catch (e) {
             console.error("SMS error:", e);
             results.sms = "error";
+            await logNotification("sms", phone, "error", String(e));
           }
         }
       } else {

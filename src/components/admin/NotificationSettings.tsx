@@ -248,6 +248,49 @@ export default function NotificationSettings() {
 
   const toggle = (key: string) => setOpenSections(s => ({ ...s, [key]: !s[key] }));
 
+  const getTriggerRecipients = (triggerKey: string) => {
+    return config.staff_trigger_recipients[triggerKey] || null;
+  };
+
+  const toggleTriggerEmailRecipient = (triggerKey: string, email: string) => {
+    setConfig(c => {
+      const current = c.staff_trigger_recipients[triggerKey] || { emails: [...c.email_recipients], phones: [...c.sms_recipients] };
+      const emails = current.emails.includes(email)
+        ? current.emails.filter(e => e !== email)
+        : [...current.emails, email];
+      return {
+        ...c,
+        staff_trigger_recipients: {
+          ...c.staff_trigger_recipients,
+          [triggerKey]: { ...current, emails },
+        },
+      };
+    });
+  };
+
+  const toggleTriggerSmsRecipient = (triggerKey: string, phone: string) => {
+    setConfig(c => {
+      const current = c.staff_trigger_recipients[triggerKey] || { emails: [...c.email_recipients], phones: [...c.sms_recipients] };
+      const phones = current.phones.includes(phone)
+        ? current.phones.filter(p => p !== phone)
+        : [...current.phones, phone];
+      return {
+        ...c,
+        staff_trigger_recipients: {
+          ...c.staff_trigger_recipients,
+          [triggerKey]: { ...current, phones },
+        },
+      };
+    });
+  };
+
+  const resetTriggerRecipients = (triggerKey: string) => {
+    setConfig(c => {
+      const { [triggerKey]: _, ...rest } = c.staff_trigger_recipients;
+      return { ...c, staff_trigger_recipients: rest };
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">

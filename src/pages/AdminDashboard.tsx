@@ -1102,20 +1102,23 @@ const AdminDashboard = () => {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  const DetailRow = ({ label, value }: { label: string; value: string | null | undefined }) => {
+  const DetailRow = ({ label, value, icon }: { label: string; value: string | null | undefined; icon?: React.ReactNode }) => {
     if (!value) return null;
     return (
-      <div className="flex justify-between py-1.5 border-b border-border last:border-0">
-        <span className="text-sm text-muted-foreground">{label}</span>
+      <div className="flex items-center justify-between py-1.5 border-b border-border last:border-0">
+        <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+          {icon && <span className="text-muted-foreground/70">{icon}</span>}
+          {label}
+        </span>
         <span className="text-sm font-medium text-card-foreground text-right max-w-[60%]">{value}</span>
       </div>
     );
   };
 
-  const ArrayDetail = ({ label, value }: { label: string; value: string[] | null | undefined }) => {
+  const ArrayDetail = ({ label, value, icon }: { label: string; value: string[] | null | undefined; icon?: React.ReactNode }) => {
     if (!value || value.length === 0 || (value.length === 1 && value[0] === "none")) return null;
     return (
-      <DetailRow label={label} value={value.join(", ")} />
+      <DetailRow label={label} value={value.join(", ")} icon={icon} />
     );
   };
 

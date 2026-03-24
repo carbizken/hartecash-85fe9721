@@ -80,7 +80,9 @@ export function InlineEdit({
                 const issues = multiValue.filter(v => v !== "none");
                 return `${issues.length} issue${issues.length > 1 ? "s" : ""}`;
               })())
-          : value || "—"}</span>
+          : type === "select" && options
+            ? (options.find(o => o.value === value)?.label || value || "—")
+            : value || "—"}</span>
         <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
       </button>
     );

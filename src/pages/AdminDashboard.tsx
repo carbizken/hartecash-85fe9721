@@ -666,6 +666,12 @@ const AdminDashboard = () => {
         new_value: getStatusLabel(newStatus),
         performed_by: userRole,
       });
+      // Deal Completed notification
+      if (oldStatus !== "purchase_complete" && newStatus === "purchase_complete") {
+        supabase.functions.invoke("send-notification", {
+          body: { trigger_key: "staff_deal_completed", submission_id: sub.id },
+        }).catch(console.error);
+      }
       toast({ title: "Status updated" });
     } else {
       toast({ title: "Error", description: error.message, variant: "destructive" });

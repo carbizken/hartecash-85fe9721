@@ -211,9 +211,10 @@ const CustomerPortal = () => {
   if (mappedStatus === "contacted" && s.offered_price) mappedStatus = "offer_made";
   const stepIdx = mapStatusToStepIndex(mappedStatus);
   const isComplete = mappedStatus === "purchase_complete";
+  const isOfferAccepted = ACCEPTED_PORTAL_STATUSES.has(s.progress_status) || !!s.offered_price;
 
-  // Mileage editable only when no offered_price and has BB data
-  const canEditMileage = !s.offered_price && !!s.bb_tradein_avg;
+  // Mileage editable only when no manual offered price is set and offer hasn't been accepted yet
+  const canEditMileage = !isOfferAccepted && !s.offered_price && !!s.bb_tradein_avg;
 
   const scheduleLink = `/schedule?token=${s.token}&vehicle=${encodeURIComponent(vehicleStr)}&name=${encodeURIComponent(s.name || "")}&email=${encodeURIComponent(s.email || "")}&phone=${encodeURIComponent(s.phone || "")}`;
 
@@ -254,6 +255,7 @@ const CustomerPortal = () => {
     token: s.token,
     createdAt: s.created_at,
     guaranteeDays: config.price_guarantee_days || 8,
+    isAccepted: isOfferAccepted,
   };
 
   const vehicleSummaryProps = {

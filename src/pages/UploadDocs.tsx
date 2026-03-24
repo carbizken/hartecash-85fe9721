@@ -1,18 +1,20 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, CheckCircle, Upload, X, Plus, ArrowLeft, CircleCheck } from "lucide-react";
+import { FileText, CheckCircle, Upload, X, Plus, ArrowLeft, CircleCheck, Camera, AlertTriangle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileQRBanner from "@/components/upload/MobileQRBanner";
+import DocumentCameraCapture from "@/components/upload/DocumentCameraCapture";
+import { getDocDimensions } from "@/lib/documentDimensions";
 import harteLogoFallback from "@/assets/harte-logo-white.png";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 const DOC_TYPES = [
-  { key: "drivers_license_front", label: "Driver's License (Front)", emoji: "🪪" },
-  { key: "drivers_license_back", label: "Driver's License (Back)", emoji: "🪪" },
-  { key: "registration", label: "Registration", emoji: "📋" },
-  { key: "title_front", label: "Title (Front)", emoji: "📄" },
-  { key: "title_back", label: "Title (Back)", emoji: "📄" },
+  { key: "drivers_license_front", label: "Driver's License (Front)", emoji: "🪪", ocr: true },
+  { key: "drivers_license_back", label: "Driver's License (Back)", emoji: "🪪", ocr: false },
+  { key: "registration", label: "Registration", emoji: "📋", ocr: false },
+  { key: "title_front", label: "Title (Front)", emoji: "📄", ocr: true },
+  { key: "title_back", label: "Title (Back)", emoji: "📄", ocr: false },
 ];
 
 interface SubmissionInfo {
@@ -22,6 +24,9 @@ interface SubmissionInfo {
   vehicle_model: string | null;
   name: string | null;
   photos_uploaded: boolean;
+  state: string | null;
+  zip: string | null;
+  vin: string | null;
 }
 
 const UploadDocs = () => {
@@ -34,6 +39,8 @@ const UploadDocs = () => {
   const [uploading, setUploading] = useState(false);
   const [done, setDone] = useState(false);
   const [activeDocType, setActiveDocType] = useState<string>("");
+  const [cameraDocType, setCameraDocType] = useState<string | null>(null);
+  const [vinStatus, setVinStatus] = useState<"match" | "mismatch" | "no_vin_on_file" | "not_legible" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -43,7 +50,7 @@ const UploadDocs = () => {
         .rpc("get_submission_by_token", { _token: token })
         .maybeSingle();
       if (err || !data) { setError("Submission not found. Please check your link."); }
-      else { setSubmission(data); }
+      else { setSubmission(data as unknown as SubmissionInfo); }
       setLoading(false);
     };
     fetchSubmission();
@@ -51,6 +58,16 @@ const UploadDocs = () => {
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
   const MAX_FILES = 30;
+
+  const addFileEntry = useCallback((file: File, docType: string, preview: string) => {
+    setFiles(prev => {
+      if (prev.length >= MAX_FILES) {
+        setError(`Maximum ${MAX_FILES} documents allowed.`);
+        return prev;
+      }
+      return [...prev, { file, docType, preview }];
+    });
+  }, []);
 
   const addFiles = (newFiles: FileList | null) => {
     if (!newFiles || !activeDocType) return;
@@ -68,11 +85,7 @@ const UploadDocs = () => {
     added.forEach(f => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setFiles(prev => [...prev, {
-          file: f,
-          docType: activeDocType,
-          preview: f.type.startsWith("image/") ? (e.target?.result as string) : "",
-        }]);
+        addFileEntry(f, activeDocType, f.type.startsWith("image/") ? (e.target?.result as string) : "");
       };
       reader.readAsDataURL(f);
     });
@@ -86,6 +99,7 @@ const UploadDocs = () => {
     if (!submission || files.length === 0) return;
     setUploading(true);
     let dlFrontPath: string | null = null;
+    let titleFrontPath: string | null = null;
     try {
       for (const { file, docType } of files) {
         const ext = file.name.split(".").pop();
@@ -95,6 +109,7 @@ const UploadDocs = () => {
           .upload(path, file, { contentType: file.type });
         if (uploadErr) throw uploadErr;
         if (docType === "drivers_license_front") dlFrontPath = path;
+        if (docType === "title_front") titleFrontPath = path;
       }
       await supabase.rpc("mark_docs_uploaded", { _token: token! });
       // Fire docs_uploaded staff notification
@@ -116,7 +131,26 @@ const UploadDocs = () => {
             });
           }
         } catch (ocrErr) {
-          console.warn("OCR auto-fill skipped:", ocrErr);
+          console.warn("DL OCR auto-fill skipped:", ocrErr);
+        }
+      }
+
+      // Trigger VIN verification on title front if uploaded
+      if (titleFrontPath) {
+        try {
+          const { data: signedData } = await supabase.storage
+            .from("customer-documents")
+            .createSignedUrl(titleFrontPath, 300);
+          if (signedData?.signedUrl) {
+            const { data: vinResult } = await supabase.functions.invoke("parse-title-vin", {
+              body: { imageUrl: signedData.signedUrl, submissionToken: token },
+            });
+            if (vinResult?.vin_match) {
+              setVinStatus(vinResult.vin_match);
+            }
+          }
+        } catch (ocrErr) {
+          console.warn("Title VIN verification skipped:", ocrErr);
         }
       }
 
@@ -132,6 +166,17 @@ const UploadDocs = () => {
     setTimeout(() => fileInputRef.current?.click(), 50);
   };
 
+  const triggerCamera = (docType: string) => {
+    setCameraDocType(docType);
+  };
+
+  const handleCameraCapture = (file: File, preview: string) => {
+    if (cameraDocType) {
+      addFileEntry(file, cameraDocType, preview);
+    }
+    setCameraDocType(null);
+  };
+
   const filesPerType = (type: string) => files.filter(f => f.docType === type);
 
   // Completion check: DL front + DL back + (registration OR (title front + title back))
@@ -143,6 +188,9 @@ const UploadDocs = () => {
     const hasTitleBack = filesPerType("title_back").length > 0;
     return hasDLFront && hasDLBack && (hasRegistration || (hasTitleFront && hasTitleBack));
   }, [files]);
+
+  // Determine customer state for guide dimensions
+  const customerState = submission?.state || null;
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -170,6 +218,37 @@ const UploadDocs = () => {
           {submission?.vehicle_year && ` for your ${submission.vehicle_year} ${submission.vehicle_make} ${submission.vehicle_model}`}.
           Our team will review them shortly.
         </p>
+
+        {/* VIN verification status */}
+        {vinStatus && (
+          <div className={`mt-4 rounded-lg p-3 text-sm flex items-center gap-2 ${
+            vinStatus === "match"
+              ? "bg-success/10 text-success"
+              : vinStatus === "mismatch"
+              ? "bg-destructive/10 text-destructive"
+              : "bg-muted text-muted-foreground"
+          }`}>
+            {vinStatus === "match" ? (
+              <>
+                <ShieldCheck className="w-5 h-5 flex-shrink-0" />
+                <span>VIN verified — title matches our records ✓</span>
+              </>
+            ) : vinStatus === "mismatch" ? (
+              <>
+                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                <span>VIN on title doesn't match our records. Our team will review this.</span>
+              </>
+            ) : vinStatus === "no_vin_on_file" ? (
+              <>
+                <ShieldCheck className="w-5 h-5 flex-shrink-0" />
+                <span>VIN captured from your title and added to your file.</span>
+              </>
+            ) : (
+              <span>VIN could not be read from title — our team will verify manually.</span>
+            )}
+          </div>
+        )}
+
         <Link to={`/my-submission/${token}`}>
           <Button variant="outline" className="mt-4 gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to My Submission
@@ -181,6 +260,16 @@ const UploadDocs = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Camera capture overlay */}
+      {cameraDocType && (
+        <DocumentCameraCapture
+          docLabel={DOC_TYPES.find(d => d.key === cameraDocType)?.label || "Document"}
+          dimensions={getDocDimensions(cameraDocType, customerState)}
+          onCapture={handleCameraCapture}
+          onClose={() => setCameraDocType(null)}
+        />
+      )}
+
       <div className="bg-primary text-primary-foreground px-6 py-4 mb-0">
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <Link to={`/my-submission/${token}`} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
@@ -232,13 +321,24 @@ const UploadDocs = () => {
                       {hasFile ? <CheckCircle className="w-4 h-4 text-success" /> : null}
                       {dt.emoji} {dt.label}
                     </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => triggerUpload(dt.key)}
-                    >
-                      <Plus className="w-3 h-3 mr-1" /> {hasFile ? "More" : "Add"}
-                    </Button>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => triggerCamera(dt.key)}
+                        className="gap-1 text-xs"
+                      >
+                        <Camera className="w-3 h-3" /> Capture
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => triggerUpload(dt.key)}
+                        className="text-xs"
+                      >
+                        <Plus className="w-3 h-3 mr-0.5" /> File
+                      </Button>
+                    </div>
                   </div>
                   {typeFiles.length > 0 && (
                     <div className="flex flex-wrap gap-2">
@@ -286,7 +386,7 @@ const UploadDocs = () => {
               : "bg-accent hover:bg-accent/90 text-accent-foreground shadow-accent/30"
           }`}
         >
-          {uploading ? "Uploading..." : `Upload ${files.length} Document${files.length !== 1 ? "s" : ""}`}
+          {uploading ? "Uploading & verifying..." : `Upload ${files.length} Document${files.length !== 1 ? "s" : ""}`}
         </Button>
 
         <p className="text-center mt-4 text-[13px] text-muted-foreground">

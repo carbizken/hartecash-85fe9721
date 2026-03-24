@@ -19,10 +19,9 @@ import WhatToExpect from "@/components/portal/WhatToExpect";
 import ProgressSteps, { mapStatusToStepIndex } from "@/components/portal/ProgressSteps";
 import PortalOfferCard from "@/components/portal/PortalOfferCard";
 import PortalVehicleSummary from "@/components/portal/PortalVehicleSummary";
-import ConditionReport, { type ConditionData } from "@/components/portal/ConditionReport";
-import { recalculateFromSubmission, type SubmissionCondition } from "@/lib/recalculateOffer";
-import type { OfferSettings, OfferRule } from "@/lib/offerCalculator";
-import { useToast } from "@/hooks/use-toast";
+interface ConditionData {
+  drivetrain: string | null;
+}
 
 interface PortalSubmission {
   id: string;

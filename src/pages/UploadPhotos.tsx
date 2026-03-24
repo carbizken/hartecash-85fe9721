@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import UploadSkeleton from "@/components/UploadSkeleton";
 import MobileQRBanner from "@/components/upload/MobileQRBanner";
 import PhotoGuide from "@/components/upload/PhotoGuide";
-import harteLogoWhite from "@/assets/harte-logo-white.png";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
+import harteLogoFallback from "@/assets/harte-logo-white.png";
 
 interface SubmissionInfo {
   id: string;

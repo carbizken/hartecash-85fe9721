@@ -621,7 +621,7 @@ const AdminDashboard = () => {
     }
 
     // Fetch documents from customer-documents bucket
-    const docTypes = ["drivers_license", "registration", "title_inquiry", "title", "payoff_verification", "appraisal", "carfax", "window_sticker"];
+    const docTypes = ["drivers_license", "drivers_license_front", "drivers_license_back", "registration", "title_inquiry", "title", "payoff_verification", "appraisal", "carfax", "window_sticker"];
     const allDocs: { name: string; url: string; type: string }[] = [];
     for (const docType of docTypes) {
       const { data: docFiles } = await supabase.storage

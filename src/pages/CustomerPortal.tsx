@@ -259,7 +259,7 @@ const CustomerPortal = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary via-[hsl(210,100%,30%)] to-primary text-primary-foreground px-6 py-5">
+      <div className="bg-gradient-to-r from-primary via-[hsl(210,100%,30%)] to-primary text-primary-foreground px-6 py-1">
         <div className="max-w-5xl mx-auto">
           <Link to="/my-submission" className="inline-flex items-center gap-1 text-xs text-primary-foreground/70 hover:text-primary-foreground transition-colors mb-1.5">
             <ArrowLeft className="w-3.5 h-3.5" />

@@ -100,7 +100,7 @@ const UploadDocs = () => {
       // Fire docs_uploaded staff notification
       if (submission?.id) {
         supabase.functions.invoke("send-notification", {
-          body: { trigger_key: "docs_uploaded", submission_id: (submission as any).id },
+          body: { trigger_key: "docs_uploaded", submission_id: submission.id },
         }).catch(console.error);
       }
 

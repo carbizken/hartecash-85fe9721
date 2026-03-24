@@ -180,7 +180,7 @@ const UploadPhotos = () => {
         // Fire photos_uploaded staff notification
         if (submission?.id) {
           supabase.functions.invoke("send-notification", {
-            body: { trigger_key: "photos_uploaded", submission_id: (submission as any).id },
+            body: { trigger_key: "photos_uploaded", submission_id: submission.id },
           }).catch(console.error);
         }
       }

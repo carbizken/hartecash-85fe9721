@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { DollarSign, TrendingUp, CheckCircle, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { DollarSign, TrendingUp, CheckCircle, ArrowRight, ShieldCheck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { getTaxRateFromZip, calcTradeInValue, STATE_NAMES } from "@/lib/salesTax";
-import AcceptedOfferCard from "@/components/portal/AcceptedOfferCard";
 
 interface PortalOfferCardProps {
   offeredPrice: number | null;
@@ -15,6 +14,22 @@ interface PortalOfferCardProps {
   token: string;
   createdAt: string | null;
   guaranteeDays: number;
+}
+
+function useCountdown(expiresDate: Date | null) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!expiresDate) return;
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, [expiresDate]);
+
+  if (!expiresDate) return { days: 0, hours: 0, isExpired: true };
+  const ms = expiresDate.getTime() - now;
+  if (ms <= 0) return { days: 0, hours: 0, isExpired: true };
+  const days = Math.floor(ms / 86_400_000);
+  const hours = Math.floor((ms % 86_400_000) / 3_600_000);
+  return { days, hours, isExpired: false };
 }
 
 const PortalOfferCard = ({
@@ -44,28 +59,17 @@ const PortalOfferCard = ({
   const tradeInValue = calcTradeInValue(cashOffer, taxRate);
   const tradeInValueLow = isEstimate ? calcTradeInValue(estimateLow, taxRate) : tradeInValue;
 
-  // Accepted: simple green card
-  if (isAccepted) {
-    return (
-      <AcceptedOfferCard
-        offeredPrice={offeredPrice!}
-        zip={zip}
-        vehicleStr={vehicleStr}
-        token={token}
-        createdAt={createdAt}
-        guaranteeDays={guaranteeDays}
-        compact
-      />
-    );
-  }
+  const expiresDate = createdAt
+    ? new Date(new Date(createdAt).getTime() + guaranteeDays * 86_400_000)
+    : null;
+  const { days, hours, isExpired } = useCountdown(isAccepted ? expiresDate : null);
 
-  // Not accepted: sell/trade tab switcher with range
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="bg-card rounded-2xl shadow-xl overflow-hidden"
+      className={`bg-card rounded-2xl shadow-xl overflow-hidden ${isAccepted ? "border-2 border-success/30" : ""}`}
     >
       {/* Tab Switcher */}
       <div className="p-4 pb-0">
@@ -117,15 +121,20 @@ const PortalOfferCard = ({
               className="text-center"
             >
               <p className="text-xs text-muted-foreground mb-1">
-                Estimated Cash Offer
+                {isAccepted ? "Accepted Cash Offer" : "Estimated Cash Offer"}
               </p>
-              <p className="text-3xl md:text-4xl font-extrabold text-accent tracking-tight">
-                ${estimateLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – ${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              <p className={`text-3xl md:text-4xl font-extrabold tracking-tight ${isAccepted ? "text-success" : "text-accent"}`}>
+                {isAccepted
+                  ? `$${cashOffer.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  : `$${estimateLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – $${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                }
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Preliminary estimate • Final offer after review
-              </p>
-              {taxRate > 0 && (
+              {!isAccepted && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Preliminary estimate • Final offer after review
+                </p>
+              )}
+              {!isAccepted && taxRate > 0 && (
                 <button
                   onClick={() => setActiveTab("trade")}
                   className="mt-2 mx-auto flex items-center gap-1.5 text-xs font-medium text-success hover:text-success/80 transition-colors"
@@ -145,10 +154,13 @@ const PortalOfferCard = ({
             >
               <div className="text-center mb-4">
                 <p className="text-xs text-muted-foreground mb-1">
-                  Estimated Trade-In Total Value
+                  {isAccepted ? "Accepted Trade-In Total Value" : "Estimated Trade-In Total Value"}
                 </p>
-                <p className="text-3xl md:text-4xl font-extrabold text-success tracking-tight">
-                  ${tradeInValueLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – ${tradeInValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                <p className={`text-3xl md:text-4xl font-extrabold tracking-tight ${isAccepted ? "text-success" : "text-success"}`}>
+                  {isAccepted
+                    ? `$${tradeInValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : `$${tradeInValueLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – $${tradeInValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                  }
                 </p>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
                   <TrendingUp className="w-3 h-3" />
@@ -161,7 +173,10 @@ const PortalOfferCard = ({
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Cash offer</span>
                   <span className="font-semibold">
-                    ${estimateLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – ${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                    {isAccepted
+                      ? `$${cashOffer.toLocaleString("en-US", { minimumFractionDigits: 2 })}`
+                      : `$${estimateLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – $${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                    }
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -177,7 +192,10 @@ const PortalOfferCard = ({
                 <div className="border-t border-border pt-2 flex justify-between items-center">
                   <span className="font-bold text-card-foreground">Total trade-in value</span>
                   <span className="font-extrabold text-success">
-                    ${tradeInValueLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – ${tradeInValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                    {isAccepted
+                      ? `$${tradeInValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}`
+                      : `$${tradeInValueLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – $${tradeInValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                    }
                   </span>
                 </div>
               </div>
@@ -185,14 +203,54 @@ const PortalOfferCard = ({
           )}
         </AnimatePresence>
 
-        {/* Accept button */}
-        <Link to={`/offer/${token}`}>
-          <Button className="w-full py-5 text-base font-bold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/20 gap-2 rounded-xl mt-4">
-            <CheckCircle className="w-5 h-5" />
-            Accept & Lock In Your Price
-            <ArrowRight className="w-5 h-5" />
-          </Button>
-        </Link>
+        {/* Accept button OR Accepted badge */}
+        {isAccepted ? (
+          <div className="mt-4 space-y-3">
+            {/* Green accepted badge */}
+            <div className="w-full py-3 flex items-center justify-center gap-2 rounded-xl bg-success text-white font-bold text-base">
+              <CheckCircle className="w-5 h-5" />
+              Offer Accepted
+            </div>
+
+            {/* Countdown */}
+            <div
+              className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold ${
+                isExpired
+                  ? "bg-destructive/10 text-destructive"
+                  : days <= 2
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  : "bg-success/10 text-success"
+              }`}
+            >
+              {isExpired ? (
+                <>
+                  <Clock className="w-4 h-4" />
+                  <span>Price guarantee expired — contact us for renewal</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>
+                    {days > 0 ? `${days}d ${hours}h remaining` : `${hours}h remaining`}
+                    {expiresDate && (
+                      <span className="opacity-70">
+                        {" "}· expires {expiresDate.toLocaleDateString()}
+                      </span>
+                    )}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        ) : (
+          <Link to={`/offer/${token}`}>
+            <Button className="w-full py-5 text-base font-bold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/20 gap-2 rounded-xl mt-4">
+              <CheckCircle className="w-5 h-5" />
+              Accept & Lock In Your Price
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+          </Link>
+        )}
 
         {/* Link to full offer page */}
         <Link

@@ -899,11 +899,13 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Validate driver's license uploaded
-    const { data: dlCheck } = await supabase.storage
-      .from("customer-documents")
-      .list(`${s.token}/drivers_license`);
-    if (!dlCheck || dlCheck.length === 0) {
+    // Validate driver's license uploaded (check both legacy and new front/back folders)
+    const [dlLegacy, dlFront] = await Promise.all([
+      supabase.storage.from("customer-documents").list(`${s.token}/drivers_license`),
+      supabase.storage.from("customer-documents").list(`${s.token}/drivers_license_front`),
+    ]);
+    const hasDL = (dlLegacy.data && dlLegacy.data.length > 0) || (dlFront.data && dlFront.data.length > 0);
+    if (!hasDL) {
       toast({ title: "Missing Driver's License", description: "Customer driver's license must be uploaded before generating a check request.", variant: "destructive" });
       return;
     }

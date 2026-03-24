@@ -1277,7 +1277,10 @@ const OfferPage = () => {
                 <MapPin className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Location</p>
-                  <p className="font-semibold text-foreground">{appointment.store_location}</p>
+                  <p className="font-semibold text-foreground">{getLocationLabel(appointment.store_location)}</p>
+                  {getLocationAddress(appointment.store_location) && (
+                    <p className="text-[9px] text-muted-foreground">{getLocationAddress(appointment.store_location)}</p>
+                  )}
                 </div>
               </div>
             )}

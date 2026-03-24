@@ -117,16 +117,36 @@ interface Submission {
 
 const PAGE_SIZE = 20;
 
-// Consolidated 6-step tracker for visual display
-const PROGRESS_STAGES = [
+// Consolidated 6-step tracker for visual display — two variants based on offer acceptance
+const PROGRESS_STAGES_NOT_ACCEPTED = [
   { key: "new", label: "New Lead", dbKeys: ["new"] },
   { key: "contacted", label: "Contacted", dbKeys: ["contacted"] },
-  { key: "inspected", label: "Inspection / Appraised", dbKeys: ["inspection_scheduled", "inspection_completed", "appraisal_completed"] },
-  { key: "price_agreed", label: "Price Agreed", dbKeys: ["manager_approval", "price_agreed"] },
-  { key: "docs_title", label: "Docs & Title", dbKeys: ["title_verified", "ownership_verified"] },
+  { key: "inspected", label: "Inspection / Final Appraisal", dbKeys: ["inspection_scheduled", "inspection_completed", "appraisal_completed"] },
+  { key: "price_agreed", label: "Deal Finalized", dbKeys: ["manager_approval", "price_agreed"] },
+  { key: "docs_title", label: "Paperwork Completed", dbKeys: ["title_verified", "ownership_verified"] },
   { key: "purchase_complete", label: "Purchased", dbKeys: ["purchase_complete"] },
   { key: "dead_lead", label: "Dead Lead", dbKeys: ["dead_lead"] },
 ];
+
+const PROGRESS_STAGES_ACCEPTED = [
+  { key: "new", label: "New Lead", dbKeys: ["new"] },
+  { key: "contacted", label: "Offer Accepted", dbKeys: ["contacted"] },
+  { key: "inspected", label: "Inspection / Final Appraisal", dbKeys: ["inspection_scheduled", "inspection_completed", "appraisal_completed"] },
+  { key: "price_agreed", label: "Deal Finalized", dbKeys: ["manager_approval", "price_agreed"] },
+  { key: "docs_title", label: "Paperwork Completed", dbKeys: ["title_verified", "ownership_verified"] },
+  { key: "purchase_complete", label: "Purchased", dbKeys: ["purchase_complete"] },
+  { key: "dead_lead", label: "Dead Lead", dbKeys: ["dead_lead"] },
+];
+
+// Helper to get the right stages array for a submission
+const getProgressStages = (sub: { offered_price?: number | null; progress_status: string }) => {
+  const ACCEPTED_STATUSES = ['contacted', 'inspection_scheduled', 'inspection_completed', 'appraisal_completed', 'manager_approval', 'price_agreed', 'title_verified', 'ownership_verified', 'purchase_complete'];
+  const isAccepted = !!sub.offered_price || ACCEPTED_STATUSES.includes(sub.progress_status);
+  return isAccepted ? PROGRESS_STAGES_ACCEPTED : PROGRESS_STAGES_NOT_ACCEPTED;
+};
+
+// Default reference for stage index lookups that don't depend on acceptance
+const PROGRESS_STAGES = PROGRESS_STAGES_NOT_ACCEPTED;
 
 // Full list of DB status keys for dropdowns (preserves granular control)
 const ALL_STATUS_OPTIONS = [
@@ -761,7 +781,8 @@ const AdminDashboard = () => {
     // Build deal progress HTML (uses consolidated 7-step tracker)
     const isDeadLead = s.progress_status === "dead_lead";
     const currentStageIdx = getStageIndex(s.progress_status);
-    const progressHtml = PROGRESS_STAGES.filter(st => st.key !== "dead_lead").map((st, i) => {
+    const printStages = getProgressStages(s);
+    const progressHtml = printStages.filter(st => st.key !== "dead_lead").map((st, i) => {
       const isComplete = !isDeadLead && i < currentStageIdx;
       const isCurrent = !isDeadLead && i === currentStageIdx;
       const cls = isComplete ? "stage stage-complete" : isCurrent ? "stage stage-current" : "stage stage-inactive";
@@ -2007,7 +2028,7 @@ const AdminDashboard = () => {
                   </div>
                 ) : (
                   <div className="flex items-center gap-0 w-full">
-                    {PROGRESS_STAGES.filter(s => s.key !== "dead_lead").map((stage, i, arr) => {
+                    {getProgressStages(selected).filter(s => s.key !== "dead_lead").map((stage, i, arr) => {
                       const currentStageIdx = getStageIndex(selected.progress_status);
                       const isComplete = i < currentStageIdx;
                       const isCurrent = i === currentStageIdx;

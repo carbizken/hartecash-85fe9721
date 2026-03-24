@@ -156,6 +156,8 @@ export default function NotificationSettings() {
         customer_appointment_channels: (d.customer_appointment_channels as string[]) || ["email", "sms"],
         notify_customer_offer_ready: d.notify_customer_offer_ready ?? true,
         customer_offer_ready_channels: (d.customer_offer_ready_channels as string[]) || ["email"],
+        notify_customer_offer_increased: d.notify_customer_offer_increased ?? true,
+        customer_offer_increased_channels: (d.customer_offer_increased_channels as string[]) || ["email"],
         notify_customer_appointment_reminder: d.notify_customer_appointment_reminder ?? true,
         customer_appointment_reminder_channels: (d.customer_appointment_reminder_channels as string[]) || ["email", "sms"],
         notify_customer_appointment_rescheduled: d.notify_customer_appointment_rescheduled ?? true,

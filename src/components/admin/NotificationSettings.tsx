@@ -296,7 +296,18 @@ export default function NotificationSettings() {
             </div>
           </div>
         </div>
-        {enabled && renderChannelButtons(trigger.channelKey, channels)}
+        <div className="flex items-center gap-2 shrink-0">
+          {enabled && (
+            <button
+              onClick={() => setEditingTemplate({ key: trigger.key, label: trigger.label })}
+              className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Edit message templates"
+            >
+              <Pencil className="w-3 h-3" />
+            </button>
+          )}
+          {enabled && renderChannelButtons(trigger.channelKey, channels)}
+        </div>
       </div>
     );
   };

@@ -1261,6 +1261,16 @@ const OfferPage = () => {
                   </div>
                 )}
 
+                {hasOfferedPrice ? (
+                  <AcceptedOfferCard
+                    offeredPrice={s.offered_price!}
+                    zip={s.zip}
+                    vehicleStr={vehicleStr}
+                    token={token!}
+                    createdAt={s.created_at}
+                    guaranteeDays={guaranteeDays}
+                  />
+                ) : (
                 <div className="bg-card rounded-xl p-6 shadow-lg space-y-5">
                   {TabSwitcher}
                   {OfferDisplay}
@@ -1268,6 +1278,7 @@ const OfferPage = () => {
                   {GuaranteeBadge}
                   {AcceptButton}
                 </div>
+                )}
 
                 <div className="flex gap-3 print:hidden">
                   <Button variant="outline" className="flex-1 gap-2" onClick={handlePrint}>

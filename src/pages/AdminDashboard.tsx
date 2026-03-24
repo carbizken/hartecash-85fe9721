@@ -32,6 +32,7 @@ import VehicleImageInventory from "@/components/admin/VehicleImageInventory";
 import VehicleImage from "@/components/sell-form/VehicleImage";
 import FollowUpPanel from "@/components/admin/FollowUpPanel";
 import FollowUpLog from "@/components/admin/FollowUpLog";
+import NotificationLog from "@/components/admin/NotificationLog";
 import { Badge } from "@/components/ui/badge";
 
 interface PendingRequest {

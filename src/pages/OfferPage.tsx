@@ -17,7 +17,7 @@ import { InlineEdit } from "@/components/offer/InlineEdit";
 import { recalculateFromSubmission, type SubmissionCondition } from "@/lib/recalculateOffer";
 import type { OfferSettings, OfferRule } from "@/lib/offerCalculator";
 import { useToast } from "@/hooks/use-toast";
-import AcceptedOfferCard from "@/components/portal/AcceptedOfferCard";
+
 
 interface OfferSubmission {
   id: string;
@@ -412,16 +412,25 @@ const OfferPage = () => {
 
   const AcceptButton = (
     <div className="print:hidden space-y-2">
-      <Link to={`/deal/${token}${activeTab === "trade" ? "?mode=trade" : ""}`}>
-        <Button className="w-full py-5 text-base font-bold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/20 gap-2 rounded-xl">
+      {hasOfferedPrice ? (
+        <div className="w-full py-3 flex items-center justify-center gap-2 rounded-xl bg-success text-white font-bold text-base">
           <CheckCircle className="w-5 h-5" />
-          Accept & Lock In Your Price
-          <ArrowRight className="w-5 h-5" />
-        </Button>
-      </Link>
-      <p className="text-[11px] text-muted-foreground text-center">
-        Click to lock in your price · No obligation until inspection
-      </p>
+          Offer Accepted
+        </div>
+      ) : (
+        <>
+          <Link to={`/deal/${token}${activeTab === "trade" ? "?mode=trade" : ""}`}>
+            <Button className="w-full py-5 text-base font-bold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/20 gap-2 rounded-xl">
+              <CheckCircle className="w-5 h-5" />
+              Accept & Lock In Your Price
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+          </Link>
+          <p className="text-[11px] text-muted-foreground text-center">
+            Click to lock in your price · No obligation until inspection
+          </p>
+        </>
+      )}
     </div>
   );
 
@@ -1000,12 +1009,20 @@ const OfferPage = () => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className="bg-gradient-to-br from-accent/10 via-accent/5 to-transparent border-2 border-accent/30 rounded-xl p-6 print:hidden"
+      className={`rounded-xl p-6 print:hidden ${
+        hasOfferedPrice
+          ? "bg-gradient-to-br from-success/10 via-success/5 to-transparent border-2 border-success/30"
+          : "bg-gradient-to-br from-accent/10 via-accent/5 to-transparent border-2 border-accent/30"
+      }`}
     >
       <div className="text-center mb-4">
-        <h3 className="font-bold text-xl text-card-foreground mb-1">Ready to Lock In Your Price?</h3>
+        <h3 className="font-bold text-xl text-card-foreground mb-1">
+          {hasOfferedPrice ? "Your Offer Has Been Accepted!" : "Ready to Lock In Your Price?"}
+        </h3>
         <p className="text-sm text-muted-foreground">
-          Accept your offer and we'll reach out to get everything set up.
+          {hasOfferedPrice
+            ? "Your price is locked in. Complete your checklist to finalize the deal."
+            : "Accept your offer and we'll reach out to get everything set up."}
         </p>
       </div>
 
@@ -1016,13 +1033,20 @@ const OfferPage = () => {
         </div>
       )}
 
-      <Link to={`/deal/${token}${activeTab === "trade" ? "?mode=trade" : ""}`}>
-        <Button className="w-full py-5 text-base font-bold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/20 gap-2">
+      {hasOfferedPrice ? (
+        <div className="w-full py-3 flex items-center justify-center gap-2 rounded-xl bg-success text-white font-bold text-base">
           <CheckCircle className="w-5 h-5" />
-          Accept & Lock In Your Price
-          <ArrowRight className="w-5 h-5" />
-        </Button>
-      </Link>
+          Offer Accepted
+        </div>
+      ) : (
+        <Link to={`/deal/${token}${activeTab === "trade" ? "?mode=trade" : ""}`}>
+          <Button className="w-full py-5 text-base font-bold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/20 gap-2">
+            <CheckCircle className="w-5 h-5" />
+            Accept & Lock In Your Price
+            <ArrowRight className="w-5 h-5" />
+          </Button>
+        </Link>
+      )}
 
       <div className="flex items-start gap-2 mt-4 pt-3 border-t border-border/50">
         <Sparkles className="w-4 h-4 text-success shrink-0 mt-0.5" />
@@ -1268,16 +1292,6 @@ const OfferPage = () => {
                   </div>
                 )}
 
-                {hasOfferedPrice ? (
-                  <AcceptedOfferCard
-                    offeredPrice={s.offered_price!}
-                    zip={s.zip}
-                    vehicleStr={vehicleStr}
-                    token={token!}
-                    createdAt={s.created_at}
-                    guaranteeDays={guaranteeDays}
-                  />
-                ) : (
                 <div className="bg-card rounded-xl p-6 shadow-lg space-y-5">
                   {TabSwitcher}
                   {OfferDisplay}
@@ -1285,7 +1299,6 @@ const OfferPage = () => {
                   {GuaranteeBadge}
                   {AcceptButton}
                 </div>
-                )}
 
                 <div className="flex gap-3 print:hidden">
                   <Button variant="outline" className="flex-1 gap-2" onClick={handlePrint}>
@@ -1320,21 +1333,6 @@ const OfferPage = () => {
       {/* ─── MOBILE: Single-column layout ─── */}
       <div className="lg:hidden print:hidden">
         {/* Floating Sticky Value Box */}
-        {hasOfferedPrice ? (
-          <div className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border shadow-lg">
-            <div className="max-w-lg mx-auto px-6 py-4">
-              <AcceptedOfferCard
-                offeredPrice={s.offered_price!}
-                zip={s.zip}
-                vehicleStr={vehicleStr}
-                token={token!}
-                createdAt={s.created_at}
-                guaranteeDays={guaranteeDays}
-                compact
-              />
-            </div>
-          </div>
-        ) : (
         <div className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border shadow-lg print:static print:shadow-none">
           <div className="max-w-lg mx-auto px-6 py-4 space-y-3">
             {TabSwitcher}
@@ -1344,7 +1342,6 @@ const OfferPage = () => {
             {AcceptButton}
           </div>
         </div>
-        )}
 
         <div className="max-w-lg mx-auto p-6 space-y-5">
           {s.vehicle_year && s.vehicle_make && s.vehicle_model && (

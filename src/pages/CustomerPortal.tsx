@@ -230,13 +230,6 @@ const CustomerPortal = () => {
           <CompletionChecklist {...checklistProps} />
           <VehiclePhotos token={s.token} photosUploaded={s.photos_uploaded} />
           <PortalVehicleSummary {...vehicleSummaryProps} />
-          <ConditionReport
-            condition={condition}
-            vehicleStr={vehicleStr}
-            canEdit={canEdit}
-            onFieldUpdate={canEdit ? handleFieldUpdate : undefined}
-            saving={saving}
-          />
           <PaymentInfoCard />
           {s.loan_status && ["has_loan", "lease"].includes(s.loan_status) && <LoanPayoffCard />}
           {stepIdx >= 2 && !isComplete && (

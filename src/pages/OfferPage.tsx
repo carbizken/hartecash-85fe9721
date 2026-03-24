@@ -150,6 +150,7 @@ const OfferPage = () => {
   const [offerRules, setOfferRules] = useState<OfferRule[]>([]);
   const [saving, setSaving] = useState(false);
   const [appointment, setAppointment] = useState<{ preferred_date: string; preferred_time: string; store_location: string | null } | null>(null);
+  const [dealerLocations, setDealerLocations] = useState<{ id: string; name: string; city: string; state: string; address: string | null }[]>([]);
   
   const { config } = useSiteConfig();
   const { toast } = useToast();

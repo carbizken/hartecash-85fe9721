@@ -415,7 +415,7 @@ const OfferPage = () => {
 
   const AcceptButton = (
     <div className="print:hidden space-y-2">
-      {hasOfferedPrice ? (
+      {isAccepted ? (
         <div className="w-full py-3 flex items-center justify-center gap-2 rounded-xl bg-success text-white font-bold text-base">
           <CheckCircle className="w-5 h-5" />
           Offer Accepted

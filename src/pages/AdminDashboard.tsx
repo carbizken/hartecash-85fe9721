@@ -1937,10 +1937,10 @@ const AdminDashboard = () => {
 
                 const CUSTOMER_STEPS = [
                   { label: "Offer Accepted", icon: CheckCircle },
-                  { label: "Inspection Done", icon: Car },
-                  { label: "Deal Finalized", icon: DollarSign },
-                  { label: "Paperwork Complete", icon: FileText },
-                  { label: "Check Received", icon: Check },
+                  { label: "Inspection Done", icon: ClipboardList },
+                  { label: "Deal Finalized", icon: Handshake },
+                  { label: "Paperwork Complete", icon: BadgeCheck },
+                  { label: "Check Received", icon: Trophy },
                 ];
 
                 return (

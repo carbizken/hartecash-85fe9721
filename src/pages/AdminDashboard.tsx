@@ -27,6 +27,7 @@ import FormConfiguration from "@/components/admin/FormConfiguration";
 import TestimonialManagement from "@/components/admin/TestimonialManagement";
 import ComparisonConfig from "@/components/admin/ComparisonConfig";
 import LocationManagement from "@/components/admin/LocationManagement";
+import VehicleImageInventory from "@/components/admin/VehicleImageInventory";
 import VehicleImage from "@/components/sell-form/VehicleImage";
 import FollowUpPanel from "@/components/admin/FollowUpPanel";
 import FollowUpLog from "@/components/admin/FollowUpLog";
@@ -1638,6 +1639,9 @@ const AdminDashboard = () => {
 
           {/* Locations */}
           {activeSection === "locations" && canManageAccess && <LocationManagement />}
+
+          {/* Vehicle Image Inventory */}
+          {activeSection === "image-inventory" && canManageAccess && <VehicleImageInventory />}
 
           {/* Follow-Ups */}
           {activeSection === "follow-ups" && <FollowUpLog />}

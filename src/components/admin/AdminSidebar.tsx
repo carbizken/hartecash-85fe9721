@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Inbox, CalendarDays, Users, ShieldCheck, SlidersHorizontal,
-  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin
+  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin, Car
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -62,6 +62,7 @@ const AdminSidebar = ({
         { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
         { key: "comparison", label: "Comparison", icon: BarChart3 },
         { key: "locations", label: "Locations", icon: MapPin },
+        { key: "image-inventory", label: "Image Cache", icon: Car },
       ]
     : [];
 

@@ -1311,29 +1311,37 @@ const AdminDashboard = () => {
                               </Badge>
                             </td>
                             <td className="px-3 py-3">
-                              <Select
-                                value={sub.progress_status}
-                                onValueChange={(val) => handleInlineStatusChange(sub, val)}
-                              >
-                                <SelectTrigger className={`w-44 h-7 text-xs font-medium ${
-                                  sub.progress_status === "purchase_complete" ? "border-success/50 text-success" :
-                                  sub.progress_status === "dead_lead" ? "border-destructive/50 text-destructive" :
-                                  sub.progress_status === "new" ? "border-muted text-muted-foreground" :
-                                  "border-accent/50 text-accent"
-                                }`}>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {ALL_STATUS_OPTIONS.map(s => {
-                                    const isApprovalStage = ["manager_approval", "price_agreed", "purchase_complete"].includes(s.key);
-                                    return (
-                                      <SelectItem key={s.key} value={s.key} disabled={isApprovalStage && !canApprove}>
-                                        {s.label}{isApprovalStage && !canApprove ? " 🔒" : ""}
-                                      </SelectItem>
-                                    );
-                                  })}
-                                </SelectContent>
-                              </Select>
+                              <div className="flex flex-col gap-1">
+                                <Select
+                                  value={sub.progress_status}
+                                  onValueChange={(val) => handleInlineStatusChange(sub, val)}
+                                >
+                                  <SelectTrigger className={`w-44 h-7 text-xs font-medium ${
+                                    sub.progress_status === "purchase_complete" ? "border-success/50 text-success" :
+                                    sub.progress_status === "dead_lead" ? "border-destructive/50 text-destructive" :
+                                    sub.progress_status === "new" ? "border-muted text-muted-foreground" :
+                                    "border-accent/50 text-accent"
+                                  }`}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {ALL_STATUS_OPTIONS.map(s => {
+                                      const isApprovalStage = ["manager_approval", "price_agreed", "purchase_complete"].includes(s.key);
+                                      return (
+                                        <SelectItem key={s.key} value={s.key} disabled={isApprovalStage && !canApprove}>
+                                          {s.label}{isApprovalStage && !canApprove ? " 🔒" : ""}
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                                {sub.progress_status !== "new" && sub.progress_status !== "dead_lead" && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success">
+                                    <CheckCircle className="w-3 h-3" />
+                                    Offer Accepted
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-2 py-3 text-center">
                               {(() => {

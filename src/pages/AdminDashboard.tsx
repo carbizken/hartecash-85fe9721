@@ -2040,7 +2040,7 @@ const AdminDashboard = () => {
                               isCurrent ? "bg-primary text-primary-foreground shadow-md ring-2 ring-primary/30" :
                               "bg-muted text-muted-foreground"
                             }`}>
-                              {isComplete ? <Check className="w-3.5 h-3.5" /> : i + 1}
+                              {isComplete ? <Check className="w-3.5 h-3.5" /> : <stage.icon className="w-3.5 h-3.5" />}
                             </div>
                             <span className={`text-[10px] mt-1.5 text-center leading-tight max-w-[70px] ${
                               isCurrent ? "font-bold text-card-foreground" :

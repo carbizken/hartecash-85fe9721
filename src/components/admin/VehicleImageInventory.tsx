@@ -35,6 +35,8 @@ const VehicleImageInventory = () => {
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<CachedImage | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
   const { toast } = useToast();
 
   const fetchImages = async () => {
@@ -147,6 +149,31 @@ const VehicleImageInventory = () => {
     setRegeneratingId(null);
   };
 
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      // Delete all files from storage
+      const paths = images.map((img) => img.storage_path);
+      if (paths.length > 0) {
+        await supabase.storage.from("submission-photos").remove(paths);
+      }
+
+      // Delete all cache entries
+      const ids = images.map((img) => img.id);
+      for (let i = 0; i < ids.length; i += 50) {
+        const batch = ids.slice(i, i + 50);
+        await supabase.from("vehicle_image_cache").delete().in("id", batch);
+      }
+
+      setImages([]);
+      toast({ title: "All cleared", description: `${paths.length} cached image${paths.length !== 1 ? "s" : ""} deleted.` });
+    } catch (err: any) {
+      toast({ title: "Bulk delete failed", description: err.message, variant: "destructive" });
+    }
+    setBulkDeleting(false);
+    setShowBulkDelete(false);
+  };
+
   const filtered = images.filter((img) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -181,6 +208,17 @@ const VehicleImageInventory = () => {
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
+          {images.length > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowBulkDelete(true)}
+              disabled={bulkDeleting}
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+              Clear All ({images.length})
+            </Button>
+          )}
         </div>
       </div>
 
@@ -305,6 +343,32 @@ const VehicleImageInventory = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk delete confirmation dialog */}
+      <AlertDialog open={showBulkDelete} onOpenChange={setShowBulkDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all cached images?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <strong>all {images.length} cached vehicle image{images.length !== 1 ? "s" : ""}</strong> from storage. New images will be generated on demand when needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {bulkDeleting ? (
+                <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Deleting…</>
+              ) : (
+                <>Clear All</>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

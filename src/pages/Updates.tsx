@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Sparkles, Shield, Bell, BarChart3, Wrench, Camera, FileText, Users, DollarSign, CheckCircle, ChevronDown, ChevronRight, MapPin, Smartphone, CalendarDays, MessageSquare, Star, Eye, Handshake, ClipboardCheck } from "lucide-react";
+import { ArrowLeft, Sparkles, Shield, Bell, BarChart3, Wrench, Camera, FileText, Users, DollarSign, CheckCircle, ChevronDown, ChevronRight, MapPin, Smartphone, CalendarDays, MessageSquare, Star, Eye, Handshake, ClipboardCheck, ScanLine, Car, ImagePlus, Loader, SplitSquareHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +40,66 @@ const updates: Update[] = [
       "VIN display no longer overlaps mileage on mobile devices",
       "Single-column stacked layout on small screens, 2-column grid on tablet+",
       "Pitch deck updated with ACV audit trail in comparison table and walkthrough",
+    ],
+  },
+  {
+    date: "2026-03-25",
+    title: "AI-Powered Document OCR",
+    description: "Automated data extraction from driver's licenses and vehicle titles using vision AI.",
+    icon: <ScanLine className="w-5 h-5" />,
+    tag: "feature",
+    items: [
+      "Driver's license OCR extracts customer name and full address from front image",
+      "Only populates empty fields — never overwrites existing data",
+      "Configurable 'Enable DL OCR' toggle in site settings",
+      "Vehicle title OCR extracts VIN and owner name automatically",
+      "Extracted VIN is cross-checked against VIN on file",
+      "VIN mismatches flagged in activity log for staff review",
+      "Powered by Gemini vision AI — no third-party OCR service needed",
+    ],
+  },
+  {
+    date: "2026-03-25",
+    title: "Split Document Uploads & Smart Guides",
+    description: "Front/back document capture with real-time overlay guides sized to each document type.",
+    icon: <SplitSquareHorizontal className="w-5 h-5" />,
+    tag: "improvement",
+    items: [
+      "Driver's license split into separate front and back uploads",
+      "Camera capture component with real-time CSS/HTML overlay guide frames",
+      "License guide uses standard ISO ID-1 aspect ratio",
+      "Vehicle title guide aspect ratio varies by state (letter-landscape vs half-letter)",
+      "State auto-detected from customer's ZIP code",
+      "Documents marked complete only when minimum requirements met (front/back DL + registration or title)",
+      "Dealer-only documents (Title Inquiry, Payoff Verification) hidden from customer view",
+    ],
+  },
+  {
+    date: "2026-03-24",
+    title: "AI Vehicle Image Generation",
+    description: "Realistic vehicle images generated from year/make/model/color — cached for instant reuse.",
+    icon: <ImagePlus className="w-5 h-5" />,
+    tag: "feature",
+    items: [
+      "Edge function generates photorealistic vehicle images via AI",
+      "Images keyed by year, make, model, style, and exterior color",
+      "Vehicle image cache table prevents duplicate generation",
+      "Generated images stored in Lovable Cloud storage for fast serving",
+      "Used on offer pages, deal acceptance, and portal vehicle summary",
+      "Admin vehicle image inventory view to browse cached images",
+    ],
+  },
+  {
+    date: "2026-03-24",
+    title: "Animated Offer Calculation",
+    description: "Branded loading experience while the offer is being calculated.",
+    icon: <Loader className="w-5 h-5" />,
+    tag: "improvement",
+    items: [
+      "Animated car SVG with multi-step progress messages",
+      "Configurable via 'use_animated_calculating' toggle in site settings",
+      "Smooth transitions between calculation stages",
+      "Branded with dealership primary color",
     ],
   },
   {

@@ -33,6 +33,7 @@ import VehicleImage from "@/components/sell-form/VehicleImage";
 import FollowUpPanel from "@/components/admin/FollowUpPanel";
 import FollowUpLog from "@/components/admin/FollowUpLog";
 import NotificationLog from "@/components/admin/NotificationLog";
+import ChangelogManagement from "@/components/admin/ChangelogManagement";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -1751,6 +1752,9 @@ const AdminDashboard = () => {
 
           {/* Notification Log */}
           {activeSection === "notification-log" && <NotificationLog />}
+
+          {/* Changelog */}
+          {activeSection === "changelog" && canManageAccess && <ChangelogManagement />}
 
         </div>
       </div>

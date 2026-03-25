@@ -269,6 +269,69 @@ const VehicleImageInventory = () => {
     </div>
   );
 
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          <Car className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-semibold text-card-foreground">Vehicle Image Inventory</h2>
+          <span className="text-sm text-muted-foreground">({images.length} cached)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Search year, make, model, color…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8 h-8 w-56 text-sm"
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={fetchImages} disabled={loading}>
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          {images.length > 0 && (
+            <Button variant="destructive" size="sm" onClick={() => setShowBulkDelete(true)} disabled={bulkDeleting}>
+              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+              Clear All ({images.length})
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <ImageIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="font-medium">{search ? "No matches found" : "No cached images yet"}</p>
+          <p className="text-sm mt-1">Vehicle images will appear here once they&apos;re generated.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {grouped.map(([make, makeImages]) => (
+            <Collapsible key={make} open={openMakes.has(make)} onOpenChange={() => toggleMake(make)}>
+              <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-2.5 px-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
+                <ChevronDown className={`w-4 h-4 transition-transform ${openMakes.has(make) ? "" : "-rotate-90"}`} />
+                <Car className="w-4 h-4 text-primary" />
+                <span className="font-semibold text-sm text-foreground">{make}</span>
+                <span className="text-xs text-muted-foreground ml-auto">
+                  {makeImages.length} image{makeImages.length !== 1 ? "s" : ""}
+                </span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-3 pb-1 px-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {makeImages.map(renderCard)}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          ))}
+        </div>
+      )}
+
       {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>

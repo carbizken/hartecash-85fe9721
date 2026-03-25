@@ -59,6 +59,14 @@ const SiteHeader = () => {
                   Trade-In
                 </Link>
                 <Link
+                  to="/about"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-card-foreground hover:bg-muted transition-colors"
+                  onClick={() => setOpen(false)}
+                >
+                  <Info className="w-4 h-4 text-accent" />
+                  About Us
+                </Link>
+                <Link
                   to="/my-submission"
                   className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-card-foreground hover:bg-muted transition-colors"
                   onClick={() => setOpen(false)}

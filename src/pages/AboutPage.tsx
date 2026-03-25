@@ -4,6 +4,7 @@ import {
   MapPin, Phone, Clock, Shield, Star, Car,
   Users, Building2, Award, HandshakeIcon, ChevronRight
 } from "lucide-react";
+import AnimatedCounter from "@/components/AnimatedCounter";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 import SEO from "@/components/SEO";

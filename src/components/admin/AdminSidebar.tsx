@@ -119,7 +119,19 @@ const AdminSidebar = ({
         {renderGroup("Compliance", complianceItems)}
         {renderGroup("Configuration", configItems)}
       </SidebarContent>
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 space-y-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={() => navigate("/updates")}
+              tooltip={collapsed ? "Platform Updates" : undefined}
+              className="transition-all duration-200 dark:hover:bg-white/8"
+            >
+              <Newspaper className="w-4 h-4 shrink-0" />
+              {!collapsed && <span className="flex-1 truncate">Platform Updates</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         {!collapsed && (
           <p className="text-[10px] text-sidebar-foreground/40 text-center">
             Admin Portal

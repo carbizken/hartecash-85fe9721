@@ -91,9 +91,49 @@ const StaffManagement = () => {
     if (error) {
       toast({ title: "Error", description: "Failed to load staff.", variant: "destructive" });
     } else {
-      setStaff((data || []) as unknown as StaffMember[]);
+      const staffList = (data || []) as unknown as StaffMember[];
+      setStaff(staffList);
+      // Fetch individual sections for all staff
+      const sectionMap: Record<string, string[]> = {};
+      for (const s of staffList) {
+        const { data: assignment } = await supabase
+          .from("staff_permission_assignments" as any)
+          .select("individual_sections")
+          .eq("user_id", s.user_id)
+          .is("permission_group_id", null)
+          .maybeSingle();
+        sectionMap[s.user_id] = (assignment as any)?.individual_sections || [];
+      }
+      setStaffSections(sectionMap);
     }
     setLoading(false);
+  };
+
+  const fetchPermGroups = async () => {
+    const { data } = await supabase.from("permission_groups" as any).select("id, name, allowed_sections").order("name");
+    setPermGroups((data as any[] || []).map((g: any) => ({ id: g.id, name: g.name, allowed_sections: g.allowed_sections })));
+  };
+
+  const handleSaveStaffSections = async (userId: string, sections: string[]) => {
+    const { data: existing } = await supabase
+      .from("staff_permission_assignments" as any)
+      .select("id")
+      .eq("user_id", userId)
+      .is("permission_group_id", null)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from("staff_permission_assignments" as any)
+        .update({ individual_sections: sections } as any)
+        .eq("id", (existing as any).id);
+    } else {
+      await supabase.from("staff_permission_assignments" as any)
+        .insert({ user_id: userId, permission_group_id: null, individual_sections: sections } as any);
+    }
+
+    setStaffSections((prev) => ({ ...prev, [userId]: sections }));
+    toast({ title: "Access updated" });
+    setEditingSections(null);
   };
 
   const handleRoleChange = async (member: StaffMember, newRole: string) => {

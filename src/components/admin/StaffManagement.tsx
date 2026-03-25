@@ -429,14 +429,30 @@ const StaffManagement = () => {
                   </Select>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemove(member)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" /> Remove
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    {member.role !== "admin" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingSections(member)}
+                        className="gap-1 text-xs"
+                      >
+                        <UserCog className="w-3.5 h-3.5" />
+                        Access
+                        {(staffSections[member.user_id]?.length || 0) > 0 && (
+                          <span className="text-[10px] bg-primary/10 text-primary rounded-full px-1.5">{staffSections[member.user_id].length}</span>
+                        )}
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemove(member)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" /> Remove
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}

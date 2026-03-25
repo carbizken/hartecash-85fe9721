@@ -22,6 +22,7 @@ const Index = () => {
       />
       <LocalBusinessJsonLd />
       <FAQPageJsonLd />
+      <HowToJsonLd />
       <SiteHeader />
       <main>
         <Hero />

@@ -729,6 +729,77 @@ export type Database = {
         }
         Relationships: []
       }
+      permission_access_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          requested_group_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string
+          requested_group_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          requested_group_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permission_access_requests_requested_group_id_fkey"
+            columns: ["requested_group_id"]
+            isOneToOne: false
+            referencedRelation: "permission_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permission_groups: {
+        Row: {
+          allowed_sections: string[]
+          created_at: string
+          description: string
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_sections?: string[]
+          created_at?: string
+          description?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_sections?: string[]
+          created_at?: string
+          description?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -787,6 +858,7 @@ export type Database = {
           primary_color: string
           review_request_message: string
           review_request_subject: string
+          show_request_access: boolean
           stats_cars_purchased: string | null
           stats_rating: string | null
           stats_reviews_count: string | null
@@ -824,6 +896,7 @@ export type Database = {
           primary_color?: string
           review_request_message?: string
           review_request_subject?: string
+          show_request_access?: boolean
           stats_cars_purchased?: string | null
           stats_rating?: string | null
           stats_reviews_count?: string | null
@@ -861,6 +934,7 @@ export type Database = {
           primary_color?: string
           review_request_message?: string
           review_request_subject?: string
+          show_request_access?: boolean
           stats_cars_purchased?: string | null
           stats_rating?: string | null
           stats_reviews_count?: string | null
@@ -872,6 +946,38 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: []
+      }
+      staff_permission_assignments: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          id: string
+          permission_group_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          permission_group_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          permission_group_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_permission_assignments_permission_group_id_fkey"
+            columns: ["permission_group_id"]
+            isOneToOne: false
+            referencedRelation: "permission_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       submissions: {
         Row: {

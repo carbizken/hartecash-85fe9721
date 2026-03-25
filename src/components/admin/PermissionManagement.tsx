@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import {
-  Save, Loader2, Plus, Trash2, Edit2, Shield, Users, ChevronDown,
+  Save, Loader2, Plus, Trash2, Edit2, Shield, Users, ChevronDown, UserCog,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import StaffSectionEditor from "@/components/admin/StaffSectionEditor";
 
 interface PermissionGroup {
   id: string;
@@ -39,7 +40,15 @@ interface AccessRequest {
   group_name?: string;
 }
 
-const ALL_SECTIONS = [
+interface StaffMember {
+  user_id: string;
+  email: string | null;
+  display_name: string | null;
+  role: string;
+  individual_sections: string[];
+}
+
+export const ALL_SECTIONS = [
   { key: "submissions", label: "Submissions", group: "Pipeline" },
   { key: "appointments", label: "Appointments", group: "Pipeline" },
   { key: "staff", label: "Staff", group: "Team" },
@@ -60,29 +69,36 @@ const ALL_SECTIONS = [
   { key: "permissions", label: "Permissions", group: "Configuration" },
 ];
 
-const SECTION_GROUPS = ["Pipeline", "Team", "Compliance", "Configuration"];
+export const SECTION_GROUPS = ["Pipeline", "Team", "Compliance", "Configuration"];
 
 const PermissionManagement = () => {
   const { toast } = useToast();
   const [groups, setGroups] = useState<PermissionGroup[]>([]);
   const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRequestAccess, setShowRequestAccess] = useState(true);
 
-  // Dialog state
+  // Group dialog state
   const [editGroup, setEditGroup] = useState<PermissionGroup | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<PermissionGroup | null>(null);
-
-  // Edit form state
   const [formName, setFormName] = useState("");
   const [formDesc, setFormDesc] = useState("");
   const [formSections, setFormSections] = useState<string[]>([]);
   const [formDefault, setFormDefault] = useState(false);
 
-  const [groupsOpen, setGroupsOpen] = useState(true);
+  // Staff section editor
+  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
+
+  // Request: grant specific sections
+  const [grantingRequest, setGrantingRequest] = useState<AccessRequest | null>(null);
+  const [grantSections, setGrantSections] = useState<string[]>([]);
+
+  const [groupsOpen, setGroupsOpen] = useState(false);
   const [requestsOpen, setRequestsOpen] = useState(true);
+  const [staffOpen, setStaffOpen] = useState(true);
 
   const fetchData = async () => {
     setLoading(true);
@@ -94,7 +110,7 @@ const PermissionManagement = () => {
 
     setGroups((groupData as any[] || []) as PermissionGroup[]);
 
-    // Enrich requests with user email and group name
+    // Enrich requests
     const enriched: AccessRequest[] = [];
     for (const r of (reqData as any[] || [])) {
       const { data: profile } = await supabase.from("profiles").select("email").eq("user_id", r.user_id).maybeSingle();
@@ -107,11 +123,41 @@ const PermissionManagement = () => {
     }
     setRequests(enriched);
     setShowRequestAccess((configData as any)?.show_request_access ?? true);
+
+    // Fetch staff with their individual sections
+    await fetchStaffSections();
+
     setLoading(false);
+  };
+
+  const fetchStaffSections = async () => {
+    const { data: allStaff } = await supabase.rpc("get_all_staff");
+    if (!allStaff) return;
+
+    const staffWithSections: StaffMember[] = [];
+    for (const s of allStaff as any[]) {
+      // Get individual sections for this user
+      const { data: assignments } = await supabase
+        .from("staff_permission_assignments" as any)
+        .select("individual_sections")
+        .eq("user_id", s.user_id)
+        .is("permission_group_id", null)
+        .maybeSingle();
+
+      staffWithSections.push({
+        user_id: s.user_id,
+        email: s.email,
+        display_name: s.display_name,
+        role: s.role,
+        individual_sections: (assignments as any)?.individual_sections || [],
+      });
+    }
+    setStaffMembers(staffWithSections);
   };
 
   useEffect(() => { fetchData(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // --- Permission Groups ---
   const openCreate = () => {
     setIsNew(true);
     setFormName("");
@@ -133,7 +179,6 @@ const PermissionManagement = () => {
   const handleSaveGroup = async () => {
     if (!formName.trim()) return;
     setSaving(true);
-
     const payload = {
       name: formName.trim(),
       description: formDesc.trim(),
@@ -141,7 +186,6 @@ const PermissionManagement = () => {
       is_default: formDefault,
       updated_at: new Date().toISOString(),
     };
-
     if (isNew) {
       const { error } = await supabase.from("permission_groups" as any).insert(payload as any);
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -151,7 +195,6 @@ const PermissionManagement = () => {
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
       else toast({ title: "Group updated" });
     }
-
     setSaving(false);
     setEditGroup(null);
     fetchData();
@@ -165,38 +208,82 @@ const PermissionManagement = () => {
     fetchData();
   };
 
-  const handleRequest = async (req: AccessRequest, approve: boolean) => {
-    if (approve) {
-      // Add assignment
-      await supabase.from("staff_permission_assignments" as any).insert({
-        user_id: req.user_id,
-        permission_group_id: req.requested_group_id,
-      } as any);
-    }
+  // --- Access Requests ---
+  const openGrantDialog = (req: AccessRequest) => {
+    // Pre-select the sections from the requested group
+    const group = groups.find((g) => g.id === req.requested_group_id);
+    setGrantSections(group ? [...group.allowed_sections] : []);
+    setGrantingRequest(req);
+  };
 
+  const handleGrantRequest = async () => {
+    if (!grantingRequest) return;
+    // Save individual sections for this user
+    await saveIndividualSections(grantingRequest.user_id, grantSections);
+
+    // Mark request as approved
     await supabase.from("permission_access_requests" as any)
-      .update({ status: approve ? "approved" : "denied", reviewed_at: new Date().toISOString() } as any)
+      .update({ status: "approved", reviewed_at: new Date().toISOString() } as any)
+      .eq("id", grantingRequest.id);
+
+    toast({ title: "Access granted", description: `${grantSections.length} section${grantSections.length !== 1 ? "s" : ""} granted.` });
+
+    try {
+      await supabase.functions.invoke("send-notification", {
+        body: {
+          trigger_key: "access_request_response",
+          to_email: grantingRequest.user_email,
+          data: { status: "approved", group_name: `${grantSections.length} sections` },
+        },
+      });
+    } catch { /* non-critical */ }
+
+    setGrantingRequest(null);
+    fetchData();
+  };
+
+  const handleDenyRequest = async (req: AccessRequest) => {
+    await supabase.from("permission_access_requests" as any)
+      .update({ status: "denied", reviewed_at: new Date().toISOString() } as any)
       .eq("id", req.id);
-
-    toast({ title: approve ? "Access granted" : "Request denied" });
-
-    // Send email notification to the requesting user
+    toast({ title: "Request denied" });
     try {
       await supabase.functions.invoke("send-notification", {
         body: {
           trigger_key: "access_request_response",
           to_email: req.user_email,
-          data: {
-            status: approve ? "approved" : "denied",
-            group_name: req.group_name,
-          },
+          data: { status: "denied", group_name: req.group_name },
         },
       });
-    } catch {
-      // Non-critical, don't block
-    }
-
+    } catch { /* non-critical */ }
     fetchData();
+  };
+
+  // --- Individual sections ---
+  const saveIndividualSections = async (userId: string, sections: string[]) => {
+    // Upsert the individual sections row (permission_group_id = null)
+    const { data: existing } = await supabase
+      .from("staff_permission_assignments" as any)
+      .select("id")
+      .eq("user_id", userId)
+      .is("permission_group_id", null)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from("staff_permission_assignments" as any)
+        .update({ individual_sections: sections } as any)
+        .eq("id", (existing as any).id);
+    } else {
+      await supabase.from("staff_permission_assignments" as any)
+        .insert({ user_id: userId, permission_group_id: null, individual_sections: sections } as any);
+    }
+  };
+
+  const handleSaveStaffSections = async (userId: string, sections: string[]) => {
+    await saveIndividualSections(userId, sections);
+    toast({ title: "Access updated" });
+    setEditingStaff(null);
+    fetchStaffSections();
   };
 
   const toggleShowRequestAccess = async (val: boolean) => {
@@ -229,6 +316,8 @@ const PermissionManagement = () => {
     );
   }
 
+  const nonAdminStaff = staffMembers.filter((s) => s.role !== "admin");
+
   return (
     <div className="space-y-4 max-w-4xl">
       <div className="flex items-center justify-between">
@@ -236,15 +325,15 @@ const PermissionManagement = () => {
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             <Shield className="w-5 h-5 text-primary" /> Permission Management
           </h2>
-          <p className="text-xs text-muted-foreground">Create permission groups and control what each staff member can access.</p>
+          <p className="text-xs text-muted-foreground">Toggle individual section access per employee, or use groups for bulk assignment.</p>
         </div>
       </div>
 
-      {/* Toggle: Show Request Access to employees */}
+      {/* Toggle: Show Request Access */}
       <div className="flex items-center justify-between bg-muted/50 rounded-lg p-4">
         <div>
           <p className="text-sm font-semibold text-foreground">Allow employees to request access</p>
-          <p className="text-xs text-muted-foreground">When enabled, non-admin staff see a "Request Access" option for sections they can't access.</p>
+          <p className="text-xs text-muted-foreground">When enabled, non-admin staff see a "Request Access" option.</p>
         </div>
         <Switch checked={showRequestAccess} onCheckedChange={toggleShowRequestAccess} />
       </div>
@@ -274,10 +363,10 @@ const PermissionManagement = () => {
                   </p>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  <Button size="sm" onClick={() => handleRequest(req, true)} className="gap-1">
-                    Approve
+                  <Button size="sm" onClick={() => openGrantDialog(req)} className="gap-1">
+                    <UserCog className="w-3.5 h-3.5" /> Grant Sections
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleRequest(req, false)}>
+                  <Button size="sm" variant="outline" onClick={() => handleDenyRequest(req)}>
                     Deny
                   </Button>
                 </div>
@@ -287,12 +376,52 @@ const PermissionManagement = () => {
         </Collapsible>
       )}
 
+      {/* Staff Access — individual section toggles */}
+      <Collapsible open={staffOpen} onOpenChange={setStaffOpen}>
+        <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-2.5 px-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
+          <ChevronDown className={`w-4 h-4 transition-transform ${staffOpen ? "" : "-rotate-90"}`} />
+          <UserCog className="w-4 h-4 text-primary" />
+          <span className="font-semibold text-sm">Staff Access</span>
+          <span className="text-xs text-muted-foreground ml-auto mr-2">{nonAdminStaff.length} employees</span>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-3 space-y-2 px-1">
+          {nonAdminStaff.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">No non-admin staff members yet.</p>
+          ) : (
+            nonAdminStaff.map((member) => (
+              <div key={member.user_id} className="bg-card border border-border rounded-lg p-4 flex items-start gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{member.display_name || member.email || "Unknown"}</p>
+                  {member.display_name && member.email && (
+                    <p className="text-xs text-muted-foreground">{member.email}</p>
+                  )}
+                  {member.individual_sections.length > 0 ? (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {member.individual_sections.map((s) => (
+                        <Badge key={s} variant="outline" className="text-[10px]">
+                          {ALL_SECTIONS.find((sec) => sec.key === s)?.label || s}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground/60 mt-1 italic">Using default access</p>
+                  )}
+                </div>
+                <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={() => setEditingStaff(member)}>
+                  <UserCog className="w-3.5 h-3.5" /> Manage Access
+                </Button>
+              </div>
+            ))
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+
       {/* Permission Groups */}
       <Collapsible open={groupsOpen} onOpenChange={setGroupsOpen}>
         <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-2.5 px-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
           <ChevronDown className={`w-4 h-4 transition-transform ${groupsOpen ? "" : "-rotate-90"}`} />
           <Shield className="w-4 h-4 text-primary" />
-          <span className="font-semibold text-sm">Permission Groups</span>
+          <span className="font-semibold text-sm">Permission Groups (Templates)</span>
           <span className="text-xs text-muted-foreground ml-auto mr-2">{groups.length} groups</span>
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-3 space-y-2 px-1">
@@ -328,7 +457,7 @@ const PermissionManagement = () => {
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Edit/Create Dialog */}
+      {/* Edit/Create Group Dialog */}
       <Dialog open={!!editGroup} onOpenChange={(open) => !open && setEditGroup(null)}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -341,13 +470,12 @@ const PermissionManagement = () => {
             </div>
             <div>
               <Label className="text-xs">Description</Label>
-              <Textarea value={formDesc} onChange={(e) => setFormDesc(e.target.value)} placeholder="Brief description of this access level" rows={2} />
+              <Textarea value={formDesc} onChange={(e) => setFormDesc(e.target.value)} placeholder="Brief description" rows={2} />
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={formDefault} onCheckedChange={setFormDefault} id="default-toggle" />
-              <Label htmlFor="default-toggle" className="text-xs">Default group (auto-assigned to new staff without explicit assignment)</Label>
+              <Label htmlFor="default-toggle" className="text-xs">Default group (auto-assigned to new staff)</Label>
             </div>
-
             <div>
               <Label className="text-xs mb-2 block">Allowed Sections</Label>
               <div className="space-y-3">
@@ -366,10 +494,7 @@ const PermissionManagement = () => {
                       <div className="grid grid-cols-2 gap-1.5">
                         {secs.map((s) => (
                           <label key={s.key} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-2 py-1 transition-colors">
-                            <Checkbox
-                              checked={formSections.includes(s.key)}
-                              onCheckedChange={() => toggleSection(s.key)}
-                            />
+                            <Checkbox checked={formSections.includes(s.key)} onCheckedChange={() => toggleSection(s.key)} />
                             {s.label}
                           </label>
                         ))}
@@ -390,13 +515,51 @@ const PermissionManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirmation */}
+      {/* Staff Section Editor Dialog */}
+      {editingStaff && (
+        <StaffSectionEditor
+          open={!!editingStaff}
+          onOpenChange={(open) => !open && setEditingStaff(null)}
+          staffName={editingStaff.display_name || editingStaff.email || "Employee"}
+          currentSections={editingStaff.individual_sections}
+          groups={groups}
+          onSave={(sections) => handleSaveStaffSections(editingStaff.user_id, sections)}
+        />
+      )}
+
+      {/* Grant Sections for Access Request */}
+      {grantingRequest && (
+        <StaffSectionEditor
+          open={!!grantingRequest}
+          onOpenChange={(open) => !open && setGrantingRequest(null)}
+          staffName={grantingRequest.user_email || "Employee"}
+          currentSections={grantSections}
+          groups={groups}
+          onSave={async (sections) => {
+            await saveIndividualSections(grantingRequest.user_id, sections);
+            await supabase.from("permission_access_requests" as any)
+              .update({ status: "approved", reviewed_at: new Date().toISOString() } as any)
+              .eq("id", grantingRequest.id);
+            toast({ title: "Access granted", description: `${sections.length} section${sections.length !== 1 ? "s" : ""} granted.` });
+            try {
+              await supabase.functions.invoke("send-notification", {
+                body: { trigger_key: "access_request_response", to_email: grantingRequest.user_email, data: { status: "approved", group_name: `${sections.length} sections` } },
+              });
+            } catch { /* non-critical */ }
+            setGrantingRequest(null);
+            fetchData();
+          }}
+          title={`Grant Access — ${grantingRequest.user_email}`}
+        />
+      )}
+
+      {/* Delete group confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete "{deleteTarget?.name}"?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the permission group and unassign all staff members from it. This action cannot be undone.
+              This will remove the permission group. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

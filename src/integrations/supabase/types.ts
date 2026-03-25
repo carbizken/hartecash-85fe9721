@@ -952,21 +952,24 @@ export type Database = {
           assigned_by: string | null
           created_at: string
           id: string
-          permission_group_id: string
+          individual_sections: string[]
+          permission_group_id: string | null
           user_id: string
         }
         Insert: {
           assigned_by?: string | null
           created_at?: string
           id?: string
-          permission_group_id: string
+          individual_sections?: string[]
+          permission_group_id?: string | null
           user_id: string
         }
         Update: {
           assigned_by?: string | null
           created_at?: string
           id?: string
-          permission_group_id?: string
+          individual_sections?: string[]
+          permission_group_id?: string | null
           user_id?: string
         }
         Relationships: [

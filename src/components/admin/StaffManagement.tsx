@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Shield, Info, Phone, Save, UserPlus } from "lucide-react";
+import { Trash2, Shield, Info, Phone, Save, UserPlus, UserCog } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import AvatarCropDialog from "./AvatarCropDialog";
+import StaffSectionEditor from "./StaffSectionEditor";
+import { ALL_SECTIONS } from "./PermissionManagement";
 
 interface StaffMember {
   user_id: string;
@@ -73,10 +75,14 @@ const StaffManagement = () => {
   const [addRole, setAddRole] = useState("sales_bdc");
   const [addDisplayName, setAddDisplayName] = useState("");
   const [adding, setAdding] = useState(false);
+  const [permGroups, setPermGroups] = useState<{ id: string; name: string; allowed_sections: string[] }[]>([]);
+  const [editingSections, setEditingSections] = useState<StaffMember | null>(null);
+  const [staffSections, setStaffSections] = useState<Record<string, string[]>>({});
   const { toast } = useToast();
 
   useEffect(() => {
     fetchStaff();
+    fetchPermGroups();
   }, []);
 
   const fetchStaff = async () => {
@@ -85,9 +91,49 @@ const StaffManagement = () => {
     if (error) {
       toast({ title: "Error", description: "Failed to load staff.", variant: "destructive" });
     } else {
-      setStaff((data || []) as unknown as StaffMember[]);
+      const staffList = (data || []) as unknown as StaffMember[];
+      setStaff(staffList);
+      // Fetch individual sections for all staff
+      const sectionMap: Record<string, string[]> = {};
+      for (const s of staffList) {
+        const { data: assignment } = await supabase
+          .from("staff_permission_assignments" as any)
+          .select("individual_sections")
+          .eq("user_id", s.user_id)
+          .is("permission_group_id", null)
+          .maybeSingle();
+        sectionMap[s.user_id] = (assignment as any)?.individual_sections || [];
+      }
+      setStaffSections(sectionMap);
     }
     setLoading(false);
+  };
+
+  const fetchPermGroups = async () => {
+    const { data } = await supabase.from("permission_groups" as any).select("id, name, allowed_sections").order("name");
+    setPermGroups((data as any[] || []).map((g: any) => ({ id: g.id, name: g.name, allowed_sections: g.allowed_sections })));
+  };
+
+  const handleSaveStaffSections = async (userId: string, sections: string[]) => {
+    const { data: existing } = await supabase
+      .from("staff_permission_assignments" as any)
+      .select("id")
+      .eq("user_id", userId)
+      .is("permission_group_id", null)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from("staff_permission_assignments" as any)
+        .update({ individual_sections: sections } as any)
+        .eq("id", (existing as any).id);
+    } else {
+      await supabase.from("staff_permission_assignments" as any)
+        .insert({ user_id: userId, permission_group_id: null, individual_sections: sections } as any);
+    }
+
+    setStaffSections((prev) => ({ ...prev, [userId]: sections }));
+    toast({ title: "Access updated" });
+    setEditingSections(null);
   };
 
   const handleRoleChange = async (member: StaffMember, newRole: string) => {
@@ -383,20 +429,48 @@ const StaffManagement = () => {
                   </Select>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemove(member)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" /> Remove
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    {member.role !== "admin" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingSections(member)}
+                        className="gap-1 text-xs"
+                      >
+                        <UserCog className="w-3.5 h-3.5" />
+                        Access
+                        {(staffSections[member.user_id]?.length || 0) > 0 && (
+                          <span className="text-[10px] bg-primary/10 text-primary rounded-full px-1.5">{staffSections[member.user_id].length}</span>
+                        )}
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemove(member)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" /> Remove
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Staff Section Editor Dialog */}
+      {editingSections && (
+        <StaffSectionEditor
+          open={!!editingSections}
+          onOpenChange={(open) => !open && setEditingSections(null)}
+          staffName={editingSections.display_name || editingSections.email || "Employee"}
+          currentSections={staffSections[editingSections.user_id] || []}
+          groups={permGroups}
+          onSave={(sections) => handleSaveStaffSections(editingSections.user_id, sections)}
+        />
+      )}
     </div>
   );
 };

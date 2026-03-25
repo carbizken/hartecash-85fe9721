@@ -75,6 +75,9 @@ const StaffManagement = () => {
   const [addRole, setAddRole] = useState("sales_bdc");
   const [addDisplayName, setAddDisplayName] = useState("");
   const [adding, setAdding] = useState(false);
+  const [permGroups, setPermGroups] = useState<{ id: string; name: string; allowed_sections: string[] }[]>([]);
+  const [editingSections, setEditingSections] = useState<StaffMember | null>(null);
+  const [staffSections, setStaffSections] = useState<Record<string, string[]>>({});
   const { toast } = useToast();
 
   useEffect(() => {

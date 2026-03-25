@@ -35,6 +35,9 @@ import FollowUpLog from "@/components/admin/FollowUpLog";
 import NotificationLog from "@/components/admin/NotificationLog";
 import ChangelogManagement from "@/components/admin/ChangelogManagement";
 import AboutPageConfig from "@/components/admin/AboutPageConfig";
+import PermissionManagement from "@/components/admin/PermissionManagement";
+import { useStaffPermissions } from "@/hooks/useStaffPermissions";
+import RequestAccessDialog from "@/components/admin/RequestAccessDialog";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -231,6 +234,10 @@ const AdminDashboard = () => {
   const [optOutStatus, setOptOutStatus] = useState<{ email: boolean; sms: boolean }>({ email: false, sms: false });
   const [activeSection, setActiveSection] = useState("submissions");
   const [dealerLocations, setDealerLocations] = useState<DealerLocation[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [permissionRequestCount, setPermissionRequestCount] = useState(0);
+  const [showRequestAccessDialog, setShowRequestAccessDialog] = useState(false);
+  const [showRequestAccessToggle, setShowRequestAccessToggle] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -247,6 +254,7 @@ const AdminDashboard = () => {
   const canDelete = userRole === "admin";
   const canManageAccess = userRole === "admin";
   const canUpdateStatus = true; // all staff
+  const { allowedSections, hasAccess } = useStaffPermissions(userId, canManageAccess);
 
   const auditLabel = userName
     ? `${userName} — ${ROLE_LABELS[userRole] || userRole}`
@@ -304,6 +312,7 @@ const AdminDashboard = () => {
       navigate("/admin/login");
     } else {
       setUserRole(roleData.role);
+      setUserId(session.user.id);
       // Fetch display name for audit trail
       const { data: profileData } = await supabase
         .from("profiles")
@@ -315,6 +324,23 @@ const AdminDashboard = () => {
       } else {
         setUserName(session.user.email || "");
       }
+
+      // Fetch permission request count for admins
+      if (roleData.role === "admin") {
+        const { count } = await supabase
+          .from("permission_access_requests" as any)
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending");
+        setPermissionRequestCount(count || 0);
+      }
+
+      // Fetch show_request_access toggle
+      const { data: configData } = await supabase
+        .from("site_config")
+        .select("show_request_access")
+        .eq("dealership_id", "default")
+        .maybeSingle();
+      setShowRequestAccessToggle((configData as any)?.show_request_access ?? true);
     }
   };
 
@@ -1226,6 +1252,10 @@ const AdminDashboard = () => {
         submissionCount={total}
         appointmentCount={appointments.length}
         pendingRequestCount={pendingRequests.length}
+        permissionRequestCount={permissionRequestCount}
+        allowedSections={allowedSections}
+        showRequestAccess={showRequestAccessToggle && !canManageAccess}
+        onRequestAccess={() => setShowRequestAccessDialog(true)}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -1760,9 +1790,21 @@ const AdminDashboard = () => {
           {/* About Page */}
           {activeSection === "about-page" && canManageAccess && <AboutPageConfig />}
 
+          {/* Permissions */}
+          {activeSection === "permissions" && canManageAccess && <PermissionManagement />}
+
         </div>
       </div>
       </div>
+
+      {/* Request Access Dialog (for non-admin staff) */}
+      {userId && (
+        <RequestAccessDialog
+          open={showRequestAccessDialog}
+          onOpenChange={setShowRequestAccessDialog}
+          userId={userId}
+        />
+      )}
 
       {/* Detail Modal */}
       <Dialog open={!!selected} onOpenChange={() => { setSelected(null); setPhotos([]); setDocs([]); }}>

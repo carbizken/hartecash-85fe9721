@@ -65,6 +65,11 @@ const DEFAULTS: SiteConfig = {
   enable_animations: false,
   use_animated_calculating: false,
   enable_dl_ocr: false,
+  about_hero_headline: "Four Generations. One Promise.",
+  about_hero_subtext: "Since 1951, the Harte family has been helping Connecticut drivers — not just sell and buy cars, but feel good about the experience.",
+  about_story: "",
+  about_milestones: [],
+  about_values: [],
 };
 
 let cachedConfig: SiteConfig | null = null;

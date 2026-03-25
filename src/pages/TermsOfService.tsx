@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import harteLogo from "@/assets/harte-logo-white.png";
+import SEO from "@/components/SEO";
 
 const TermsOfService = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title="Terms of Service | Harte Auto Group"
+        description="Review the terms and conditions for using hartecash.com and Harte Auto Group's vehicle appraisal and purchasing services."
+        path="/terms"
+      />
       <div className="bg-primary text-primary-foreground px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <Link to="/" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">

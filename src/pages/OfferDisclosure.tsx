@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, AlertTriangle, ChevronDown } from "lucide-react";
 import harteLogo from "@/assets/harte-logo-white.png";
 import SiteFooter from "@/components/SiteFooter";
+import SEO from "@/components/SEO";
 
 // ─── Factor cards ────────────────────────────────────────────────────────────
 const factors = [
@@ -300,6 +301,11 @@ const OfferDisclosure = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title="How We Calculate Your Offer | Harte Auto Group"
+        description="Full transparency on how Harte Auto Group determines your vehicle's cash offer — inspection factors, valuation methodology, and price guarantee details."
+        path="/disclosure"
+      />
       {/* Hero */}
       <div className="bg-gradient-to-br from-[hsl(210,100%,15%)] via-primary to-[hsl(220,80%,18%)] text-primary-foreground px-6 py-16 md:py-20 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_-10%,rgba(220,40,40,0.18)_0%,transparent_65%)] pointer-events-none" />

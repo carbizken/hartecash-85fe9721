@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { CalendarDays, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import harteLogo from "@/assets/harte-logo-white.png";
+import SEO from "@/components/SEO";
 
 interface DealerLocation {
   id: string;
@@ -267,6 +268,11 @@ const ScheduleVisit = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title="Schedule Your Visit | Harte Auto Group"
+        description="Book an appointment to sell or trade in your vehicle at Harte Auto Group. Pick a time and location that works for you."
+        path="/schedule"
+      />
       <div className="bg-primary text-primary-foreground px-6 py-4">
         <div className="max-w-lg mx-auto flex items-center gap-3">
           {submissionToken && (

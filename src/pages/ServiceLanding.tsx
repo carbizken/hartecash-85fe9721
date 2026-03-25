@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { logConsent } from "@/lib/consent";
 import serviceLogo from "@/assets/harte-service-logo.png";
+import SEO from "@/components/SEO";
 
 interface VehicleInfo {
   year: string;
@@ -297,6 +298,12 @@ const ServiceLanding = () => {
 
   return (
     <div className="min-h-screen bg-[hsl(222,47%,5%)] text-[hsl(210,40%,98%)]">
+      <SEO
+        title="Service Customer Trade-In Value | Harte Auto Group"
+        description="Already here for service? Find out what your car is worth in 60 seconds. Get a guaranteed cash offer or trade-in value from Harte Auto Group."
+        path="/service"
+        noindex
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[hsl(222,47%,5%)]/90 backdrop-blur-md border-b border-[hsl(217,33%,17%)] overflow-visible">
         <div className="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between">

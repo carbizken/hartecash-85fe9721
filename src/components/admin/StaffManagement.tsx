@@ -459,6 +459,18 @@ const StaffManagement = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Staff Section Editor Dialog */}
+      {editingSections && (
+        <StaffSectionEditor
+          open={!!editingSections}
+          onOpenChange={(open) => !open && setEditingSections(null)}
+          staffName={editingSections.display_name || editingSections.email || "Employee"}
+          currentSections={staffSections[editingSections.user_id] || []}
+          groups={permGroups}
+          onSave={(sections) => handleSaveStaffSections(editingSections.user_id, sections)}
+        />
+      )}
     </div>
   );
 };

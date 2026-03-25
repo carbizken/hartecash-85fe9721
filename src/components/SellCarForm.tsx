@@ -27,9 +27,10 @@ const stepVariants = {
 
 interface SellCarFormProps {
   leadSource?: string;
+  variant?: "default" | "split";
 }
 
-const SellCarForm = ({ leadSource = "inventory" }: SellCarFormProps) => {
+const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarFormProps) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);

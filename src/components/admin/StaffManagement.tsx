@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Shield, Info, Phone, Save, UserPlus } from "lucide-react";
+import { Trash2, Shield, Info, Phone, Save, UserPlus, UserCog } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import AvatarCropDialog from "./AvatarCropDialog";
+import StaffSectionEditor from "./StaffSectionEditor";
+import { ALL_SECTIONS } from "./PermissionManagement";
 
 interface StaffMember {
   user_id: string;

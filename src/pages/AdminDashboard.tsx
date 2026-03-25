@@ -311,6 +311,7 @@ const AdminDashboard = () => {
       navigate("/admin/login");
     } else {
       setUserRole(roleData.role);
+      setUserId(session.user.id);
       // Fetch display name for audit trail
       const { data: profileData } = await supabase
         .from("profiles")
@@ -322,6 +323,23 @@ const AdminDashboard = () => {
       } else {
         setUserName(session.user.email || "");
       }
+
+      // Fetch permission request count for admins
+      if (roleData.role === "admin") {
+        const { count } = await supabase
+          .from("permission_access_requests" as any)
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending");
+        setPermissionRequestCount(count || 0);
+      }
+
+      // Fetch show_request_access toggle
+      const { data: configData } = await supabase
+        .from("site_config")
+        .select("show_request_access")
+        .eq("dealership_id", "default")
+        .maybeSingle();
+      setShowRequestAccessToggle((configData as any)?.show_request_access ?? true);
     }
   };
 

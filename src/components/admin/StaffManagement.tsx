@@ -82,6 +82,7 @@ const StaffManagement = () => {
 
   useEffect(() => {
     fetchStaff();
+    fetchPermGroups();
   }, []);
 
   const fetchStaff = async () => {

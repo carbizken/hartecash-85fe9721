@@ -34,6 +34,12 @@ const Sitemap = () => {
         { label: "Offer Disclosure", to: "/disclosure" },
       ],
     },
+    {
+      title: "Employee",
+      links: [
+        { label: "Admin Login", to: "/admin" },
+      ],
+    },
   ];
 
   return (

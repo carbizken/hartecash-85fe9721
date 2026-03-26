@@ -36,6 +36,7 @@ interface NotificationConfig {
   status_change_channels: string[];
   staff_customer_accepted_channels: string[];
   staff_deal_completed_channels: string[];
+  abandoned_lead_channels: string[];
   // Customer triggers
   notify_customer_offer_accepted: boolean;
   customer_offer_accepted_channels: string[];

@@ -55,6 +55,56 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
   const [selectedAddDeducts, setSelectedAddDeducts] = useState<string[]>([]);
   const [showTrimStep, setShowTrimStep] = useState(false);
 
+  // ── Abandoned form auto-save ──
+  // Save a partial submission when the user has contact info but leaves
+  const savePartialRef = useRef<() => void>();
+  savePartialRef.current = () => {
+    if (submittedRef.current) return;
+    const hasContact = formData.email.trim().length > 3 && formData.email.includes("@");
+    if (!hasContact) return;
+
+    const payload = {
+      progress_status: "partial",
+      name: formData.name || null,
+      phone: formData.phone || null,
+      email: formData.email || null,
+      zip: formData.zip || null,
+      plate: formData.plate || null,
+      state: formData.state || null,
+      vin: formData.vin || null,
+      mileage: formData.mileage || null,
+      vehicle_year: vehicleInfo?.year || null,
+      vehicle_make: vehicleInfo?.make || null,
+      vehicle_model: vehicleInfo?.model || null,
+      exterior_color: formData.exteriorColor || null,
+      overall_condition: formData.overallCondition || null,
+      lead_source: leadSource,
+    };
+
+    if (partialIdRef.current) {
+      // Update existing partial
+      supabase.from("submissions").update(payload as any).eq("id", partialIdRef.current).then(() => {});
+    } else {
+      // Insert new partial
+      supabase.from("submissions").insert(payload as any).select("id").maybeSingle().then(({ data }) => {
+        if (data) partialIdRef.current = data.id;
+      });
+    }
+  };
+
+  useEffect(() => {
+    const handleBeforeUnload = () => savePartialRef.current?.();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") savePartialRef.current?.();
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   useEffect(() => {
     if (step > 0 && formRef.current) {
       const headerHeight = document.querySelector('header')?.getBoundingClientRect().height || 80;

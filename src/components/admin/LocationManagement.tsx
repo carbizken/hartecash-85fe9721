@@ -102,7 +102,7 @@ const LocationManagement = () => {
     for (const loc of locations) {
       const { error } = await supabase
         .from("dealership_locations" as any)
-        .update({ name: loc.name, city: loc.city, state: loc.state, address: loc.address, sort_order: loc.sort_order })
+        .update({ name: loc.name, city: loc.city, state: loc.state, address: loc.address, sort_order: loc.sort_order, zip_codes: loc.zip_codes || [], oem_brands: loc.oem_brands || [] })
         .eq("id", loc.id);
       if (error) hasError = true;
     }

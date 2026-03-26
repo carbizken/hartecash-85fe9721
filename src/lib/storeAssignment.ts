@@ -9,6 +9,8 @@ interface LocationWithZips {
   oem_brands: string[];
   center_zip: string;
   coverage_radius_miles: number;
+  all_brands: boolean;
+  excluded_oem_brands: string[];
 }
 
 let cachedLocations: LocationWithZips[] | null = null;

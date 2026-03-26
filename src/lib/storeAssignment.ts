@@ -73,7 +73,8 @@ export async function findStoreByZip(customerZip: string): Promise<string | null
  */
 export async function findStoreByBrand(vehicleMake: string): Promise<string | null> {
   if (!vehicleMake) return null;
-  const locations = await getLocations();
+  const allLocations = await getLocations();
+  const locations = getAvailableLocations(allLocations);
   const make = vehicleMake.toLowerCase();
 
   // First try specific brand match (locations with all_brands OFF)

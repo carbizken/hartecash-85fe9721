@@ -19,7 +19,7 @@ async function getLocations(): Promise<LocationWithZips[]> {
   if (!cachedLocations) {
     const { data } = await supabase
       .from("dealership_locations")
-      .select("id, name, city, state, zip_codes, oem_brands, center_zip, coverage_radius_miles")
+      .select("id, name, city, state, zip_codes, oem_brands, center_zip, coverage_radius_miles, all_brands, excluded_oem_brands")
       .eq("is_active", true)
       .order("sort_order");
     cachedLocations = (data as any) || [];

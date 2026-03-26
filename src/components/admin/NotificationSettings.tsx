@@ -27,6 +27,7 @@ interface NotificationConfig {
   notify_status_change: boolean;
   notify_staff_customer_accepted: boolean;
   notify_staff_deal_completed: boolean;
+  notify_abandoned_lead: boolean;
   new_submission_channels: string[];
   hot_lead_channels: string[];
   appointment_channels: string[];

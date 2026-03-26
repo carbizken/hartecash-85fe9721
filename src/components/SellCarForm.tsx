@@ -42,6 +42,8 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [honeypot, setHoneypot] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
+  const partialIdRef = useRef<string | null>(null);
+  const submittedRef = useRef(false);
   const { toast } = useToast();
   const { config } = useSiteConfig();
   const { formConfig } = useFormConfig();

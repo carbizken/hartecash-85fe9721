@@ -29,6 +29,7 @@ interface AdminSidebarProps {
   allowedSections?: string[] | null; // null = unrestricted (admin)
   showRequestAccess?: boolean;
   onRequestAccess?: (sectionKey: string) => void;
+  locationCount?: number;
 }
 
 const AdminSidebar = ({

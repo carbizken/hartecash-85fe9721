@@ -20,6 +20,8 @@ interface Location {
   show_in_scheduling: boolean;
   zip_codes: string[];
   oem_brands: string[];
+  center_zip: string;
+  coverage_radius_miles: number;
 }
 
 const LocationManagement = () => {

@@ -1213,6 +1213,15 @@ const AdminDashboard = () => {
     // Source filter
     if (sourceFilter && sourceFilter !== "__all__" && s.lead_source !== sourceFilter) return false;
 
+    // Store filter
+    if (storeFilter && storeFilter !== "__all__") {
+      if (storeFilter === "__unassigned__") {
+        if (s.store_location_id) return false;
+      } else {
+        if (s.store_location_id !== storeFilter) return false;
+      }
+    }
+
     // Date range filter
     if (dateRangeFilter.from || dateRangeFilter.to) {
       const submissionDate = new Date(s.created_at).toISOString().split('T')[0];

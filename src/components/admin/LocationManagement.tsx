@@ -31,6 +31,8 @@ const LocationManagement = () => {
   const [newCity, setNewCity] = useState("");
   const [newState, setNewState] = useState("CT");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [zipInputs, setZipInputs] = useState<Record<string, string>>({});
+  const [brandInputs, setBrandInputs] = useState<Record<string, string>>({});
 
   const fetchLocations = async () => {
     const { data, error } = await supabase

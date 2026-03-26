@@ -122,6 +122,7 @@ interface Submission {
   address_city: string | null;
   address_state: string | null;
   lead_source: string;
+  store_location_id: string | null;
 }
 
 const PAGE_SIZE = 20;

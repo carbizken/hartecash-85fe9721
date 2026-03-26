@@ -107,6 +107,7 @@ const STAFF_TRIGGERS = [
   { key: "status_change", label: "Status Change", desc: "When a submission status is updated", channelKey: "status_change_channels", icon: Bell },
   { key: "staff_customer_accepted", label: "Customer Accepted Offer", desc: "Alert staff immediately when a customer clicks 'Accept Offer'", channelKey: "staff_customer_accepted_channels", icon: Handshake },
   { key: "staff_deal_completed", label: "Deal Completed", desc: "When a submission reaches 'Purchase Complete' status", channelKey: "staff_deal_completed_channels", icon: PartyPopper },
+  { key: "abandoned_lead", label: "Abandoned Lead Alert", desc: "When a customer provides contact info but leaves before completing the form (checked every 15 min)", channelKey: "abandoned_lead_channels", icon: AlertTriangle },
 ] as const;
 
 const CUSTOMER_TRIGGERS = [

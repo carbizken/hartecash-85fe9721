@@ -202,6 +202,7 @@ const AdminDashboard = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [sourceFilter, setSourceFilter] = useState<string>("");
+  const [storeFilter, setStoreFilter] = useState<string>("");
   const [dateRangeFilter, setDateRangeFilter] = useState<{ from: string; to: string }>({ from: "", to: "" });
   const [selected, setSelected] = useState<Submission | null>(null);
   const [photos, setPhotos] = useState<{ url: string; name: string }[]>([]);

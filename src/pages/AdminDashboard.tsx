@@ -2378,6 +2378,25 @@ const AdminDashboard = () => {
                 </div>
               )}
 
+              {/* Assigned Store */}
+              <div data-print-section className="bg-muted/40 rounded-lg p-4">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">
+                  <MapPin className="w-4 h-4 inline mr-1" />Assigned Store
+                </h3>
+                <Select
+                  value={selected.store_location_id || "unassigned"}
+                  onValueChange={(v) => setSelected({ ...selected, store_location_id: v === "unassigned" ? null : v })}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select store" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">— Not Assigned —</SelectItem>
+                    {dealerLocations.map(loc => (
+                      <SelectItem key={loc.id} value={loc.id}>{loc.name} — {loc.city}, {loc.state}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Internal Notes */}
               <div data-print-section className="bg-muted/40 rounded-lg p-4">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">

@@ -77,6 +77,11 @@ const DEFAULT_CONFIG: SiteConfig = {
   enable_dl_ocr: false,
   cta_offer_color: "",
   cta_accept_color: "",
+  assign_customer_picks: false,
+  assign_auto_zip: true,
+  assign_oem_brand_match: false,
+  assign_buying_center: false,
+  buying_center_location_id: null,
 };
 
 interface SectionProps {

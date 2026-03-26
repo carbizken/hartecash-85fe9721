@@ -52,6 +52,7 @@ const AdminSidebar = ({
   const mainItems = [
     { key: "submissions", label: "Submissions", icon: Inbox, badge: submissionCount > 0 ? String(submissionCount) : undefined },
     { key: "appointments", label: "Appointments", icon: CalendarDays, badge: appointmentCount > 0 ? String(appointmentCount) : undefined },
+    { key: "executive", label: "Executive HUD", icon: BarChart3 },
   ].filter((item) => isAllowed(item.key));
 
   const teamItems = canManageAccess

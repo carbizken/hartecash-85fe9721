@@ -41,6 +41,11 @@ interface SiteConfig {
   enable_dl_ocr: boolean;
   cta_offer_color: string;
   cta_accept_color: string;
+  assign_customer_picks: boolean;
+  assign_auto_zip: boolean;
+  assign_oem_brand_match: boolean;
+  assign_buying_center: boolean;
+  buying_center_location_id: string | null;
 }
 
 const DEFAULT_CONFIG: SiteConfig = {

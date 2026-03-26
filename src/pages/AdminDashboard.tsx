@@ -1332,14 +1332,17 @@ const AdminDashboard = () => {
                 { label: "All", value: "__all__", icon: undefined },
                 { label: "Abandoned", value: "partial", icon: <AlertTriangle className="w-3 h-3" /> },
                 { label: "New", value: "new", icon: undefined },
+                { label: "My Queue", value: "__mine__", icon: <UserCheck className="w-3 h-3" /> },
                 { label: "Hot Leads", value: "__hot__", icon: <TrendingUp className="w-3 h-3" /> },
                 { label: "Dead", value: "dead_lead", icon: <XCircle className="w-3 h-3" /> },
               ].map(chip => {
                 const isActive = chip.value === "__hot__"
                   ? statusFilter === "__hot__"
-                  : chip.value === "__all__"
-                    ? (!statusFilter || statusFilter === "__all__")
-                    : statusFilter === chip.value;
+                  : chip.value === "__mine__"
+                    ? statusFilter === "__mine__"
+                    : chip.value === "__all__"
+                      ? (!statusFilter || statusFilter === "__all__")
+                      : statusFilter === chip.value;
                 return (
                   <button
                     key={chip.value}
@@ -1352,7 +1355,9 @@ const AdminDashboard = () => {
                             ? "bg-destructive/10 border-destructive/40 text-destructive"
                             : chip.value === "__hot__"
                               ? "bg-orange-500/15 border-orange-500/40 text-orange-700"
-                              : "bg-primary/10 border-primary/40 text-primary"
+                              : chip.value === "__mine__"
+                                ? "bg-blue-500/15 border-blue-500/40 text-blue-700"
+                                : "bg-primary/10 border-primary/40 text-primary"
                         : "bg-muted/50 border-border text-muted-foreground hover:bg-muted"
                     }`}
                   >
@@ -1361,6 +1366,11 @@ const AdminDashboard = () => {
                     {chip.value === "partial" && (
                       <span className="ml-0.5 bg-amber-500/20 px-1.5 rounded-full text-[10px]">
                         {submissions.filter(s => s.progress_status === "partial").length}
+                      </span>
+                    )}
+                    {chip.value === "__mine__" && (
+                      <span className="ml-0.5 bg-blue-500/20 px-1.5 rounded-full text-[10px]">
+                        {submissions.filter(s => s.status_updated_by === auditLabel || s.appraised_by?.includes(userName)).length}
                       </span>
                     )}
                   </button>

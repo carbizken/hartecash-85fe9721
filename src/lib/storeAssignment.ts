@@ -12,6 +12,7 @@ interface LocationWithZips {
   all_brands: boolean;
   excluded_oem_brands: string[];
   temporarily_offline: boolean;
+  use_bdc: boolean;
 }
 
 let cachedLocations: LocationWithZips[] | null = null;

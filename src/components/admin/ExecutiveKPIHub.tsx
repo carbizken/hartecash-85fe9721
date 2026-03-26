@@ -107,15 +107,17 @@ const ExecutiveKPIHub = ({ standalone = false }: ExecutiveKPIHubProps) => {
     const total = filteredSubs.length;
     const completed = filteredSubs.filter(s => COMPLETED.includes(s.progress_status)).length;
     const dead = filteredSubs.filter(s => DEAD.includes(s.progress_status)).length;
-    const active = total - completed - dead;
+    const abandoned = filteredSubs.filter(s => s.progress_status === "partial").length;
+    const active = total - completed - dead - abandoned;
     const convRate = total > 0 ? Math.round((completed / total) * 1000) / 10 : 0;
+    const dropOffRate = total > 0 ? Math.round((abandoned / total) * 1000) / 10 : 0;
 
     let pipeline = 0, closed = 0;
     filteredSubs.forEach(s => {
       const val = s.offered_price || s.acv_value || 0;
       if (val > 0) {
         if (COMPLETED.includes(s.progress_status)) closed += val;
-        else if (!DEAD.includes(s.progress_status)) pipeline += val;
+        else if (!DEAD.includes(s.progress_status) && s.progress_status !== "partial") pipeline += val;
       }
     });
 
@@ -131,7 +133,7 @@ const ExecutiveKPIHub = ({ standalone = false }: ExecutiveKPIHubProps) => {
     }).length;
     const trend = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : thisMonth > 0 ? 100 : 0;
 
-    return { total, completed, dead, active, convRate, pipeline, closed, trend };
+    return { total, completed, dead, abandoned, active, convRate, dropOffRate, pipeline, closed, trend };
   }, [filteredSubs]);
 
   /* ── per-store breakdown ────────────────────────── */

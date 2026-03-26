@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  TrendingUp, TrendingDown, Users, DollarSign, Target, UserCheck, Building2
+  TrendingUp, TrendingDown, Users, DollarSign, Target, UserCheck, Building2, AlertTriangle
 } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -107,15 +107,17 @@ const ExecutiveKPIHub = ({ standalone = false }: ExecutiveKPIHubProps) => {
     const total = filteredSubs.length;
     const completed = filteredSubs.filter(s => COMPLETED.includes(s.progress_status)).length;
     const dead = filteredSubs.filter(s => DEAD.includes(s.progress_status)).length;
-    const active = total - completed - dead;
+    const abandoned = filteredSubs.filter(s => s.progress_status === "partial").length;
+    const active = total - completed - dead - abandoned;
     const convRate = total > 0 ? Math.round((completed / total) * 1000) / 10 : 0;
+    const dropOffRate = total > 0 ? Math.round((abandoned / total) * 1000) / 10 : 0;
 
     let pipeline = 0, closed = 0;
     filteredSubs.forEach(s => {
       const val = s.offered_price || s.acv_value || 0;
       if (val > 0) {
         if (COMPLETED.includes(s.progress_status)) closed += val;
-        else if (!DEAD.includes(s.progress_status)) pipeline += val;
+        else if (!DEAD.includes(s.progress_status) && s.progress_status !== "partial") pipeline += val;
       }
     });
 
@@ -131,7 +133,7 @@ const ExecutiveKPIHub = ({ standalone = false }: ExecutiveKPIHubProps) => {
     }).length;
     const trend = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : thisMonth > 0 ? 100 : 0;
 
-    return { total, completed, dead, active, convRate, pipeline, closed, trend };
+    return { total, completed, dead, abandoned, active, convRate, dropOffRate, pipeline, closed, trend };
   }, [filteredSubs]);
 
   /* ── per-store breakdown ────────────────────────── */
@@ -266,9 +268,11 @@ const ExecutiveKPIHub = ({ standalone = false }: ExecutiveKPIHubProps) => {
       </div>
 
       {/* Row 1 — Top KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
         <KpiCard label="Total Leads" value={kpis.total} icon={Users} color="text-blue-500" bg="from-blue-500/15 to-blue-600/5" />
         <KpiCard label="Active Deals" value={kpis.active} icon={Target} color="text-violet-500" bg="from-violet-500/15 to-violet-600/5" />
+        <KpiCard label="Abandoned" value={kpis.abandoned} icon={AlertTriangle} color="text-amber-500" bg="from-amber-500/15 to-amber-600/5"
+          badge={kpis.dropOffRate > 0 ? { value: `${kpis.dropOffRate}% drop-off`, positive: false } : undefined} />
         <KpiCard label="Conversion" value={`${kpis.convRate}%`} icon={TrendingUp} color="text-emerald-500" bg="from-emerald-500/15 to-emerald-600/5"
           badge={kpis.trend !== 0 ? { value: `${kpis.trend > 0 ? "+" : ""}${kpis.trend}%`, positive: kpis.trend > 0 } : undefined} />
         <KpiCard label="Pipeline Value" value={`$${(kpis.pipeline / 1000).toFixed(0)}k`} icon={DollarSign} color="text-amber-500" bg="from-amber-500/15 to-amber-600/5" />

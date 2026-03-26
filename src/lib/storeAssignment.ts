@@ -7,6 +7,8 @@ interface LocationWithZips {
   state: string;
   zip_codes: string[];
   oem_brands: string[];
+  center_zip: string;
+  coverage_radius_miles: number;
 }
 
 let cachedLocations: LocationWithZips[] | null = null;

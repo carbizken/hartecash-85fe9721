@@ -641,6 +641,11 @@ const SiteConfiguration = () => {
         </div>
       </Section>
 
+      {/* About Page */}
+      <Section icon={FileText} title="About Page Content">
+        <AboutPageConfig />
+      </Section>
+
       {/* Preview */}
       <div className="rounded-xl border border-border bg-muted/30 p-4">
         <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Live Preview</h4>

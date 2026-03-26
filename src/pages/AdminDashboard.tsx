@@ -1825,9 +1825,6 @@ const AdminDashboard = () => {
           {/* Changelog */}
           {activeSection === "changelog" && canManageAccess && <ChangelogManagement />}
 
-          {/* About Page */}
-          {activeSection === "about-page" && canManageAccess && <AboutPageConfig />}
-
           {/* Permissions */}
           {activeSection === "permissions" && canManageAccess && <PermissionManagement />}
 

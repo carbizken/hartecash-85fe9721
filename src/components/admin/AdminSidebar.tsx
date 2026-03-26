@@ -78,7 +78,7 @@ const AdminSidebar = ({
         { key: "comparison", label: "Comparison", icon: BarChart3 },
         { key: "locations", label: "Locations", icon: MapPin },
         { key: "image-inventory", label: "Image Cache", icon: Car },
-        { key: "about-page", label: "About Page", icon: FileText },
+        
         { key: "changelog", label: "Changelog", icon: Newspaper },
         { key: "permissions", label: "Permissions", icon: Shield, badge: permissionRequestCount > 0 ? String(permissionRequestCount) : undefined, badgeVariant: "destructive" as const },
       ].filter((item) => isAllowed(item.key))

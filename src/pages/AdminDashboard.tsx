@@ -160,6 +160,7 @@ const PROGRESS_STAGES = PROGRESS_STAGES_NOT_ACCEPTED;
 
 // Full list of DB status keys for dropdowns (preserves granular control)
 const ALL_STATUS_OPTIONS = [
+  { key: "partial", label: "Abandoned" },
   { key: "new", label: "New Lead" },
   { key: "contacted", label: "Contacted" },
   { key: "inspection_scheduled", label: "Inspection Scheduled" },
@@ -1481,6 +1482,7 @@ const AdminDashboard = () => {
                                   <SelectTrigger className={`w-44 h-7 text-xs font-medium ${
                                     sub.progress_status === "purchase_complete" ? "border-success/50 text-success" :
                                     sub.progress_status === "dead_lead" ? "border-destructive/50 text-destructive" :
+                                    sub.progress_status === "partial" ? "border-amber-500/50 text-amber-600" :
                                     sub.progress_status === "new" ? "border-muted text-muted-foreground" :
                                     "border-accent/50 text-accent"
                                   }`}>
@@ -1497,7 +1499,12 @@ const AdminDashboard = () => {
                                     })}
                                   </SelectContent>
                                 </Select>
-                                {sub.progress_status !== "new" && sub.progress_status !== "dead_lead" && (
+                                {sub.progress_status === "partial" && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600">
+                                    ⚠ Abandoned — needs follow-up
+                                  </span>
+                                )}
+                                {sub.progress_status !== "new" && sub.progress_status !== "dead_lead" && sub.progress_status !== "partial" && (
                                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success">
                                     <CheckCircle className="w-3 h-3" />
                                     Offer Accepted

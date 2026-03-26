@@ -322,6 +322,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
           is_hot_lead: estimate?.isHotLead || false,
           matched_rule_ids: estimate?.matchedRuleIds?.length ? estimate.matchedRuleIds : null,
           store_location_id: storeLocationId || null,
+          salesperson_name: formData.salespersonName || null,
         } as any);
 
       if (error) throw error;

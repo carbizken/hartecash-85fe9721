@@ -402,7 +402,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
       case "History":
         return <StepHistory formData={formData} update={update} formConfig={formConfig} />;
       case "Finalize":
-        return <StepFinalize formData={formData} update={update} formConfig={formConfig} />;
+        return <StepFinalize formData={formData} update={update} formConfig={formConfig} leadSource={leadSource} />;
       default:
         return null;
     }

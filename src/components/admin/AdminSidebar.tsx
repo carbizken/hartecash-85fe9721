@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Inbox, CalendarDays, Users, ShieldCheck, SlidersHorizontal,
-  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin, Car, ScrollText, Newspaper, FileText, Shield, Lock
+  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin, Car, ScrollText, Newspaper, Shield, Lock
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -78,14 +78,14 @@ const AdminSidebar = ({
         { key: "comparison", label: "Comparison", icon: BarChart3 },
         { key: "locations", label: "Locations", icon: MapPin },
         { key: "image-inventory", label: "Image Cache", icon: Car },
-        { key: "about-page", label: "About Page", icon: FileText },
+        
         { key: "changelog", label: "Changelog", icon: Newspaper },
         { key: "permissions", label: "Permissions", icon: Shield, badge: permissionRequestCount > 0 ? String(permissionRequestCount) : undefined, badgeVariant: "destructive" as const },
       ].filter((item) => isAllowed(item.key))
     : [];
 
   // Collect locked sections for "Request Access" display
-  const allSectionKeys = ["submissions", "appointments", "executive", "staff", "requests", "consent", "follow-ups", "notification-log", "offer-settings", "site-config", "notifications", "form-config", "testimonials", "comparison", "locations", "image-inventory", "about-page", "changelog", "permissions"];
+  const allSectionKeys = ["submissions", "appointments", "executive", "staff", "requests", "consent", "follow-ups", "notification-log", "offer-settings", "site-config", "notifications", "form-config", "testimonials", "comparison", "locations", "image-inventory", "changelog", "permissions"];
   const lockedSections = showRequestAccess && allowedSections !== null
     ? allSectionKeys.filter((k) => !allowedSections.includes(k))
     : [];

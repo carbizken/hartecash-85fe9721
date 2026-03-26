@@ -77,6 +77,7 @@ const DEFAULT_CONFIG: SiteConfig = {
   enable_animations: false,
   use_animated_calculating: false,
   enable_dl_ocr: false,
+  track_abandoned_leads: true,
   cta_offer_color: "",
   cta_accept_color: "",
   assign_customer_picks: false,

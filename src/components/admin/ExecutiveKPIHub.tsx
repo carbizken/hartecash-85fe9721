@@ -202,6 +202,40 @@ const ExecutiveKPIHub = ({ standalone = false }: ExecutiveKPIHubProps) => {
     }));
   }, [filteredSubs]);
 
+  /* ── conversion funnel ────────────────────────── */
+  const funnelStages = useMemo(() => {
+    const statusMap: Record<string, string> = {
+      new: "New",
+      partial: "Abandoned",
+      contacted: "Contacted",
+      inspection_scheduled: "Inspected",
+      inspected: "Inspected",
+      offer_made: "Contacted",
+      offer_accepted: "Contacted",
+      paperwork: "Inspected",
+      purchase_complete: "Purchased",
+      dead_lead: "Dead",
+    };
+
+    const counts: Record<string, number> = { New: 0, Abandoned: 0, Contacted: 0, Inspected: 0, Purchased: 0, Dead: 0 };
+    filteredSubs.forEach(s => {
+      const stage = statusMap[s.progress_status] || "New";
+      counts[stage]++;
+    });
+
+    const stages = [
+      { name: "New", count: counts.New + counts.Contacted + counts.Inspected + counts.Purchased, color: "hsl(210,70%,50%)" },
+      { name: "Contacted", count: counts.Contacted + counts.Inspected + counts.Purchased, color: "hsl(190,70%,45%)" },
+      { name: "Inspected", count: counts.Inspected + counts.Purchased, color: "hsl(280,60%,55%)" },
+      { name: "Purchased", count: counts.Purchased, color: "hsl(160,60%,45%)" },
+    ];
+
+    const abandoned = counts.Abandoned;
+    const dead = counts.Dead;
+
+    return { stages, abandoned, dead };
+  }, [filteredSubs]);
+
   /* ── staff performance ──────────────────────────── */
   const staffMetrics = useMemo(() => {
     const map: Record<string, { name: string; deals: number; totalValue: number }> = {};

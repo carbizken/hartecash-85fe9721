@@ -39,6 +39,17 @@ interface OfferSubmission {
   created_at: string | null;
   loan_status: string | null;
   progress_status: string | null;
+  // New BB fields
+  bb_msrp: number | null;
+  bb_class_name: string | null;
+  bb_drivetrain: string | null;
+  bb_transmission: string | null;
+  bb_fuel_type: string | null;
+  bb_engine: string | null;
+  bb_mileage_adj: number | null;
+  bb_regional_adj: number | null;
+  bb_base_whole_avg: number | null;
+  bb_retail_avg: number | null;
 }
 
 interface ConditionDetails {
@@ -55,6 +66,17 @@ interface ConditionDetails {
   windshield_damage: string | null;
   modifications: string | null;
   drivetrain: string | null;
+  // BB verified data
+  bb_msrp: number | null;
+  bb_class_name: string | null;
+  bb_drivetrain: string | null;
+  bb_transmission: string | null;
+  bb_fuel_type: string | null;
+  bb_engine: string | null;
+  bb_mileage_adj: number | null;
+  bb_regional_adj: number | null;
+  bb_base_whole_avg: number | null;
+  bb_retail_avg: number | null;
 }
 
 /* ─── Edit option lists ─── */
@@ -174,7 +196,7 @@ const OfferPage = () => {
       const [condRes, settingsRes, rulesRes, apptRes, locRes] = await Promise.all([
         supabase
           .from("submissions")
-          .select("accidents, drivable, exterior_damage, interior_damage, mechanical_issues, engine_issues, tech_issues, smoked_in, tires_replaced, num_keys, windshield_damage, modifications, drivetrain")
+          .select("accidents, drivable, exterior_damage, interior_damage, mechanical_issues, engine_issues, tech_issues, smoked_in, tires_replaced, num_keys, windshield_damage, modifications, drivetrain, bb_msrp, bb_class_name, bb_drivetrain, bb_transmission, bb_fuel_type, bb_engine, bb_mileage_adj, bb_regional_adj, bb_base_whole_avg, bb_retail_avg")
           .eq("token", token)
           .maybeSingle(),
         supabase.from("offer_settings" as any).select("*").eq("dealership_id", "default").maybeSingle(),
@@ -637,6 +659,55 @@ const OfferPage = () => {
     </motion.div>
   );
 
+  /* ─── Verified Vehicle Specs (from Black Book) ─── */
+  const bbSpecs = condition ? [
+    { label: "Vehicle Class", value: condition.bb_class_name, verified: !!condition.bb_class_name },
+    { label: "Drivetrain", value: condition.bb_drivetrain, verified: !!condition.bb_drivetrain },
+    { label: "Transmission", value: condition.bb_transmission, verified: !!condition.bb_transmission },
+    { label: "Engine", value: condition.bb_engine, verified: !!condition.bb_engine },
+    { label: "Fuel Type", value: condition.bb_fuel_type, verified: !!condition.bb_fuel_type },
+    { label: "Original MSRP", value: condition.bb_msrp ? `$${condition.bb_msrp.toLocaleString()}` : null, verified: !!condition.bb_msrp },
+  ].filter(s => s.value) : [];
+
+  const VerifiedSpecsBlock = bbSpecs.length > 0 ? (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      className="bg-card rounded-xl shadow-lg overflow-hidden"
+    >
+      <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-5 py-3 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-primary" />
+          <h3 className="font-bold text-card-foreground">Verified Vehicle Data</h3>
+        </div>
+      </div>
+      <div className="p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {bbSpecs.map((spec) => (
+            <div
+              key={spec.label}
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm border ${
+                spec.verified
+                  ? "bg-success/5 border-success/15"
+                  : "bg-destructive/5 border-destructive/15"
+              }`}
+            >
+              {spec.verified ? (
+                <CheckCircle className="w-4 h-4 text-success shrink-0" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+              )}
+              <span className="font-medium text-card-foreground">{spec.label}:</span>
+              <span className="text-muted-foreground truncate">{spec.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  ) : null;
+
   /* ─── Condition / "What's Behind Your Offer" block (with inline edit) ─── */
   interface ConditionItem {
     label: string;
@@ -650,6 +721,20 @@ const OfferPage = () => {
   }
 
   const conditionItems: ConditionItem[] = [];
+
+  // BB-Verified specs with green check / red X
+  if (condition?.bb_class_name) {
+    conditionItems.push({ label: `Vehicle Class: ${condition.bb_class_name}`, status: "good", icon: <Car className="w-3.5 h-3.5" /> });
+  }
+  if (condition?.bb_drivetrain) {
+    conditionItems.push({ label: `Drivetrain: ${condition.bb_drivetrain}`, status: "good", icon: <Settings2 className="w-3.5 h-3.5" /> });
+  }
+  if (condition?.bb_transmission) {
+    conditionItems.push({ label: `Transmission: ${condition.bb_transmission}`, status: "good", icon: <Settings2 className="w-3.5 h-3.5" /> });
+  }
+  if (condition?.bb_engine) {
+    conditionItems.push({ label: `Engine: ${condition.bb_engine}`, status: "good", icon: <Gauge className="w-3.5 h-3.5" /> });
+  }
 
   // Accidents
   const accidentsVal = (condition?.accidents || "").toLowerCase();
@@ -1397,6 +1482,7 @@ const OfferPage = () => {
             {/* Right column — vehicle summary → trade-in → condition */}
             <div className="col-span-3 space-y-5">
               {VehicleSummary}
+              {VerifiedSpecsBlock}
               {TradeInExplanation}
               {NoTaxBlock}
               {ConditionBlock}
@@ -1435,6 +1521,7 @@ const OfferPage = () => {
           )}
 
           {VehicleSummary}
+          {VerifiedSpecsBlock}
           {TradeInExplanation}
           {NoTaxBlock}
           {ConditionBlock}

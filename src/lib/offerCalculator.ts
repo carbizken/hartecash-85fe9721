@@ -72,6 +72,7 @@ export interface OfferSettings {
   offer_ceiling: number | null;
   age_tiers: AgeTier[];
   mileage_tiers: MileageTier[];
+  regional_adjustment_pct: number;
 }
 
 export interface OfferRule {
@@ -142,6 +143,7 @@ const DEFAULT_SETTINGS: OfferSettings = {
   offer_ceiling: null,
   age_tiers: [],
   mileage_tiers: [],
+  regional_adjustment_pct: 0,
 };
 
 /** Extract the correct BB value based on the configured basis */
@@ -256,6 +258,12 @@ export function calculateOffer(
   // 6. Apply global adjustment %
   if (cfg.global_adjustment_pct !== 0) {
     high = Math.round(high * (1 + cfg.global_adjustment_pct / 100));
+  }
+
+  // 6b. Apply regional adjustment %
+  const regionalPct = cfg.regional_adjustment_pct || 0;
+  if (regionalPct !== 0) {
+    high = Math.round(high * (1 + regionalPct / 100));
   }
 
   // 7. Apply age-based tier adjustments

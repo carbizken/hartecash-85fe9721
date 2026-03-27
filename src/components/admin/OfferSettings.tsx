@@ -116,6 +116,7 @@ interface OfferSettingsRow {
   offer_ceiling: number | null;
   age_tiers: AgeTier[];
   mileage_tiers: MileageTier[];
+  regional_adjustment_pct: number;
 }
 
 interface OfferRule {
@@ -239,6 +240,7 @@ const OfferSettings = () => {
         offer_ceiling: d.offer_ceiling ?? null,
         age_tiers: Array.isArray(d.age_tiers) ? d.age_tiers : [],
         mileage_tiers: Array.isArray(d.mileage_tiers) ? d.mileage_tiers : [],
+        regional_adjustment_pct: d.regional_adjustment_pct ?? 0,
       } as OfferSettingsRow);
       setSavedSettings({
         ...d,
@@ -249,6 +251,7 @@ const OfferSettings = () => {
         offer_ceiling: d.offer_ceiling ?? null,
         age_tiers: Array.isArray(d.age_tiers) ? d.age_tiers : [],
         mileage_tiers: Array.isArray(d.mileage_tiers) ? d.mileage_tiers : [],
+        regional_adjustment_pct: d.regional_adjustment_pct ?? 0,
       } as OfferSettingsRow);
     }
     if (rulesRes.data) {
@@ -271,6 +274,7 @@ const OfferSettings = () => {
       offer_ceiling: settings.offer_ceiling,
       age_tiers: settings.age_tiers as any,
       mileage_tiers: settings.mileage_tiers as any,
+      regional_adjustment_pct: settings.regional_adjustment_pct,
       updated_at: new Date().toISOString(),
     } as any).eq("id", settings.id);
 
@@ -442,6 +446,20 @@ const OfferSettings = () => {
                 type="number"
                 value={settings.global_adjustment_pct}
                 onChange={(e) => setSettings({ ...settings, global_adjustment_pct: Number(e.target.value) })}
+                className="w-28"
+                step="0.5"
+              />
+              <span className="text-sm font-semibold text-muted-foreground">%</span>
+            </div>
+          </div>
+          <div>
+            <Label className="text-sm font-semibold">Regional Adjustment %</Label>
+            <p className="text-xs text-muted-foreground mb-2">Market-specific adjustment for your region (e.g. +3% for high-demand area).</p>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={settings.regional_adjustment_pct}
+                onChange={(e) => setSettings({ ...settings, regional_adjustment_pct: Number(e.target.value) })}
                 className="w-28"
                 step="0.5"
               />

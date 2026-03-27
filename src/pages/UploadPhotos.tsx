@@ -93,8 +93,20 @@ const UploadPhotos = () => {
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
   const handleCategoryClick = (categoryId: string) => {
-    setActiveCategory(categoryId);
-    fileInputRef.current?.click();
+    if (isMobile) {
+      setCameraCategory(categoryId);
+    } else {
+      setActiveCategory(categoryId);
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleCameraCapture = (file: File, preview: string) => {
+    setCategoryUploads((prev) => ({
+      ...prev,
+      [cameraCategory!]: { file, preview },
+    }));
+    setCameraCategory(null);
   };
 
   const handleCategoryFile = (e: React.ChangeEvent<HTMLInputElement>) => {

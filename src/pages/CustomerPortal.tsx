@@ -338,7 +338,7 @@ const CustomerPortal = () => {
           <PortalOfferCard {...offerCardProps} />
           <CompletionChecklist {...checklistProps} />
           <VehiclePhotos token={s.token} photosUploaded={s.photos_uploaded} />
-          {s.photos_uploaded && <AIDamageReport submissionId={s.id} vehicleStr={vehicleStr} />}
+          
           <PortalVehicleSummary {...vehicleSummaryProps} />
           <PaymentInfoCard />
           {s.loan_status && ["has_loan", "lease"].includes(s.loan_status) && <LoanPayoffCard />}

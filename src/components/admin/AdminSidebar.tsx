@@ -94,6 +94,7 @@ const AdminSidebar = ({
   // ── Tools (utilities) ──
   const toolsItems = canManageAccess
     ? [
+        { key: "onboarding", label: "Dealer Onboarding", icon: Rocket },
         { key: "image-inventory", label: "Image Cache", icon: Car },
         { key: "changelog", label: "Changelog", icon: Newspaper },
       ].filter((item) => isAllowed(item.key))

@@ -1884,6 +1884,9 @@ const AdminDashboard = () => {
           {/* Changelog */}
           {activeSection === "changelog" && canManageAccess && <ChangelogManagement />}
 
+          {/* Dealer Onboarding */}
+          {activeSection === "onboarding" && canManageAccess && <DealerOnboarding />}
+
           {/* Permissions */}
           {activeSection === "permissions" && canManageAccess && <PermissionManagement />}
 

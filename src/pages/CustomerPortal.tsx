@@ -22,6 +22,7 @@ import PortalOfferCard from "@/components/portal/PortalOfferCard";
 import PortalVehicleSummary from "@/components/portal/PortalVehicleSummary";
 import { recalculateFromSubmission, type SubmissionCondition } from "@/lib/recalculateOffer";
 import type { OfferSettings, OfferRule } from "@/lib/offerCalculator";
+import { resolveEffectiveSettings } from "@/lib/resolvePricingModel";
 import { useToast } from "@/hooks/use-toast";
 
 interface ConditionData {

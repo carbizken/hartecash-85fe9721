@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import OfferSimulator from "./OfferSimulator";
 import PricingModelManager from "./PricingModelManager";
 import PricingAccessGate from "./PricingAccessGate";

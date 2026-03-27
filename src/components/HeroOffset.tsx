@@ -5,6 +5,9 @@ import { motion } from "framer-motion";
 
 interface HeroOffsetProps {
   side: "left" | "right";
+  leadSource?: string;
+  headlineOverride?: string;
+  subtextOverride?: string;
 }
 
 const HeroOffset = ({ side }: HeroOffsetProps) => {

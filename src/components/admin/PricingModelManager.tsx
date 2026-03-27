@@ -206,9 +206,11 @@ const Section = ({
 interface Props {
   /** Called when the active model changes so the simulator can recalculate */
   onModelChange?: (settings: OfferSettings) => void;
+  /** Ref-style callback so parent can push workbench changes back into the edit model */
+  onRegisterSync?: (syncFn: (settings: OfferSettings) => void) => void;
 }
 
-const PricingModelManager = ({ onModelChange }: Props) => {
+const PricingModelManager = ({ onModelChange, onRegisterSync }: Props) => {
   const { toast } = useToast();
   const [models, setModels] = useState<PricingModel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -273,6 +275,28 @@ const PricingModelManager = ({ onModelChange }: Props) => {
       onModelChange(modelAsSettings);
     }
   }, [modelAsSettings]);
+
+  // Register sync callback so parent (OfferSettings) can push workbench changes back into editModel
+  useEffect(() => {
+    if (onRegisterSync) {
+      onRegisterSync((incoming: OfferSettings) => {
+        setEditModel(prev => prev ? {
+          ...prev,
+          bb_value_basis: incoming.bb_value_basis,
+          global_adjustment_pct: incoming.global_adjustment_pct,
+          regional_adjustment_pct: incoming.regional_adjustment_pct,
+          condition_multipliers: incoming.condition_multipliers as any,
+          deductions_config: incoming.deductions_config as any,
+          deduction_amounts: incoming.deduction_amounts as any,
+          recon_cost: incoming.recon_cost,
+          offer_floor: incoming.offer_floor,
+          offer_ceiling: incoming.offer_ceiling,
+          age_tiers: incoming.age_tiers as any,
+          mileage_tiers: incoming.mileage_tiers as any,
+        } : prev);
+      });
+    }
+  }, [onRegisterSync]);
 
   const selectModel = (id: string) => {
     const m = models.find(m => m.id === id);

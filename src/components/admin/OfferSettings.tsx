@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import OfferSimulator from "./OfferSimulator";
 import PricingModelManager from "./PricingModelManager";
 import PricingAccessGate from "./PricingAccessGate";
@@ -230,6 +230,13 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
   const [editingRule, setEditingRule] = useState<Partial<OfferRule> | null>(null);
   const [savingRule, setSavingRule] = useState(false);
   const [modelOverrideSettings, setModelOverrideSettings] = useState<OfferSettingsType | null>(null);
+  const syncToModelRef = useRef<((s: OfferSettingsType) => void) | null>(null);
+
+  const handleWorkbenchChange = useCallback((newSettings: OfferSettingsType) => {
+    setModelOverrideSettings(newSettings);
+    // Push workbench changes back into the PricingModelManager's editModel
+    syncToModelRef.current?.(newSettings);
+  }, []);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -415,7 +422,10 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
         </p>
 
         {/* Pricing Model Manager — model save/load/schedule */}
-        <PricingModelManager onModelChange={setModelOverrideSettings} />
+        <PricingModelManager
+          onModelChange={setModelOverrideSettings}
+          onRegisterSync={(fn) => { syncToModelRef.current = fn; }}
+        />
 
         {/* Unified Simulator — all controls inline alongside results */}
         <div className="mt-4">
@@ -424,7 +434,7 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
             savedSettings={savedSettings}
             rules={rules}
             inlineControls={true}
-            onSettingsChange={(newSettings) => setModelOverrideSettings(newSettings)}
+            onSettingsChange={handleWorkbenchChange}
           />
         </div>
       </div>

@@ -83,7 +83,7 @@ const AdminSidebar = ({
   // ── Storefront (brand & presence) ──
   const storefrontItems = canManageAccess
     ? [
-        { key: "site-config", label: "Site Config", icon: Settings },
+        { key: "site-config", label: "Branding", icon: Settings },
         ...(locationCount > 1 ? [{ key: "locations", label: "Locations", icon: MapPin }] : []),
         { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
       ].filter((item) => isAllowed(item.key))

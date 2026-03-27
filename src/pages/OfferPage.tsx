@@ -460,15 +460,14 @@ const OfferPage = () => {
         </div>
       ) : (
         <>
-          <Link to={`/deal/${token}${activeTab === "trade" ? "?mode=trade" : ""}`}>
-            <Button className="w-full py-5 text-base font-bold text-white shadow-lg gap-2 rounded-xl" style={{ backgroundColor: "hsl(var(--cta-accept))", boxShadow: "0 10px 15px -3px hsl(var(--cta-accept) / 0.2)" }}>
-              <CheckCircle className="w-5 h-5" />
-              Accept & Lock In Your Price
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </Link>
+          <SlideToAccept
+            onAccept={() => {
+              window.location.href = `/deal/${token}${activeTab === "trade" ? "?mode=trade" : ""}`;
+            }}
+            label="Slide to Accept Your Price"
+          />
           <p className="text-[11px] text-muted-foreground text-center">
-            Click to lock in your price · No obligation until inspection
+            Slide to lock in your price · No obligation until inspection
           </p>
         </>
       )}

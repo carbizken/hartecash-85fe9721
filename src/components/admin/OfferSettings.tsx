@@ -836,6 +836,7 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
           )}
         </DialogContent>
       </Dialog>
+      </PricingAccessGate>
     </div>
   );
 };

@@ -240,6 +240,7 @@ const OfferSettings = () => {
         offer_ceiling: d.offer_ceiling ?? null,
         age_tiers: Array.isArray(d.age_tiers) ? d.age_tiers : [],
         mileage_tiers: Array.isArray(d.mileage_tiers) ? d.mileage_tiers : [],
+        regional_adjustment_pct: d.regional_adjustment_pct ?? 0,
       } as OfferSettingsRow);
       setSavedSettings({
         ...d,
@@ -250,6 +251,7 @@ const OfferSettings = () => {
         offer_ceiling: d.offer_ceiling ?? null,
         age_tiers: Array.isArray(d.age_tiers) ? d.age_tiers : [],
         mileage_tiers: Array.isArray(d.mileage_tiers) ? d.mileage_tiers : [],
+        regional_adjustment_pct: d.regional_adjustment_pct ?? 0,
       } as OfferSettingsRow);
     }
     if (rulesRes.data) {

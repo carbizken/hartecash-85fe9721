@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, CheckCircle, Upload, X, Plus, ArrowLeft, CircleCheck, Camera, AlertTriangle, ShieldCheck } from "lucide-react";
+import {
+  FileText, CheckCircle, Upload, X, Plus, ArrowLeft, CircleCheck,
+  Camera, AlertTriangle, ShieldCheck, CreditCard, ClipboardList, ScrollText
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileQRBanner from "@/components/upload/MobileQRBanner";
 import DocumentCameraCapture from "@/components/upload/DocumentCameraCapture";
@@ -10,11 +13,11 @@ import harteLogoFallback from "@/assets/harte-logo-white.png";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 const DOC_TYPES = [
-  { key: "drivers_license_front", label: "Driver's License (Front)", emoji: "🪪", ocr: true },
-  { key: "drivers_license_back", label: "Driver's License (Back)", emoji: "🪪", ocr: false },
-  { key: "registration", label: "Registration", emoji: "📋", ocr: false },
-  { key: "title_front", label: "Title (Front)", emoji: "📄", ocr: true },
-  { key: "title_back", label: "Title (Back)", emoji: "📄", ocr: false },
+  { key: "drivers_license_front", label: "Driver's License (Front)", icon: CreditCard, ocr: true },
+  { key: "drivers_license_back", label: "Driver's License (Back)", icon: CreditCard, ocr: false },
+  { key: "registration", label: "Registration", icon: ClipboardList, ocr: false },
+  { key: "title_front", label: "Title (Front)", icon: ScrollText, ocr: true },
+  { key: "title_back", label: "Title (Back)", icon: ScrollText, ocr: false },
 ];
 
 interface SubmissionInfo {
@@ -112,14 +115,12 @@ const UploadDocs = () => {
         if (docType === "title_front") titleFrontPath = path;
       }
       await supabase.rpc("mark_docs_uploaded", { _token: token! });
-      // Fire docs_uploaded staff notification
       if (submission?.id) {
         supabase.functions.invoke("send-notification", {
           body: { trigger_key: "docs_uploaded", submission_id: submission.id },
         }).catch(console.error);
       }
 
-      // Trigger OCR on driver's license front if uploaded
       if (dlFrontPath) {
         try {
           const { data: signedData } = await supabase.storage
@@ -135,7 +136,6 @@ const UploadDocs = () => {
         }
       }
 
-      // Trigger VIN verification on title front if uploaded
       if (titleFrontPath) {
         try {
           const { data: signedData } = await supabase.storage
@@ -179,7 +179,6 @@ const UploadDocs = () => {
 
   const filesPerType = (type: string) => files.filter(f => f.docType === type);
 
-  // Completion check: DL front + DL back + (registration OR (title front + title back))
   const isComplete = useMemo(() => {
     const hasDLFront = filesPerType("drivers_license_front").length > 0;
     const hasDLBack = filesPerType("drivers_license_back").length > 0;
@@ -189,7 +188,6 @@ const UploadDocs = () => {
     return hasDLFront && hasDLBack && (hasRegistration || (hasTitleFront && hasTitleBack));
   }, [files]);
 
-  // Determine customer state for guide dimensions
   const customerState = submission?.state || null;
 
   if (loading) return (
@@ -200,9 +198,11 @@ const UploadDocs = () => {
 
   if (error && !submission) return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      <div className="text-center">
-        <div className="text-5xl mb-4">😕</div>
-        <h1 className="text-xl font-bold text-foreground mb-2">Oops!</h1>
+      <div className="text-center max-w-sm">
+        <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-5">
+          <X className="w-10 h-10 text-destructive" />
+        </div>
+        <h1 className="font-display text-2xl text-foreground mb-2">Oops!</h1>
         <p className="text-muted-foreground">{error}</p>
       </div>
     </div>
@@ -210,23 +210,24 @@ const UploadDocs = () => {
 
   if (done) return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      <div className="text-center max-w-sm">
-        <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
-        <h1 className="text-2xl font-bold text-foreground mb-2">Documents Received!</h1>
-        <p className="text-muted-foreground">
+      <div className="text-center max-w-md">
+        <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-5">
+          <CheckCircle className="w-10 h-10 text-success" />
+        </div>
+        <h1 className="font-display text-3xl text-foreground mb-3">Documents Received!</h1>
+        <p className="text-muted-foreground leading-relaxed">
           Thank you{submission?.name ? `, ${submission.name}` : ""}! We've received your documents
           {submission?.vehicle_year && ` for your ${submission.vehicle_year} ${submission.vehicle_make} ${submission.vehicle_model}`}.
           Our team will review them shortly.
         </p>
 
-        {/* VIN verification status */}
         {vinStatus && (
-          <div className={`mt-4 rounded-lg p-3 text-sm flex items-center gap-2 ${
+          <div className={`mt-4 rounded-xl p-3.5 text-sm flex items-center gap-2.5 ${
             vinStatus === "match"
-              ? "bg-success/10 text-success"
+              ? "bg-success/10 text-success border border-success/20"
               : vinStatus === "mismatch"
-              ? "bg-destructive/10 text-destructive"
-              : "bg-muted text-muted-foreground"
+              ? "bg-destructive/10 text-destructive border border-destructive/20"
+              : "bg-muted text-muted-foreground border border-border"
           }`}>
             {vinStatus === "match" ? (
               <>
@@ -250,7 +251,7 @@ const UploadDocs = () => {
         )}
 
         <Link to={`/my-submission/${token}`}>
-          <Button variant="outline" className="mt-4 gap-2">
+          <Button variant="outline" className="mt-6 gap-2 border-border hover:bg-muted">
             <ArrowLeft className="w-4 h-4" /> Back to My Submission
           </Button>
         </Link>
@@ -258,9 +259,12 @@ const UploadDocs = () => {
     </div>
   );
 
+  const vehicleLabel = submission
+    ? `${submission.vehicle_year ?? ""} ${submission.vehicle_make ?? ""} ${submission.vehicle_model ?? ""}`.trim()
+    : "";
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Camera capture overlay */}
       {cameraDocType && (
         <DocumentCameraCapture
           docLabel={DOC_TYPES.find(d => d.key === cameraDocType)?.label || "Document"}
@@ -270,6 +274,7 @@ const UploadDocs = () => {
         />
       )}
 
+      {/* Header — same style as photo upload */}
       <div className="bg-primary text-primary-foreground px-6 py-4 mb-0">
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <Link to={`/my-submission/${token}`} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
@@ -279,13 +284,14 @@ const UploadDocs = () => {
           <h1 className="font-bold text-lg">Upload Documents</h1>
         </div>
       </div>
-      <div className="max-w-lg mx-auto p-6">
+
+      <div className="max-w-lg mx-auto px-5 py-8">
         <div className="text-center mb-6">
-          <FileText className="w-12 h-12 text-accent mx-auto mb-3" />
-          {submission && (
-            <p className="text-muted-foreground text-sm">
-              {submission.vehicle_year} {submission.vehicle_make} {submission.vehicle_model}
-            </p>
+          <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center mx-auto mb-3">
+            <FileText className="w-7 h-7 text-primary/70" />
+          </div>
+          {vehicleLabel && (
+            <p className="text-muted-foreground text-sm">{vehicleLabel}</p>
           )}
         </div>
 
@@ -293,8 +299,10 @@ const UploadDocs = () => {
 
         {/* Completion banner */}
         {isComplete && (
-          <div className="bg-success/10 border border-success/30 rounded-xl p-4 mb-4 flex items-center gap-3">
-            <CircleCheck className="w-6 h-6 text-success flex-shrink-0" />
+          <div className="bg-success/10 border border-success/20 rounded-xl p-4 mb-5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
+              <CircleCheck className="w-5 h-5 text-success" />
+            </div>
             <div>
               <p className="text-sm font-semibold text-success">All required documents added!</p>
               <p className="text-xs text-muted-foreground">You can still add more if needed.</p>
@@ -302,31 +310,42 @@ const UploadDocs = () => {
           </div>
         )}
 
-        <div className={`bg-card rounded-xl p-5 shadow-lg mb-6 transition-colors ${isComplete ? "ring-2 ring-success/40" : ""}`}>
+        <div className={`bg-card rounded-xl p-5 shadow-sm border transition-colors mb-6 ${isComplete ? "border-success/30 ring-1 ring-success/20" : "border-border"}`}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-card-foreground">Documents needed:</h3>
-            {isComplete && <span className="text-xs bg-success/10 text-success font-semibold px-2 py-0.5 rounded-full">Complete ✓</span>}
+            <h3 className="font-display text-base text-card-foreground tracking-wide">Documents Needed</h3>
+            {isComplete && (
+              <span className="text-xs bg-success/10 text-success font-semibold px-2.5 py-1 rounded-full">Complete</span>
+            )}
           </div>
-          <p className="text-xs text-muted-foreground mb-3">
+          <p className="text-xs text-muted-foreground mb-4">
             Required: Driver's license (front & back) + either registration or title (front & back)
           </p>
           <div className="space-y-3">
             {DOC_TYPES.map(dt => {
               const typeFiles = filesPerType(dt.key);
               const hasFile = typeFiles.length > 0;
+              const Icon = dt.icon;
               return (
-                <div key={dt.key} className={`border rounded-lg p-3 transition-colors ${hasFile ? "border-success/40 bg-success/5" : "border-border"}`}>
+                <div key={dt.key} className={`border rounded-xl p-3.5 transition-all ${hasFile ? "border-success/40 bg-success/5 ring-1 ring-success/10" : "border-border hover:border-primary/20"}`}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-card-foreground flex items-center gap-1.5">
-                      {hasFile ? <CheckCircle className="w-4 h-4 text-success" /> : null}
-                      {dt.emoji} {dt.label}
+                    <span className="text-sm font-medium text-card-foreground flex items-center gap-2">
+                      {hasFile ? (
+                        <div className="w-6 h-6 rounded-full bg-success/10 flex items-center justify-center">
+                          <CheckCircle className="w-3.5 h-3.5 text-success" />
+                        </div>
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-primary/5 flex items-center justify-center">
+                          <Icon className="w-3.5 h-3.5 text-primary/60" />
+                        </div>
+                      )}
+                      {dt.label}
                     </span>
                     <div className="flex items-center gap-1.5">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => triggerCamera(dt.key)}
-                        className="gap-1 text-xs"
+                        className="gap-1 text-xs border-border"
                       >
                         <Camera className="w-3 h-3" /> Capture
                       </Button>
@@ -345,14 +364,14 @@ const UploadDocs = () => {
                       {typeFiles.map((f, i) => {
                         const globalIdx = files.indexOf(f);
                         return (
-                          <div key={i} className="relative bg-muted rounded-md px-2 py-1 flex items-center gap-1.5 text-xs">
+                          <div key={i} className="relative bg-muted rounded-lg px-2.5 py-1.5 flex items-center gap-2 text-xs border border-border shadow-sm">
                             {f.preview ? (
                               <img src={f.preview} alt="" className="w-8 h-8 object-cover rounded" />
                             ) : (
                               <FileText className="w-4 h-4 text-muted-foreground" />
                             )}
                             <span className="text-muted-foreground max-w-[100px] truncate">{f.file.name}</span>
-                            <button onClick={() => removeFile(globalIdx)} className="text-destructive hover:text-destructive/80">
+                            <button onClick={() => removeFile(globalIdx)} className="text-destructive hover:text-destructive/80 transition-colors">
                               <X className="w-3 h-3" />
                             </button>
                           </div>
@@ -375,22 +394,31 @@ const UploadDocs = () => {
           onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
         />
 
-        {error && <p className="text-destructive text-sm text-center mb-4">{error}</p>}
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-3 mb-4 text-center">
+            <p className="text-destructive text-sm font-medium">{error}</p>
+          </div>
+        )}
 
         <Button
           onClick={handleUpload}
           disabled={files.length === 0 || uploading}
-          className={`w-full py-4 text-[17px] font-bold shadow-lg ${
+          size="lg"
+          className={`w-full py-5 text-[17px] font-bold shadow-lg rounded-xl gap-2 ${
             isComplete
-              ? "bg-success hover:bg-success/90 text-success-foreground shadow-success/30"
-              : "bg-accent hover:bg-accent/90 text-accent-foreground shadow-accent/30"
+              ? "bg-success hover:bg-success/90 text-success-foreground shadow-success/20"
+              : "bg-accent hover:bg-accent/90 text-accent-foreground shadow-accent/20"
           }`}
         >
+          <Upload className="w-5 h-5" />
           {uploading ? "Uploading & verifying..." : `Upload ${files.length} Document${files.length !== 1 ? "s" : ""}`}
         </Button>
 
-        <p className="text-center mt-4 text-[13px] text-muted-foreground">
-          🔒 Your documents are securely uploaded and only used for your vehicle transaction.
+        <p className="text-center mt-5 text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+          <span className="inline-block w-4 h-4 rounded-full bg-success/10 flex items-center justify-center">
+            <CheckCircle className="w-3 h-3 text-success" />
+          </span>
+          Your documents are securely uploaded and only used for your vehicle transaction.
         </p>
       </div>
     </div>

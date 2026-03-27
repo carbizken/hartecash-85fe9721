@@ -385,6 +385,24 @@ const OfferSettings = () => {
 
   return (
     <div className="space-y-4">
+      {/* ── Price Builder Workbench — Simulator First ── */}
+      <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl border border-primary/20 p-5 mb-2">
+        <div className="flex items-center gap-2 mb-1">
+          <SlidersHorizontal className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-bold text-card-foreground">Price Builder Workbench</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Use the live simulator to test your pricing model. Adjust settings below and watch offers update instantly.
+        </p>
+        <OfferSimulator settings={settings} savedSettings={savedSettings} rules={rules} />
+      </div>
+
+      {/* Save button — prominent at top */}
+      <Button onClick={handleSaveSettings} disabled={saving} size="lg" className="gap-2 bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto">
+        <Save className="w-4 h-4" />
+        {saving ? "Saving…" : "Save All Settings"}
+      </Button>
+
       {/* ── Section 1: Value Basis ── */}
       <Section icon={<SlidersHorizontal className="w-5 h-5 text-primary" />} title="Valuation Basis" defaultOpen>
         <p className="text-sm text-muted-foreground mb-3">

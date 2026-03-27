@@ -91,16 +91,16 @@ const HeroOffset = ({ side, leadSource, headlineOverride, subtextOverride }: Her
       {/* Compact hero text */}
       <div className="text-center px-5 pt-5 pb-3">
         <h1 className="font-display text-[22px] font-extrabold tracking-[0.08em] leading-tight mb-1.5 uppercase">
-          {config.hero_headline || "Sell Your Car\nThe Easy Way"}
+          {headline}
         </h1>
         <p className="text-sm font-medium opacity-95 leading-relaxed">
-          {config.hero_subtext || "Get a top-dollar cash offer in 2 minutes. No haggling, no stress."}
+          {subtext}
         </p>
       </div>
 
       {/* Form card – immediately visible */}
       <div className="px-4 pb-4">
-        <SellCarForm variant="split" />
+        <SellCarForm variant="split" leadSource={leadSource} />
       </div>
 
       {/* Benefits below the form */}

@@ -221,26 +221,28 @@ const ScheduleVisit = () => {
                 <ArrowLeft className="w-5 h-5" />
               </Link>
             )}
-            <img src={harteLogo} alt="Harte" className="h-[60px] w-auto" />
+            <img src={config.logo_white_url || harteLogo} alt={config.dealership_name} className="h-[70px] w-auto" />
             <h1 className="font-bold text-lg">Schedule a Visit</h1>
           </div>
         </div>
         <main className="flex-1 flex items-center justify-center p-4">
-          <Card className="max-w-md w-full">
+          <Card className="max-w-md w-full shadow-sm border-border">
             <CardContent className="pt-8 pb-8 space-y-6">
-              <div className="text-center space-y-2">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
+              <div className="text-center space-y-3">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-success/10">
                   <CheckCircle2 className="h-10 w-10 text-success" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">Appointment Requested</h2>
-                <p className="text-sm text-muted-foreground">
+                <h2 className="font-display text-3xl text-foreground tracking-wide">Appointment Requested</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Our team will reach out shortly to confirm your visit.
                 </p>
               </div>
 
-              <div className="bg-muted/50 border border-border rounded-lg divide-y divide-border">
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <CalendarDays className="h-5 w-5 text-primary shrink-0" />
+              <div className="bg-muted/30 border border-border rounded-xl divide-y divide-border overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3.5">
+                  <div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center flex-shrink-0">
+                    <CalendarDays className="h-4.5 w-4.5 text-primary/70" />
+                  </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Date & Time</p>
                     <p className="font-semibold text-foreground">{formatDate(form.preferred_date)}</p>
@@ -248,8 +250,10 @@ const ScheduleVisit = () => {
                   </div>
                 </div>
                 {locationName && (
-                  <div className="flex items-center gap-3 px-4 py-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <div className="flex items-center gap-3 px-4 py-3.5">
+                    <div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="h-4.5 w-4.5 text-primary/70" />
+                    </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Location</p>
                       <p className="font-semibold text-foreground">{locationName}</p>
@@ -257,8 +261,10 @@ const ScheduleVisit = () => {
                   </div>
                 )}
                 {form.vehicle_info && (
-                  <div className="flex items-center gap-3 px-4 py-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+                  <div className="flex items-center gap-3 px-4 py-3.5">
+                    <div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center flex-shrink-0">
+                      <Car className="h-4.5 w-4.5 text-primary/70" />
+                    </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Vehicle</p>
                       <p className="font-semibold text-foreground">{form.vehicle_info}</p>
@@ -267,7 +273,8 @@ const ScheduleVisit = () => {
                 )}
               </div>
 
-              <p className="text-xs text-center text-muted-foreground">
+              <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1.5">
+                <CheckCircle className="w-3 h-3 text-success" />
                 A confirmation will be sent to <strong>{form.customer_email}</strong>
               </p>
             </CardContent>

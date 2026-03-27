@@ -465,6 +465,7 @@ const OfferSettings = () => {
               />
               <span className="text-sm font-semibold text-muted-foreground">%</span>
             </div>
+          </div>
           <div>
             <Label className="text-sm font-semibold">Reconditioning Cost</Label>
             <p className="text-xs text-muted-foreground mb-2">Flat $ deducted from every offer (transport, detail, inspection).</p>

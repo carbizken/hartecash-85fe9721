@@ -110,7 +110,7 @@ const CustomerPortal = () => {
       setLoading(false);
 
       // Fetch condition + offer config for mileage recalculation
-      const [condRes, settingsRes, rulesRes] = await Promise.all([
+      const [condRes, pricingRes] = await Promise.all([
         supabase
           .from("submissions")
           .select("drivetrain, accidents, drivable, exterior_damage, interior_damage, mechanical_issues, engine_issues, tech_issues, smoked_in, tires_replaced, num_keys, windshield_damage")
@@ -119,8 +119,8 @@ const CustomerPortal = () => {
         resolveEffectiveSettings("default"),
       ]);
       if (condRes.data) setCondition(condRes.data as ConditionData);
-      if (settingsRes.data) setOfferSettings(settingsRes.data as unknown as OfferSettings);
-      if (rulesRes.data) setOfferRules(rulesRes.data as unknown as OfferRule[]);
+      if (pricingRes.settings) setOfferSettings(pricingRes.settings);
+      if (pricingRes.rules) setOfferRules(pricingRes.rules);
     };
     fetchData();
   }, [token]);

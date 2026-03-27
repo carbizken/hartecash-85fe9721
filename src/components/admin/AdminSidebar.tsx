@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Inbox, CalendarDays, Users, ShieldCheck, SlidersHorizontal,
-  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin, Car, ScrollText, Newspaper, Shield, Lock, Wrench, MessageCircle
+  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin, Car, ScrollText, Newspaper, Shield, Lock, Wrench, MessageCircle, Rocket
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -94,6 +94,7 @@ const AdminSidebar = ({
   // ── Tools (utilities) ──
   const toolsItems = canManageAccess
     ? [
+        { key: "onboarding", label: "Dealer Onboarding", icon: Rocket },
         { key: "image-inventory", label: "Image Cache", icon: Car },
         { key: "changelog", label: "Changelog", icon: Newspaper },
       ].filter((item) => isAllowed(item.key))

@@ -66,6 +66,17 @@ interface ConditionDetails {
   windshield_damage: string | null;
   modifications: string | null;
   drivetrain: string | null;
+  // BB verified data
+  bb_msrp: number | null;
+  bb_class_name: string | null;
+  bb_drivetrain: string | null;
+  bb_transmission: string | null;
+  bb_fuel_type: string | null;
+  bb_engine: string | null;
+  bb_mileage_adj: number | null;
+  bb_regional_adj: number | null;
+  bb_base_whole_avg: number | null;
+  bb_retail_avg: number | null;
 }
 
 /* ─── Edit option lists ─── */

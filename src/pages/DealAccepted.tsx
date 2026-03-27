@@ -285,9 +285,7 @@ const DealAccepted = () => {
 
           {/* Right: Fast Track */}
           <motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            {...entrance(4)}
           >
             <div className="bg-gradient-to-br from-accent/5 via-accent/3 to-transparent rounded-xl p-6 shadow-lg border-2 border-accent/20 h-full">
               <div className="flex items-center gap-2 mb-1">

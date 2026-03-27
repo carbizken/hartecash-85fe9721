@@ -1468,6 +1468,7 @@ const OfferPage = () => {
             {/* Right column — vehicle summary → trade-in → condition */}
             <div className="col-span-3 space-y-5">
               {VehicleSummary}
+              {VerifiedSpecsBlock}
               {TradeInExplanation}
               {NoTaxBlock}
               {ConditionBlock}

@@ -72,6 +72,7 @@ export interface OfferSettings {
   offer_ceiling: number | null;
   age_tiers: AgeTier[];
   mileage_tiers: MileageTier[];
+  regional_adjustment_pct: number;
 }
 
 export interface OfferRule {

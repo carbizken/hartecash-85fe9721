@@ -18,7 +18,7 @@ import {
   BadgeDollarSign, Handshake, PartyPopper, CircleDot,
   ShieldCheck, MousePointerClick, Send, Phone, Mail,
   CreditCard, KeyRound, MapPin, AlertCircle, LayoutDashboard,
-  Link2, Repeat
+  Link2, Repeat, ChevronUp
 } from "lucide-react";
 
 /* ─── Animated Counter ─── */
@@ -1421,6 +1421,16 @@ export default function PitchDeck() {
             </motion.div>
           </motion.div>
         </Section>
+
+        {/* ── Back to Channels ── */}
+        <section className="bg-[hsl(220,25%,6%)] px-6 py-16 text-center border-t border-white/5">
+          <button
+            onClick={scrollToHero}
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full border border-white/20 text-white font-bold text-lg hover:bg-white/5 transition-colors"
+          >
+            <ChevronUp className="w-5 h-5" /> Back to All Three Channels
+          </button>
+        </section>
 
         {/* ═══ 21 — CTA ═══ */}
         <Section id="cta" dark isPresenting={isPresenting} currentSlide={current} key={isPresenting ? current : "cta"}>

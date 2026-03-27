@@ -59,7 +59,7 @@ const AdminSidebar = ({
   const pipelineItems = [
     { key: "submissions", label: "Submissions", icon: Inbox, badge: submissionCount > 0 ? String(submissionCount) : undefined },
     { key: "appointments", label: "Appointments", icon: CalendarDays, badge: appointmentCount > 0 ? String(appointmentCount) : undefined },
-    { key: "executive", label: "Executive HUD", icon: BarChart3 },
+    { key: "executive", label: "Performance", icon: BarChart3 },
   ].filter((item) => isAllowed(item.key));
 
   // ── Team (people & access) ──
@@ -74,8 +74,8 @@ const AdminSidebar = ({
   // ── Lead Flow (acquisition engine) ──
   const leadFlowItems = (canManageAccess || userRole === "gsm_gm")
     ? [
-        { key: "offer-settings", label: "Offer Settings", icon: SlidersHorizontal, badge: pricingAccessRequestCount > 0 ? String(pricingAccessRequestCount) : undefined, badgeVariant: "destructive" as const },
-        ...(canManageAccess ? [{ key: "form-config", label: "Form Config", icon: ListChecks }] : []),
+        { key: "offer-settings", label: "Offer Builder", icon: SlidersHorizontal, badge: pricingAccessRequestCount > 0 ? String(pricingAccessRequestCount) : undefined, badgeVariant: "destructive" as const },
+        ...(canManageAccess ? [{ key: "form-config", label: "Lead Form", icon: ListChecks }] : []),
         ...(canManageAccess ? [{ key: "notifications", label: "Notifications", icon: Bell }] : []),
       ].filter((item) => isAllowed(item.key))
     : [];
@@ -83,7 +83,7 @@ const AdminSidebar = ({
   // ── Storefront (brand & presence) ──
   const storefrontItems = canManageAccess
     ? [
-        { key: "site-config", label: "Site Config", icon: Settings },
+        { key: "site-config", label: "Branding", icon: Settings },
         ...(locationCount > 1 ? [{ key: "locations", label: "Locations", icon: MapPin }] : []),
         { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
       ].filter((item) => isAllowed(item.key))
@@ -97,9 +97,9 @@ const AdminSidebar = ({
 
   // ── Tools (utilities) ──
   const toolsItems = [
-    ...(canManageAccess ? [{ key: "image-inventory", label: "Image Cache", icon: Car }] : []),
+    ...(canManageAccess ? [{ key: "image-inventory", label: "Vehicle Images", icon: Car }] : []),
     ...(canManageAccess ? [{ key: "changelog", label: "Changelog", icon: Newspaper }] : []),
-    { key: "onboarding", label: "Dealer Onboarding", icon: Rocket },
+    { key: "onboarding", label: "Dealer Setup Guide", icon: Rocket },
   ].filter((item) => isAllowed(item.key));
 
   // Collect locked sections for "Request Access" display

@@ -453,6 +453,19 @@ const OfferSettings = () => {
             </div>
           </div>
           <div>
+            <Label className="text-sm font-semibold">Regional Adjustment %</Label>
+            <p className="text-xs text-muted-foreground mb-2">Market-specific adjustment for your region (e.g. +3% for high-demand area).</p>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={settings.regional_adjustment_pct}
+                onChange={(e) => setSettings({ ...settings, regional_adjustment_pct: Number(e.target.value) })}
+                className="w-28"
+                step="0.5"
+              />
+              <span className="text-sm font-semibold text-muted-foreground">%</span>
+            </div>
+          <div>
             <Label className="text-sm font-semibold">Reconditioning Cost</Label>
             <p className="text-xs text-muted-foreground mb-2">Flat $ deducted from every offer (transport, detail, inspection).</p>
             <div className="flex items-center gap-2">

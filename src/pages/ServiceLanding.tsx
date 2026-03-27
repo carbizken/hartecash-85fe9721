@@ -334,11 +334,14 @@ const ServiceLanding = () => {
               </>
             ) : (
               <>
-                There's Never Been a{" "}
-                <span className="bg-gradient-to-r from-[hsl(210,80%,60%)] to-[hsl(250,80%,70%)] bg-clip-text text-transparent">
-                  Better Time
-                </span>{" "}
-                to Upgrade or Sell
+                {(() => {
+                  const headline = siteConfig.service_hero_headline || "There's Never Been a Better Time to Upgrade or Sell";
+                  const parts = headline.split("||");
+                  if (parts.length >= 3) {
+                    return <>{parts[0]}<span className="bg-gradient-to-r from-[hsl(210,80%,60%)] to-[hsl(250,80%,70%)] bg-clip-text text-transparent">{parts[1]}</span>{parts[2]}</>;
+                  }
+                  return headline;
+                })()}
               </>
             )}
           </motion.h1>

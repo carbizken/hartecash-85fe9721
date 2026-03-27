@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, Clock, Shield, CheckCircle2, XCircle, Send } from "lucide-react";
+import { Lock, Clock, Shield, XCircle, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PricingAccessGateProps {
@@ -12,72 +12,44 @@ interface PricingAccessGateProps {
   children: React.ReactNode;
 }
 
-/**
- * Gates access to pricing models for GSM users.
- * - Admin/GM: always allowed
- * - GSM: only if they have an approved, non-expired access request
- * - Others: blocked
- */
 const PricingAccessGate = ({ userId, userRole, children }: PricingAccessGateProps) => {
   const { toast } = useToast();
   const [accessStatus, setAccessStatus] = useState<"loading" | "granted" | "pending" | "none" | "expired">("loading");
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState("");
   const [requesting, setRequesting] = useState(false);
 
-  // Admin and GM always have access
-  if (userRole === "admin" || userRole === "gsm_gm") {
-    return <>{children}</>;
-  }
+  const isGsm = userRole === "gsm_gm";
+  const isPrivileged = userRole === "admin" || userRole === "gsm_gm";
 
-  // Only GSM can request — everyone else is fully blocked
-  if (userRole !== "gsm_gm" && userRole !== "admin") {
-    // Check if they're a GSM with temp access — but this component is only for gsm_gm
-    // For non-GSM non-admin roles, just show locked
-    if (userRole !== "gsm_gm") {
-      return (
-        <Card className="border-destructive/20 bg-destructive/5">
-          <CardContent className="py-12 text-center">
-            <Lock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-bold text-lg text-card-foreground mb-2">Restricted Access</h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Pricing model configuration is restricted to Admin and GM roles. Contact your administrator for access.
-            </p>
-          </CardContent>
-        </Card>
-      );
+  useEffect(() => {
+    if (userRole === "admin" || userRole === "gsm_gm") {
+      setAccessStatus("granted");
+      return;
     }
-  }
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
     checkAccess();
-  }, [userId]);
+  }, [userId, userRole]);
 
-  // Countdown timer
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // Countdown timer for GSM temp access
   useEffect(() => {
-    if (!expiresAt) return;
+    if (!expiresAt || userRole === "admin" || userRole === "gsm_gm") return;
     const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const exp = new Date(expiresAt).getTime();
-      const diff = exp - now;
+      const diff = new Date(expiresAt).getTime() - Date.now();
       if (diff <= 0) {
         setAccessStatus("expired");
         setTimeLeft("Expired");
         clearInterval(interval);
         return;
       }
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const secs = Math.floor((diff % (1000 * 60)) / 1000);
-      setTimeLeft(`${hours}h ${mins}m ${secs}s`);
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(`${h}h ${m}m ${s}s`);
     }, 1000);
     return () => clearInterval(interval);
-  }, [expiresAt]);
+  }, [expiresAt, userRole]);
 
   const checkAccess = async () => {
-    // Check for an approved, non-expired access request
     const { data } = await supabase
       .from("pricing_model_access_requests" as any)
       .select("*")
@@ -85,17 +57,12 @@ const PricingAccessGate = ({ userId, userRole, children }: PricingAccessGateProp
       .order("created_at", { ascending: false })
       .limit(1);
 
-    const requests = (data as any[]) || [];
-    if (requests.length === 0) {
-      setAccessStatus("none");
-      return;
-    }
+    const reqs = (data as any[]) || [];
+    if (reqs.length === 0) { setAccessStatus("none"); return; }
 
-    const latest = requests[0];
+    const latest = reqs[0];
     if (latest.status === "approved" && latest.expires_at) {
-      const now = new Date().getTime();
-      const exp = new Date(latest.expires_at).getTime();
-      if (exp > now) {
+      if (new Date(latest.expires_at).getTime() > Date.now()) {
         setAccessStatus("granted");
         setExpiresAt(latest.expires_at);
       } else {
@@ -111,10 +78,8 @@ const PricingAccessGate = ({ userId, userRole, children }: PricingAccessGateProp
   const handleRequestAccess = async () => {
     setRequesting(true);
     const { error } = await supabase.from("pricing_model_access_requests" as any).insert({
-      user_id: userId,
-      status: "pending",
+      user_id: userId, status: "pending",
     } as any);
-
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
@@ -124,22 +89,26 @@ const PricingAccessGate = ({ userId, userRole, children }: PricingAccessGateProp
     setRequesting(false);
   };
 
+  // Admin/GM — always pass through
+  if (isPrivileged) return <>{children}</>;
+
   if (accessStatus === "loading") {
     return <div className="text-sm text-muted-foreground py-8 text-center">Checking access…</div>;
   }
 
-  if (accessStatus === "granted") {
+  // GSM with active temp access
+  if (accessStatus === "granted" && expiresAt) {
     return (
       <div className="space-y-3">
-        <div className="flex items-center gap-3 px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-          <Clock className="w-5 h-5 text-amber-600 shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3 bg-primary/5 border border-primary/20 rounded-lg">
+          <Clock className="w-5 h-5 text-primary shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Temporary Access Active</p>
-            <p className="text-xs text-amber-600/80 dark:text-amber-400/70">
+            <p className="text-sm font-semibold text-card-foreground">Temporary Access Active</p>
+            <p className="text-xs text-muted-foreground">
               Your 24-hour pricing access window expires in <span className="font-mono font-bold">{timeLeft}</span>
             </p>
           </div>
-          <Badge variant="outline" className="border-amber-500/30 text-amber-700 dark:text-amber-400 shrink-0 font-mono text-xs">
+          <Badge variant="outline" className="border-primary/30 text-primary shrink-0 font-mono text-xs">
             {timeLeft}
           </Badge>
         </div>
@@ -148,6 +117,22 @@ const PricingAccessGate = ({ userId, userRole, children }: PricingAccessGateProp
     );
   }
 
+  // Non-GSM roles — fully blocked
+  if (!isGsm) {
+    return (
+      <Card className="border-destructive/20 bg-destructive/5">
+        <CardContent className="py-12 text-center">
+          <Lock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="font-bold text-lg text-card-foreground mb-2">Restricted Access</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Pricing model configuration is restricted to Admin and GM roles. Contact your administrator for access.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // GSM — request access UI
   return (
     <Card className="border-primary/20">
       <CardHeader className="text-center pb-2">

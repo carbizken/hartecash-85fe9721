@@ -47,6 +47,10 @@ export interface SiteConfig {
   assign_oem_brand_match: boolean;
   assign_buying_center: boolean;
   buying_center_location_id: string | null;
+  service_hero_headline: string;
+  service_hero_subtext: string;
+  trade_hero_headline: string;
+  trade_hero_subtext: string;
 }
 
 const DEFAULTS: SiteConfig = {

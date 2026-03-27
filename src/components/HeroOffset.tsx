@@ -10,8 +10,11 @@ interface HeroOffsetProps {
   subtextOverride?: string;
 }
 
-const HeroOffset = ({ side }: HeroOffsetProps) => {
+const HeroOffset = ({ side, leadSource, headlineOverride, subtextOverride }: HeroOffsetProps) => {
   const { config } = useSiteConfig();
+
+  const headline = headlineOverride || config.hero_headline || "Sell Your Car\nThe Easy Way";
+  const subtext = subtextOverride || config.hero_subtext || "Get a top-dollar cash offer in 2 minutes. No haggling, no stress.";
 
   const benefits = [
     "Faster: Get cash in 24 hours, not weeks of meetups",

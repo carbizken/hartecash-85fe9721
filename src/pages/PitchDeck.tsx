@@ -946,10 +946,10 @@ export default function PitchDeck() {
               Full Control: <span className="text-blue-400">Docs, Roles & Oversight</span>
             </motion.h2>
             <motion.p variants={fadeUp} custom={0.5} className="text-lg text-white/50 max-w-3xl mb-12">
-              Internal document management, staff permissions, and complete audit trails — everything a GM needs to run the operation with confidence.
+              Internal document management, staff permissions, complete audit trails, and a dedicated Executive KPI Hub — everything a GM needs to run the operation with confidence.
             </motion.p>
 
-            <motion.div variants={fadeUp} custom={1} className="grid lg:grid-cols-3 gap-8">
+            <motion.div variants={fadeUp} custom={1} className="grid lg:grid-cols-4 gap-6">
               <motion.div variants={scaleIn} custom={1}>
                 <MockupFrame title="📁 Internal Documents" dark>
                   <div className="space-y-3">

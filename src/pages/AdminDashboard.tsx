@@ -33,6 +33,7 @@ import VehicleImage from "@/components/sell-form/VehicleImage";
 import FollowUpPanel from "@/components/admin/FollowUpPanel";
 import CommunicationLog from "@/components/admin/CommunicationLog";
 import ChangelogManagement from "@/components/admin/ChangelogManagement";
+import DealerOnboarding from "@/components/admin/DealerOnboarding";
 
 import PermissionManagement from "@/components/admin/PermissionManagement";
 import ExecutiveKPIHub from "@/components/admin/ExecutiveKPIHub";

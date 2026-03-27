@@ -18,6 +18,7 @@ import { recalculateFromSubmission, type SubmissionCondition } from "@/lib/recal
 import type { OfferSettings, OfferRule } from "@/lib/offerCalculator";
 import { resolveEffectiveSettings } from "@/lib/resolvePricingModel";
 import { useToast } from "@/hooks/use-toast";
+import SlideToAccept from "@/components/SlideToAccept";
 
 
 interface OfferSubmission {

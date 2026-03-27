@@ -5,10 +5,16 @@ import { motion } from "framer-motion";
 
 interface HeroOffsetProps {
   side: "left" | "right";
+  leadSource?: string;
+  headlineOverride?: string;
+  subtextOverride?: string;
 }
 
-const HeroOffset = ({ side }: HeroOffsetProps) => {
+const HeroOffset = ({ side, leadSource, headlineOverride, subtextOverride }: HeroOffsetProps) => {
   const { config } = useSiteConfig();
+
+  const headline = headlineOverride || config.hero_headline || "Sell Your Car\nThe Easy Way";
+  const subtext = subtextOverride || config.hero_subtext || "Get a top-dollar cash offer in 2 minutes. No haggling, no stress.";
 
   const benefits = [
     "Faster: Get cash in 24 hours, not weeks of meetups",
@@ -56,10 +62,10 @@ const HeroOffset = ({ side }: HeroOffsetProps) => {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <h1 className="font-display text-[48px] font-extrabold tracking-[0.08em] leading-tight mb-3 uppercase">
-        {config.hero_headline || "Sell Your Car\nThe Easy Way"}
+        {headline}
       </h1>
       <p className="text-xl font-medium opacity-95 mb-6 leading-relaxed">
-        {config.hero_subtext || "Get a top-dollar cash offer in 2 minutes. No haggling, no stress."}
+        {subtext}
       </p>
       {renderBenefits()}
       {renderStars()}
@@ -74,7 +80,7 @@ const HeroOffset = ({ side }: HeroOffsetProps) => {
       transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
     >
       <div className="shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] rounded-2xl">
-        <SellCarForm variant="split" />
+        <SellCarForm variant="split" leadSource={leadSource} />
       </div>
     </motion.div>
   );
@@ -85,16 +91,16 @@ const HeroOffset = ({ side }: HeroOffsetProps) => {
       {/* Compact hero text */}
       <div className="text-center px-5 pt-5 pb-3">
         <h1 className="font-display text-[22px] font-extrabold tracking-[0.08em] leading-tight mb-1.5 uppercase">
-          {config.hero_headline || "Sell Your Car\nThe Easy Way"}
+          {headline}
         </h1>
         <p className="text-sm font-medium opacity-95 leading-relaxed">
-          {config.hero_subtext || "Get a top-dollar cash offer in 2 minutes. No haggling, no stress."}
+          {subtext}
         </p>
       </div>
 
       {/* Form card – immediately visible */}
       <div className="px-4 pb-4">
-        <SellCarForm variant="split" />
+        <SellCarForm variant="split" leadSource={leadSource} />
       </div>
 
       {/* Benefits below the form */}

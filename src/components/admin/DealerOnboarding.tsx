@@ -71,13 +71,20 @@ const DEFAULT_ACCOUNT: Omit<DealerAccount, "id"> = {
   onboarded_by: null,
 };
 
-const DealerOnboarding = () => {
+interface DealerOnboardingProps {
+  isAdmin?: boolean;
+}
+
+const DealerOnboarding = ({ isAdmin = false }: DealerOnboardingProps) => {
   const [account, setAccount] = useState<Omit<DealerAccount, "id">>(DEFAULT_ACCOUNT);
   const [existingId, setExistingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [applying, setApplying] = useState(false);
   const { toast } = useToast();
+
+  // Read-only for non-admins when account is active/finalized
+  const readOnly = !isAdmin && ["active", "paused", "cancelled"].includes(account.onboarding_status);
 
   useEffect(() => {
     fetchAccount();

@@ -71,13 +71,20 @@ const DEFAULT_ACCOUNT: Omit<DealerAccount, "id"> = {
   onboarded_by: null,
 };
 
-const DealerOnboarding = () => {
+interface DealerOnboardingProps {
+  isAdmin?: boolean;
+}
+
+const DealerOnboarding = ({ isAdmin = false }: DealerOnboardingProps) => {
   const [account, setAccount] = useState<Omit<DealerAccount, "id">>(DEFAULT_ACCOUNT);
   const [existingId, setExistingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [applying, setApplying] = useState(false);
   const { toast } = useToast();
+
+  // Read-only for non-admins when account is active/finalized
+  const readOnly = !isAdmin && ["active", "paused", "cancelled"].includes(account.onboarding_status);
 
   useEffect(() => {
     fetchAccount();
@@ -199,7 +206,9 @@ const DealerOnboarding = () => {
         <div>
           <h2 className="text-xl font-bold text-card-foreground">Dealer Onboarding</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Configure the account architecture, BDC model, and billing for this dealership.
+            {readOnly
+              ? "Account configuration (read-only). Contact an admin to make changes."
+              : "Configure the account architecture, BDC model, and billing for this dealership."}
           </p>
         </div>
         <Badge variant="outline" className={cn("gap-1.5 px-3 py-1", statusCfg.color)}>
@@ -225,9 +234,11 @@ const DealerOnboarding = () => {
               return (
                 <button
                   key={opt.value}
-                  onClick={() => updateField("architecture", opt.value)}
+                  onClick={() => !readOnly && updateField("architecture", opt.value)}
+                  disabled={readOnly}
                   className={cn(
                     "flex items-start gap-3 p-4 rounded-lg border text-left transition-all",
+                    readOnly && "opacity-70 cursor-default",
                     selected
                       ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                       : "border-border hover:border-primary/40 hover:bg-muted/30"
@@ -267,9 +278,11 @@ const DealerOnboarding = () => {
               return (
                 <button
                   key={opt.value}
-                  onClick={() => updateField("bdc_model", opt.value)}
+                  onClick={() => !readOnly && updateField("bdc_model", opt.value)}
+                  disabled={readOnly}
                   className={cn(
                     "flex items-start gap-3 p-4 rounded-lg border text-left transition-all",
+                    readOnly && "opacity-70 cursor-default",
                     selected
                       ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                       : "border-border hover:border-primary/40 hover:bg-muted/30"
@@ -306,6 +319,7 @@ const DealerOnboarding = () => {
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Plan Tier</Label>
               <Select
+                disabled={readOnly}
                 value={account.plan_tier}
                 onValueChange={v => {
                   const tier = PLAN_TIERS.find(t => t.value === v);
@@ -332,6 +346,7 @@ const DealerOnboarding = () => {
                 min={0}
                 value={account.plan_cost}
                 onChange={e => updateField("plan_cost", Number(e.target.value))}
+                disabled={readOnly}
               />
             </div>
 
@@ -342,6 +357,7 @@ const DealerOnboarding = () => {
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
+                    disabled={readOnly}
                     className={cn("w-full justify-start text-left font-normal", !account.start_date && "text-muted-foreground")}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -363,6 +379,7 @@ const DealerOnboarding = () => {
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Billing Day of Month</Label>
               <Select
+                disabled={readOnly}
                 value={account.billing_date?.toString() || ""}
                 onValueChange={v => updateField("billing_date", v ? Number(v) : null)}
               >
@@ -382,6 +399,7 @@ const DealerOnboarding = () => {
             <Select
               value={account.onboarding_status}
               onValueChange={v => updateField("onboarding_status", v)}
+              disabled={readOnly}
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -407,26 +425,29 @@ const DealerOnboarding = () => {
             onChange={e => updateField("special_instructions", e.target.value)}
             placeholder="e.g. No SMS follow-ups after 6pm, use dealer logo on all customer emails, custom offer floor of $2,000..."
             className="text-sm"
+            disabled={readOnly}
           />
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-2 pb-8">
-        <Button onClick={handleSave} disabled={saving} className="gap-2 flex-1">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {existingId ? "Update Account" : "Create Account"}
-        </Button>
-        <Button
-          onClick={applyAutoConfig}
-          disabled={applying}
-          variant="outline"
-          className="gap-2 flex-1"
-        >
-          {applying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
-          Apply Auto-Config
-        </Button>
-      </div>
+      {/* Actions — hidden in read-only mode */}
+      {!readOnly && (
+        <div className="flex flex-col sm:flex-row gap-3 pt-2 pb-8">
+          <Button onClick={handleSave} disabled={saving} className="gap-2 flex-1">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {existingId ? "Update Account" : "Create Account"}
+          </Button>
+          <Button
+            onClick={applyAutoConfig}
+            disabled={applying}
+            variant="outline"
+            className="gap-2 flex-1"
+          >
+            {applying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
+            Apply Auto-Config
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -990,10 +990,11 @@ const OfferPage = () => {
                           </span>
                           <span className="font-medium text-card-foreground whitespace-nowrap">{categoryLabel}</span>
                           <InlineEdit
-                            value={item.editValue || answerPart}
+                            value={answerPart}
                             onSave={(val) => handleFieldUpdate(item.field!, val)}
                             type="select"
                             options={item.editOptions!}
+                            selectedValue={item.editValue}
                             label={item.field}
                             className="text-sm"
                           />

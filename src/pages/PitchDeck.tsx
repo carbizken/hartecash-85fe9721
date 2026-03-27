@@ -1152,6 +1152,7 @@ export default function PitchDeck() {
                 ["Service drive seed-planting SMS", true, false],
                 ["In-store trade link generation", true, false],
                 ["Basic lead capture form", true, true],
+                ["AI-powered photo damage detection", true, false],
               ].map(([feature, us, them], i) => (
                 <CompRow key={i} feature={feature as string} us={us as boolean} them={them as boolean} />
               ))}

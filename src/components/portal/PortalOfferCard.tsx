@@ -214,6 +214,15 @@ const PortalOfferCard = ({
               Offer Accepted
             </div>
 
+            {/* Link back to offer page */}
+            <Link
+              to={`/offer/${token}`}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary/20 bg-primary/5 text-primary font-semibold text-sm hover:bg-primary/10 transition-colors"
+            >
+              View Your Offer
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+
             {/* Countdown */}
             <div
               className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold ${

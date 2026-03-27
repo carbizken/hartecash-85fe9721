@@ -101,6 +101,7 @@ const benefits = [
 ];
 
 const ServiceLanding = () => {
+  const { config: siteConfig } = useSiteConfig();
   const [searchParams] = useSearchParams();
   const vinParam = searchParams.get("vin") || "";
   const appointmentDate = searchParams.get("date") || "";

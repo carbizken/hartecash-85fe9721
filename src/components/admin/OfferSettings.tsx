@@ -395,9 +395,20 @@ const OfferSettings = () => {
           <h2 className="text-lg font-bold text-card-foreground">Price Builder Workbench</h2>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
-          Use the live simulator to test your pricing model. Adjust settings below and watch offers update instantly.
+          Build, test, and save pricing models. Adjust any setting below and watch the simulator update in real-time. Save named models to switch strategies instantly.
         </p>
-        <OfferSimulator settings={settings} savedSettings={savedSettings} rules={rules} />
+
+        {/* Pricing Model Manager — embedded controls */}
+        <PricingModelManager onModelChange={setModelOverrideSettings} />
+
+        {/* Simulator — uses model override settings when available */}
+        <div className="mt-4">
+          <OfferSimulator
+            settings={modelOverrideSettings || settings}
+            savedSettings={savedSettings}
+            rules={rules}
+          />
+        </div>
       </div>
 
       {/* Save button — prominent at top */}

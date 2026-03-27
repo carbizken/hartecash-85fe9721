@@ -630,14 +630,11 @@ const OfferSettings = () => {
         </div>
       </Section>
 
-      {/* Save button */}
-      <Button onClick={handleSaveSettings} disabled={saving} className="gap-2 bg-accent hover:bg-accent/90 text-accent-foreground">
+      {/* Save button — bottom */}
+      <Button onClick={handleSaveSettings} disabled={saving} size="lg" className="gap-2 bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto">
         <Save className="w-4 h-4" />
         {saving ? "Saving…" : "Save All Settings"}
       </Button>
-
-      {/* ── Offer Simulator ── */}
-      <OfferSimulator settings={settings} savedSettings={savedSettings} rules={rules} />
 
       {/* ── Section 5: Criteria-Based Rules ── */}
       <Section

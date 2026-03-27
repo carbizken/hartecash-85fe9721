@@ -349,7 +349,7 @@ const ServiceLanding = () => {
           <motion.p variants={fadeUp} custom={2} className="text-lg md:text-xl text-[hsl(215,20%,65%)] mb-10 leading-relaxed max-w-xl mx-auto">
             {formattedAppointment
               ? `While you're here on ${formattedAppointment.split(" at")[0]} for service, let us show you what your ${vehicleLabel || "vehicle"} is worth — it only takes 2 minutes.`
-              : `You're already trusting us with your vehicle's care. Let us show you what it's worth — and how easy upgrading can be.`}
+              : (siteConfig.service_hero_subtext || `You're already trusting us with your vehicle's care. Let us show you what it's worth — and how easy upgrading can be.`)}
           </motion.p>
 
           <motion.div variants={fadeUp} custom={3} className="flex items-center justify-center gap-1 mb-2">

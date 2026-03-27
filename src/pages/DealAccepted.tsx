@@ -190,9 +190,7 @@ const DealAccepted = () => {
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Vehicle + offer recap */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
+          {...entrance(2)}
           className="bg-card rounded-xl p-6 shadow-lg mb-8 flex flex-col md:flex-row items-center gap-6"
         >
           {s.vehicle_year && s.vehicle_make && s.vehicle_model && (

@@ -298,6 +298,7 @@ const PricingModelManager = ({ onModelChange, onRegisterSync }: Props) => {
     }
   }, [onRegisterSync]);
 
+  const selectModel = (id: string) => {
     const m = models.find(m => m.id === id);
     if (m) {
       setSelectedModelId(id);

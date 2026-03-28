@@ -421,11 +421,18 @@ const SubmissionDetailSheet = ({
               <SectionCard
                 icon={Car}
                 title="Vehicle Details"
-                headerRight={
-                  <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => window.open(`${window.location.origin}/inspection/${sub.id}`, "_blank")}>
-                    <ClipboardList className="w-3.5 h-3.5" /> Inspection Sheet
-                  </Button>
-                }
+                headerRight={(() => {
+                  const INSPECTED_STATUSES = ['inspection_completed','appraisal_completed','manager_approval','price_agreed','title_verified','ownership_verified','purchase_complete'];
+                  const isInspected = INSPECTED_STATUSES.includes(sub.progress_status);
+                  const inspClass = isInspected
+                    ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 border-0"
+                    : "bg-gradient-to-r from-orange-400 to-amber-500 text-white hover:from-orange-500 hover:to-amber-600 border-0";
+                  return (
+                    <Button size="sm" className={`h-7 text-xs gap-1 ${inspClass}`} onClick={() => window.open(`${window.location.origin}/inspection/${sub.id}`, "_blank")}>
+                      <ClipboardList className="w-3.5 h-3.5" /> Inspection Sheet
+                    </Button>
+                  );
+                })()}
               >
                 {sub.vehicle_year && sub.vehicle_make && sub.vehicle_model && (
                   <div className="mb-4 rounded-lg overflow-hidden bg-gradient-to-b from-muted/30 to-transparent" style={{ aspectRatio: "16/7" }}>

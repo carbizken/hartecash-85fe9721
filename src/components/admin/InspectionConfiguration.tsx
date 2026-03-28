@@ -182,6 +182,7 @@ const InspectionConfiguration = () => {
         tire_deduct_threshold: tireDeductThreshold,
         tire_credit_per_32: tireCreditPer32,
         tire_deduct_per_32: tireDeductPer32,
+        tire_adjustment_mode: tireAdjustmentMode,
         updated_at: new Date().toISOString(),
       } as any)
       .eq("id", configId);

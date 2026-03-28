@@ -2491,6 +2491,8 @@ const AdminDashboard = () => {
                 />
               </div>
 
+              {/* Two-Column: Photos + Documents */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {/* Photos */}
               <div data-print-section className="rounded-xl border border-border bg-card shadow-sm overflow-hidden p-4">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">

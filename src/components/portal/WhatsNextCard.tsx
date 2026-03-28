@@ -92,7 +92,7 @@ function getNextAction(status: string, photosUploaded: boolean, docsUploaded: bo
   }
 
   // Everything done but no appointment yet (edge case)
-  if (!appointmentSet && ["offer_made", "contacted", "price_agreed"].includes(status)) {
+  if (!appointmentSet && ["offer_accepted"].includes(status)) {
     return {
       emoji: "📅",
       title: "You're All Set — Just Book Your Visit!",

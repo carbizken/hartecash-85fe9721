@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -96,6 +97,7 @@ const InspectionConfiguration = () => {
 
   // Tire credit/deduction policy
   const [enableTireAdjustments, setEnableTireAdjustments] = useState(false);
+  const [tireAdjustmentMode, setTireAdjustmentMode] = useState<"whole" | "per_tire">("whole");
   const [tireCreditThreshold, setTireCreditThreshold] = useState(6);
   const [tireDeductThreshold, setTireDeductThreshold] = useState(3);
   const [tireCreditPer32, setTireCreditPer32] = useState(25);
@@ -147,6 +149,7 @@ const InspectionConfiguration = () => {
         setTireDeductThreshold((data as any).tire_deduct_threshold ?? 3);
         setTireCreditPer32((data as any).tire_credit_per_32 ?? 25);
         setTireDeductPer32((data as any).tire_deduct_per_32 ?? 50);
+        setTireAdjustmentMode((data as any).tire_adjustment_mode || 'whole');
       }
       setLoading(false);
     };
@@ -180,6 +183,7 @@ const InspectionConfiguration = () => {
         tire_deduct_threshold: tireDeductThreshold,
         tire_credit_per_32: tireCreditPer32,
         tire_deduct_per_32: tireDeductPer32,
+        tire_adjustment_mode: tireAdjustmentMode,
         updated_at: new Date().toISOString(),
       } as any)
       .eq("id", configId);
@@ -380,33 +384,67 @@ const InspectionConfiguration = () => {
 
                         {enableTireAdjustments && (
                           <div className="mt-3 space-y-3 bg-muted/30 rounded-lg p-3">
+                            {/* Mode toggle */}
+                            <div>
+                              <label className="text-xs font-semibold text-muted-foreground block mb-1.5">Calculation Mode</label>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setTireAdjustmentMode("whole")}
+                                  className={cn(
+                                    "flex-1 text-xs py-2 px-3 rounded-md border font-medium transition-colors",
+                                    tireAdjustmentMode === "whole"
+                                      ? "bg-primary text-primary-foreground border-primary"
+                                      : "bg-background border-border text-muted-foreground hover:bg-muted"
+                                  )}
+                                >
+                                  Average (Whole Set)
+                                </button>
+                                <button
+                                  onClick={() => setTireAdjustmentMode("per_tire")}
+                                  className={cn(
+                                    "flex-1 text-xs py-2 px-3 rounded-md border font-medium transition-colors",
+                                    tireAdjustmentMode === "per_tire"
+                                      ? "bg-primary text-primary-foreground border-primary"
+                                      : "bg-background border-border text-muted-foreground hover:bg-muted"
+                                  )}
+                                >
+                                  Per Tire
+                                </button>
+                              </div>
+                              <p className="text-[9px] text-muted-foreground mt-1">
+                                {tireAdjustmentMode === "whole"
+                                  ? "Uses the average depth of all 4 tires to calculate one flat credit/deduction"
+                                  : "Each tire is evaluated individually — mixed depths = mixed credits & deductions"}
+                              </p>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-3">
                               <div>
                                 <label className="text-xs text-muted-foreground block mb-1">Credit above (/32)</label>
                                 <Input
                                   type="number"
-                                  min={1} max={12}
+                                  min={2} max={10}
                                   value={tireCreditThreshold}
                                   onChange={e => setTireCreditThreshold(Number(e.target.value))}
                                   className="h-8 text-sm"
                                 />
-                                <p className="text-[9px] text-muted-foreground mt-0.5">Avg depth ≥ this = credit</p>
+                                <p className="text-[9px] text-muted-foreground mt-0.5">{tireAdjustmentMode === "whole" ? "Avg" : "Each tire"} depth ≥ this = credit</p>
                               </div>
                               <div>
                                 <label className="text-xs text-muted-foreground block mb-1">Deduct below (/32)</label>
                                 <Input
                                   type="number"
-                                  min={0} max={12}
+                                  min={2} max={10}
                                   value={tireDeductThreshold}
                                   onChange={e => setTireDeductThreshold(Number(e.target.value))}
                                   className="h-8 text-sm"
                                 />
-                                <p className="text-[9px] text-muted-foreground mt-0.5">Avg depth ≤ this = deduction</p>
+                                <p className="text-[9px] text-muted-foreground mt-0.5">{tireAdjustmentMode === "whole" ? "Avg" : "Each tire"} depth ≤ this = deduction</p>
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="text-xs text-muted-foreground block mb-1">Credit per /32 per tire ($)</label>
+                                <label className="text-xs text-muted-foreground block mb-1">Credit $ per /32 {tireAdjustmentMode === "per_tire" ? "per tire" : "× 4 tires"}</label>
                                 <Input
                                   type="number"
                                   min={0}
@@ -416,7 +454,7 @@ const InspectionConfiguration = () => {
                                 />
                               </div>
                               <div>
-                                <label className="text-xs text-muted-foreground block mb-1">Deduct per /32 per tire ($)</label>
+                                <label className="text-xs text-muted-foreground block mb-1">Deduct $ per /32 {tireAdjustmentMode === "per_tire" ? "per tire" : "× 4 tires"}</label>
                                 <Input
                                   type="number"
                                   min={0}
@@ -427,10 +465,19 @@ const InspectionConfiguration = () => {
                               </div>
                             </div>
                             <div className="text-[10px] text-muted-foreground bg-background rounded p-2 border">
-                              <strong>Example:</strong> If avg depth is {tireCreditThreshold + 2}/32 (credit threshold {tireCreditThreshold}), 
-                              credit = 2 × ${tireCreditPer32} × 4 tires = <strong className="text-green-600">+${2 * tireCreditPer32 * 4}</strong>.
-                              If avg depth is {Math.max(tireDeductThreshold - 1, 0)}/32 (deduct threshold {tireDeductThreshold}),
-                              deduction = {Math.max(tireDeductThreshold - Math.max(tireDeductThreshold - 1, 0), 0)} × ${tireDeductPer32} × 4 = <strong className="text-red-600">-${Math.max(tireDeductThreshold - Math.max(tireDeductThreshold - 1, 0), 0) * tireDeductPer32 * 4}</strong>
+                              {tireAdjustmentMode === "per_tire" ? (
+                                <>
+                                  <strong>Example (Per Tire):</strong> Tire at 8/32 (threshold {tireCreditThreshold}) → credit = {Math.max(8 - tireCreditThreshold, 0)} × ${tireCreditPer32} = <strong className="text-green-600">+${Math.max(8 - tireCreditThreshold, 0) * tireCreditPer32}</strong>.
+                                  Tire at 2/32 (threshold {tireDeductThreshold}) → deduction = {Math.max(tireDeductThreshold - 2, 0)} × ${tireDeductPer32} = <strong className="text-red-600">-${Math.max(tireDeductThreshold - 2, 0) * tireDeductPer32}</strong>. Each tire calculated separately, then summed.
+                                </>
+                              ) : (
+                                <>
+                                  <strong>Example (Whole):</strong> Avg depth {tireCreditThreshold + 2}/32 (threshold {tireCreditThreshold}) → 
+                                  credit = 2 × ${tireCreditPer32} × 4 = <strong className="text-green-600">+${2 * tireCreditPer32 * 4}</strong>.
+                                  Avg depth {Math.max(tireDeductThreshold - 1, 2)}/32 (threshold {tireDeductThreshold}) → 
+                                  deduction = {Math.max(tireDeductThreshold - Math.max(tireDeductThreshold - 1, 2), 0)} × ${tireDeductPer32} × 4 = <strong className="text-red-600">-${Math.max(tireDeductThreshold - Math.max(tireDeductThreshold - 1, 2), 0) * tireDeductPer32 * 4}</strong>
+                                </>
+                              )}
                             </div>
                           </div>
                         )}

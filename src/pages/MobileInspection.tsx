@@ -252,9 +252,9 @@ const MobileInspection = () => {
             
             {/* Legend */}
             <div className="flex justify-between text-[10px] pt-1 border-t">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> 6+ Add $$$</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> 4-5 No Change</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> ≤3 Deduct $</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> 6–10 Credit $$$</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> 4–5 No Change</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> 2–3 Deduct $</span>
             </div>
           </CardContent>
         </Card>

@@ -75,6 +75,7 @@ const AdminSidebar = ({
     ? [
         { key: "offer-settings", label: "Offer Builder", icon: SlidersHorizontal, badge: pricingAccessRequestCount > 0 ? String(pricingAccessRequestCount) : undefined, badgeVariant: "destructive" as const },
         ...(canManageAccess ? [{ key: "form-config", label: "Lead Form", icon: ListChecks }] : []),
+        ...(canManageAccess ? [{ key: "inspection-config", label: "Inspection Sheet", icon: Shield }] : []),
         ...(canManageAccess ? [{ key: "notifications", label: "Notifications", icon: Bell }] : []),
       ].filter((item) => isAllowed(item.key))
     : [];

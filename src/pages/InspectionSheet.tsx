@@ -931,7 +931,7 @@ const InspectionSheet = () => {
         )}
 
         {/* ── #3 Smart-ordered sections: Tires/Brakes first ── */}
-        {SECTION_DEFS.map(section => {
+        {ACTIVE_SECTION_DEFS.map(section => {
           if (section.key === "tires") {
             return (
               <div key="tires" ref={el => { sectionRefs.current["tires"] = el; }}>

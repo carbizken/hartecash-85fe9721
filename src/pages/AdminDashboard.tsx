@@ -2874,7 +2874,6 @@ const AdminDashboard = () => {
                 )}
               </div>
             </div>
-            </div>
             </ScrollArea>
           )}
         </SheetContent>

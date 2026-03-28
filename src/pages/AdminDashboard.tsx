@@ -2179,6 +2179,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
+              </div>{/* End Condition + Loan grid */}
 
               {/* Unified Acquisition Tracker */}
               <div data-print-section className="rounded-xl border border-border bg-card shadow-sm overflow-hidden p-4">

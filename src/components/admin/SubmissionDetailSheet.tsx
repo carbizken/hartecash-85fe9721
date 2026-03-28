@@ -587,7 +587,7 @@ const SubmissionDetailSheet = ({
                 </Select>
               </div>
 
-              {sub.progress_status === "appraisal_completed" && (
+              {sub.progress_status === "inspection_completed" && (
                 <div className="mt-3 space-y-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1 block">In-House ACV <span className="text-destructive">*</span></label>
                   <div className="relative">

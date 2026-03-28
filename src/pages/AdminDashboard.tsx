@@ -1956,6 +1956,7 @@ const AdminDashboard = () => {
           {selected && (
             <ScrollArea className="flex-1">
             <div className="p-6 space-y-5">
+              {/* Full-width alerts */}
               {/* Duplicate Warning */}
               {duplicateWarnings[selected.id] && duplicateWarnings[selected.id].length > 0 && (
                 <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 flex items-start gap-2">

@@ -10,6 +10,7 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import TreadDepthPicker from "@/components/inspection/TreadDepthPicker";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -432,7 +433,7 @@ const InspectionSheet = () => {
   const vehicleCardRef = useRef<HTMLDivElement>(null);
 
   // Tire & brake
-  const [tireDepth, setTireDepth] = useState({ lf: "", rf: "", lr: "", rr: "" });
+  const [tireDepth, setTireDepth] = useState<{ lf: number | null; rf: number | null; lr: number | null; rr: number | null }>({ lf: null, rf: null, lr: null, rr: null });
   const [brakeDepth, setBrakeDepth] = useState({ lf: "", rf: "", lr: "", rr: "" });
 
   // Mechanical fields
@@ -556,7 +557,7 @@ const InspectionSheet = () => {
     const sections = [
       `[INSPECTION ${new Date().toLocaleString()}]`,
       ...(inspConfig.section_tires ? [
-        `Tires (tread /32): LF:${tireDepth.lf} RF:${tireDepth.rf} LR:${tireDepth.lr} RR:${tireDepth.rr}`,
+        `Tires (tread /32): LF:${tireDepth.lf ?? "—"} RF:${tireDepth.rf ?? "—"} LR:${tireDepth.lr ?? "—"} RR:${tireDepth.rr ?? "—"}`,
         `Brakes (mm): LF:${brakeDepth.lf} RF:${brakeDepth.rf} LR:${brakeDepth.lr} RR:${brakeDepth.rr}`,
       ] : []),
       ...(inspConfig.section_measurements ? [
@@ -627,7 +628,7 @@ const InspectionSheet = () => {
         <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-top:none;">
           <thead><tr style="background:#f1f5f9;"><th style="padding:6px;font-size:11px;border-bottom:1px solid #e2e8f0;"></th><th style="padding:6px;font-size:11px;border-bottom:1px solid #e2e8f0;">LF</th><th style="padding:6px;font-size:11px;border-bottom:1px solid #e2e8f0;">RF</th><th style="padding:6px;font-size:11px;border-bottom:1px solid #e2e8f0;">LR</th><th style="padding:6px;font-size:11px;border-bottom:1px solid #e2e8f0;">RR</th></tr></thead>
           <tbody>
-            <tr><td style="padding:6px;font-size:12px;font-weight:600;border-bottom:1px solid #e2e8f0;">Tread (/32)</td><td style="padding:6px;text-align:center;border-bottom:1px solid #e2e8f0;">${tireDepth.lf || "—"}</td><td style="padding:6px;text-align:center;border-bottom:1px solid #e2e8f0;">${tireDepth.rf || "—"}</td><td style="padding:6px;text-align:center;border-bottom:1px solid #e2e8f0;">${tireDepth.lr || "—"}</td><td style="padding:6px;text-align:center;border-bottom:1px solid #e2e8f0;">${tireDepth.rr || "—"}</td></tr>
+            <tr><td style="padding:6px;font-size:12px;font-weight:600;border-bottom:1px solid #e2e8f0;">Tread (/32)</td><td style="padding:6px;text-align:center;border-bottom:1px solid #e2e8f0;">${tireDepth.lf ?? "—"}</td><td style="padding:6px;text-align:center;border-bottom:1px solid #e2e8f0;">${tireDepth.rf ?? "—"}</td><td style="padding:6px;text-align:center;border-bottom:1px solid #e2e8f0;">${tireDepth.lr ?? "—"}</td><td style="padding:6px;text-align:center;border-bottom:1px solid #e2e8f0;">${tireDepth.rr ?? "—"}</td></tr>
             <tr><td style="padding:6px;font-size:12px;font-weight:600;">Brake (mm)</td><td style="padding:6px;text-align:center;">${brakeDepth.lf || "—"}</td><td style="padding:6px;text-align:center;">${brakeDepth.rf || "—"}</td><td style="padding:6px;text-align:center;">${brakeDepth.lr || "—"}</td><td style="padding:6px;text-align:center;">${brakeDepth.rr || "—"}</td></tr>
           </tbody>
         </table>
@@ -957,11 +958,11 @@ const InspectionSheet = () => {
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                         <CardContent className="pt-2">
                           {inspConfig.show_tire_tread_depth && (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                              <TireBrakeInput label="LF Tread" value={tireDepth.lf} onChange={v => setTireDepth(p => ({ ...p, lf: v }))} placeholder="/32" />
-                              <TireBrakeInput label="RF Tread" value={tireDepth.rf} onChange={v => setTireDepth(p => ({ ...p, rf: v }))} placeholder="/32" />
-                              <TireBrakeInput label="LR Tread" value={tireDepth.lr} onChange={v => setTireDepth(p => ({ ...p, lr: v }))} placeholder="/32" />
-                              <TireBrakeInput label="RR Tread" value={tireDepth.rr} onChange={v => setTireDepth(p => ({ ...p, rr: v }))} placeholder="/32" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                              <TreadDepthPicker label="Left Front" value={tireDepth.lf} onChange={v => setTireDepth(p => ({ ...p, lf: v }))} />
+                              <TreadDepthPicker label="Right Front" value={tireDepth.rf} onChange={v => setTireDepth(p => ({ ...p, rf: v }))} />
+                              <TreadDepthPicker label="Left Rear" value={tireDepth.lr} onChange={v => setTireDepth(p => ({ ...p, lr: v }))} />
+                              <TreadDepthPicker label="Right Rear" value={tireDepth.rr} onChange={v => setTireDepth(p => ({ ...p, rr: v }))} />
                             </div>
                           )}
                           {inspConfig.show_brake_pad_measurements && (
@@ -970,14 +971,6 @@ const InspectionSheet = () => {
                               <TireBrakeInput label="RF Brake" value={brakeDepth.rf} onChange={v => setBrakeDepth(p => ({ ...p, rf: v }))} placeholder="mm" accent />
                               <TireBrakeInput label="LR Brake" value={brakeDepth.lr} onChange={v => setBrakeDepth(p => ({ ...p, lr: v }))} placeholder="mm" accent />
                               <TireBrakeInput label="RR Brake" value={brakeDepth.rr} onChange={v => setBrakeDepth(p => ({ ...p, rr: v }))} placeholder="mm" accent />
-                            </div>
-                          )}
-                          {inspConfig.show_tire_tread_depth && (
-                            <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                              <TreadGuide label="New" range="10-11/32" color="bg-emerald-500" />
-                              <TreadGuide label="Good" range="6-9/32" color="bg-emerald-400" />
-                              <TreadGuide label="Fair" range="4-5/32" color="bg-amber-400" />
-                              <TreadGuide label="Replace" range="≤3/32" color="bg-red-500" />
                             </div>
                           )}
                         </CardContent>

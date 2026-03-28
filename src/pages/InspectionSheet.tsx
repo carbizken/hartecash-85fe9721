@@ -180,7 +180,7 @@ const ChecklistSection = ({
   onCycle: (item: string) => void;
   onNoteChange: (item: string, v: string) => void;
 }) => {
-  const checked = items.filter(i => grades[i] && grades[i] !== "");
+  const checked = items.filter(i => !!grades[i]);
   const issues = items.filter(i => grades[i] === "poor" || grades[i] === "damaged");
 
   return (

@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
 
   const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
     "558d8454-079c-42f0-9499-b88e01606639",
-    { password: "Summer2026!" }
+    { password: "Summer2026!Harte" }
   );
 
   return new Response(JSON.stringify({ success: !error, error: error?.message }), {

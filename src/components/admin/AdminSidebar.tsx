@@ -93,10 +93,11 @@ const AdminSidebar = ({
     { key: "compliance", label: "Compliance", icon: ShieldCheck },
   ].filter((item) => isAllowed(item.key) || isAllowed("consent") || isAllowed("comm-log"));
 
-  // ── Tools (utilities) ──
+  // ── Tools (utilities — consolidated) ──
   const toolsItems = [
+    { key: "reports", label: "Reports & Export", icon: Send },
     ...(canManageAccess ? [{ key: "image-inventory", label: "Vehicle Images", icon: Car }] : []),
-    ...(canManageAccess ? [{ key: "changelog", label: "Changelog", icon: Newspaper }] : []),
+    ...(canManageAccess ? [{ key: "system-settings", label: "System Settings", icon: Wrench }] : []),
     { key: "onboarding", label: "Dealer Setup Guide", icon: Rocket },
   ].filter((item) => isAllowed(item.key));
 

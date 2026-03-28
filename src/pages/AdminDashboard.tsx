@@ -23,6 +23,7 @@ import DealerOnboarding from "@/components/admin/DealerOnboarding";
 import ReportsExport from "@/components/admin/ReportsExport";
 import PermissionManagement from "@/components/admin/PermissionManagement";
 import ExecutiveKPIHub from "@/components/admin/ExecutiveKPIHub";
+import InspectionConfiguration from "@/components/admin/InspectionConfiguration";
 import RequestAccessDialog from "@/components/admin/RequestAccessDialog";
 import SubmissionsTable from "@/components/admin/SubmissionsTable";
 import SubmissionDetailSheet from "@/components/admin/SubmissionDetailSheet";
@@ -363,6 +364,7 @@ const AdminDashboard = () => {
             {activeSection === "site-config" && canManageAccess && <SiteConfiguration />}
             {activeSection === "notifications" && canManageAccess && <NotificationSettings />}
             {activeSection === "form-config" && canManageAccess && <FormConfiguration />}
+            {activeSection === "inspection-config" && canManageAccess && <InspectionConfiguration />}
             {activeSection === "testimonials" && canManageAccess && <TestimonialManagement />}
             {activeSection === "locations" && canManageAccess && <LocationManagement />}
             {activeSection === "image-inventory" && canManageAccess && <VehicleImageInventory />}

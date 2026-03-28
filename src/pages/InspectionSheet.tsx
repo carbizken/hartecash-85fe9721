@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useInspectionConfig } from "@/hooks/useInspectionConfig";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Printer, Camera, AlertTriangle, CheckCircle, Car, Gauge, Wrench,
@@ -378,6 +379,7 @@ const InspectionSheet = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const { config } = useSiteConfig();
+  const { config: inspConfig, loading: inspConfigLoading } = useInspectionConfig();
   const printRef = useRef<HTMLDivElement>(null);
 
   const [submission, setSubmission] = useState<any>(null);
@@ -386,6 +388,35 @@ const InspectionSheet = () => {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showMobileQR, setShowMobileQR] = useState(false);
+
+  // Build config-aware section definitions
+  const sectionToggleMap: Record<string, boolean> = {
+    tires: inspConfig.section_tires,
+    measurements: inspConfig.section_measurements,
+    exterior: inspConfig.section_exterior,
+    interior: inspConfig.section_interior,
+    mechanical: inspConfig.section_mechanical,
+    electrical: inspConfig.section_electrical,
+    glass: inspConfig.section_glass,
+  };
+
+  // Reorder + filter sections based on config
+  const ACTIVE_SECTION_DEFS = inspConfig.section_order
+    .filter(key => sectionToggleMap[key] !== false)
+    .map(key => {
+      const def = SECTION_DEFS.find(s => s.key === key);
+      if (!def) return null;
+      // Filter out disabled fields and add custom items
+      const filteredItems = def.items.filter(item => !inspConfig.disabled_fields[item]);
+      const customForSection = inspConfig.custom_items
+        .filter(ci => ci.section === key)
+        .map(ci => ci.label);
+      return { ...def, items: [...filteredItems, ...customForSection] };
+    })
+    .filter(Boolean) as typeof SECTION_DEFS;
+
+  const ACTIVE_CHECKLIST_SECTIONS = ACTIVE_SECTION_DEFS.filter(s => s.items.length > 0);
+  const ACTIVE_ALL_ITEMS = ACTIVE_CHECKLIST_SECTIONS.flatMap(s => s.items);
 
   // #6 — Sticky tab active section
   const [activeTab, setActiveTab] = useState("tires");
@@ -460,7 +491,7 @@ const InspectionSheet = () => {
   // Scroll spy for tabs
   useEffect(() => {
     const handleScroll = () => {
-      for (const section of SECTION_DEFS) {
+      for (const section of ACTIVE_SECTION_DEFS) {
         const el = sectionRefs.current[section.key];
         if (el) {
           const rect = el.getBoundingClientRect();
@@ -524,12 +555,16 @@ const InspectionSheet = () => {
 
     const sections = [
       `[INSPECTION ${new Date().toLocaleString()}]`,
-      `Tires (tread /32): LF:${tireDepth.lf} RF:${tireDepth.rf} LR:${tireDepth.lr} RR:${tireDepth.rr}`,
-      `Brakes (mm): LF:${brakeDepth.lf} RF:${brakeDepth.rf} LR:${brakeDepth.lr} RR:${brakeDepth.rr}`,
-      paintReading && `Paint: ${paintReading}`,
-      oilLife && `Oil: ${oilLife}`,
-      batteryHealth && `Battery: ${batteryHealth}`,
-      ...ALL_CHECKLIST_SECTIONS.map(s => gatherSection(s.label.toUpperCase(), s.items)),
+      ...(inspConfig.section_tires ? [
+        `Tires (tread /32): LF:${tireDepth.lf} RF:${tireDepth.rf} LR:${tireDepth.lr} RR:${tireDepth.rr}`,
+        `Brakes (mm): LF:${brakeDepth.lf} RF:${brakeDepth.rf} LR:${brakeDepth.lr} RR:${brakeDepth.rr}`,
+      ] : []),
+      ...(inspConfig.section_measurements ? [
+        paintReading && `Paint: ${paintReading}`,
+        oilLife && `Oil: ${oilLife}`,
+        batteryHealth && `Battery: ${batteryHealth}`,
+      ].filter(Boolean) : []),
+      ...ACTIVE_CHECKLIST_SECTIONS.map(s => gatherSection(s.label.toUpperCase(), s.items)),
       overallGrade && `Grade: ${overallGrade}`,
       inspectorNotes && `Notes: ${inspectorNotes}`,
     ].filter(Boolean).join("\n\n");
@@ -637,13 +672,13 @@ const InspectionSheet = () => {
       </div>
 
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-        <span style="font-size:11px;font-weight:600;color:#64748b;">Completion: ${totalChecked}/${ALL_ITEMS.length} (${Math.round(progressPct)}%)</span>
+        <span style="font-size:11px;font-weight:600;color:#64748b;">Completion: ${totalChecked}/${ACTIVE_ALL_ITEMS.length} (${Math.round(progressPct)}%)</span>
         ${totalIssues > 0 ? `<span style="font-size:11px;font-weight:600;color:#ef4444;">· ${totalIssues} issue${totalIssues > 1 ? "s" : ""} flagged</span>` : ""}
       </div>
 
       ${tireBrakeHTML}
       ${measurementsHTML}
-      ${ALL_CHECKLIST_SECTIONS.map(s => sectionBlock(s.label, s.items)).join("")}
+      ${ACTIVE_CHECKLIST_SECTIONS.map(s => sectionBlock(s.label, s.items)).join("")}
       ${notesHTML}
 
       <div style="margin-top:32px;padding-top:16px;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;">
@@ -686,9 +721,9 @@ const InspectionSheet = () => {
   );
 
   // Overall completion
-  const totalChecked = ALL_ITEMS.filter(i => !!allGrades[i]).length;
-  const totalIssues = ALL_ITEMS.filter(i => allGrades[i] === "poor" || allGrades[i] === "damaged").length;
-  const progressPct = ALL_ITEMS.length > 0 ? (totalChecked / ALL_ITEMS.length) * 100 : 0;
+  const totalChecked = ACTIVE_ALL_ITEMS.filter(i => !!allGrades[i]).length;
+  const totalIssues = ACTIVE_ALL_ITEMS.filter(i => allGrades[i] === "poor" || allGrades[i] === "damaged").length;
+  const progressPct = ACTIVE_ALL_ITEMS.length > 0 ? (totalChecked / ACTIVE_ALL_ITEMS.length) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -710,7 +745,7 @@ const InspectionSheet = () => {
             {/* #4 — Progress Ring */}
             <ProgressRing progress={progressPct} size={42} strokeWidth={4} />
             <div className="hidden md:block text-xs text-right">
-              <p className="font-semibold">{totalChecked}/{ALL_ITEMS.length}</p>
+              <p className="font-semibold">{totalChecked}/{ACTIVE_ALL_ITEMS.length}</p>
               {totalIssues > 0 && <p className="text-red-300">{totalIssues} issues</p>}
             </div>
             <div className="relative">
@@ -745,7 +780,7 @@ const InspectionSheet = () => {
         {/* #6 — Sticky Tab Navigation */}
         <div className="border-t border-primary-foreground/10 overflow-x-auto scrollbar-hide">
           <div className="max-w-5xl mx-auto px-4 flex gap-0.5">
-            {SECTION_DEFS.map(s => {
+            {ACTIVE_SECTION_DEFS.map(s => {
               const Icon = s.icon;
               const isActive = activeTab === s.key;
               return (
@@ -900,7 +935,7 @@ const InspectionSheet = () => {
         )}
 
         {/* ── #3 Smart-ordered sections: Tires/Brakes first ── */}
-        {SECTION_DEFS.map(section => {
+        {ACTIVE_SECTION_DEFS.map(section => {
           if (section.key === "tires") {
             return (
               <div key="tires" ref={el => { sectionRefs.current["tires"] = el; }}>
@@ -921,24 +956,30 @@ const InspectionSheet = () => {
                     {openSections.tires && (
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                         <CardContent className="pt-2">
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                            <TireBrakeInput label="LF Tread" value={tireDepth.lf} onChange={v => setTireDepth(p => ({ ...p, lf: v }))} placeholder="/32" />
-                            <TireBrakeInput label="RF Tread" value={tireDepth.rf} onChange={v => setTireDepth(p => ({ ...p, rf: v }))} placeholder="/32" />
-                            <TireBrakeInput label="LR Tread" value={tireDepth.lr} onChange={v => setTireDepth(p => ({ ...p, lr: v }))} placeholder="/32" />
-                            <TireBrakeInput label="RR Tread" value={tireDepth.rr} onChange={v => setTireDepth(p => ({ ...p, rr: v }))} placeholder="/32" />
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                            <TireBrakeInput label="LF Brake" value={brakeDepth.lf} onChange={v => setBrakeDepth(p => ({ ...p, lf: v }))} placeholder="mm" accent />
-                            <TireBrakeInput label="RF Brake" value={brakeDepth.rf} onChange={v => setBrakeDepth(p => ({ ...p, rf: v }))} placeholder="mm" accent />
-                            <TireBrakeInput label="LR Brake" value={brakeDepth.lr} onChange={v => setBrakeDepth(p => ({ ...p, lr: v }))} placeholder="mm" accent />
-                            <TireBrakeInput label="RR Brake" value={brakeDepth.rr} onChange={v => setBrakeDepth(p => ({ ...p, rr: v }))} placeholder="mm" accent />
-                          </div>
-                          <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                            <TreadGuide label="New" range="10-11/32" color="bg-emerald-500" />
-                            <TreadGuide label="Good" range="6-9/32" color="bg-emerald-400" />
-                            <TreadGuide label="Fair" range="4-5/32" color="bg-amber-400" />
-                            <TreadGuide label="Replace" range="≤3/32" color="bg-red-500" />
-                          </div>
+                          {inspConfig.show_tire_tread_depth && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                              <TireBrakeInput label="LF Tread" value={tireDepth.lf} onChange={v => setTireDepth(p => ({ ...p, lf: v }))} placeholder="/32" />
+                              <TireBrakeInput label="RF Tread" value={tireDepth.rf} onChange={v => setTireDepth(p => ({ ...p, rf: v }))} placeholder="/32" />
+                              <TireBrakeInput label="LR Tread" value={tireDepth.lr} onChange={v => setTireDepth(p => ({ ...p, lr: v }))} placeholder="/32" />
+                              <TireBrakeInput label="RR Tread" value={tireDepth.rr} onChange={v => setTireDepth(p => ({ ...p, rr: v }))} placeholder="/32" />
+                            </div>
+                          )}
+                          {inspConfig.show_brake_pad_measurements && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                              <TireBrakeInput label="LF Brake" value={brakeDepth.lf} onChange={v => setBrakeDepth(p => ({ ...p, lf: v }))} placeholder="mm" accent />
+                              <TireBrakeInput label="RF Brake" value={brakeDepth.rf} onChange={v => setBrakeDepth(p => ({ ...p, rf: v }))} placeholder="mm" accent />
+                              <TireBrakeInput label="LR Brake" value={brakeDepth.lr} onChange={v => setBrakeDepth(p => ({ ...p, lr: v }))} placeholder="mm" accent />
+                              <TireBrakeInput label="RR Brake" value={brakeDepth.rr} onChange={v => setBrakeDepth(p => ({ ...p, rr: v }))} placeholder="mm" accent />
+                            </div>
+                          )}
+                          {inspConfig.show_tire_tread_depth && (
+                            <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                              <TreadGuide label="New" range="10-11/32" color="bg-emerald-500" />
+                              <TreadGuide label="Good" range="6-9/32" color="bg-emerald-400" />
+                              <TreadGuide label="Fair" range="4-5/32" color="bg-amber-400" />
+                              <TreadGuide label="Replace" range="≤3/32" color="bg-red-500" />
+                            </div>
+                          )}
                         </CardContent>
                       </motion.div>
                     )}
@@ -969,9 +1010,9 @@ const InspectionSheet = () => {
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                         <CardContent className="pt-2">
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <InspectionField label="Paint Meter (mil)" value={paintReading} onChange={setPaintReading} placeholder="e.g. 4.2 avg" />
-                            <InspectionField label="Oil Life %" value={oilLife} onChange={setOilLife} placeholder="e.g. 65%" />
-                            <InspectionField label="Battery Health" value={batteryHealth} onChange={setBatteryHealth} placeholder="e.g. Good — 12.6V" />
+                            {inspConfig.show_paint_readings && <InspectionField label="Paint Meter (mil)" value={paintReading} onChange={setPaintReading} placeholder="e.g. 4.2 avg" />}
+                            {inspConfig.show_oil_life && <InspectionField label="Oil Life %" value={oilLife} onChange={setOilLife} placeholder="e.g. 65%" />}
+                            {inspConfig.show_battery_health && <InspectionField label="Battery Health" value={batteryHealth} onChange={setBatteryHealth} placeholder="e.g. Good — 12.6V" />}
                           </div>
                         </CardContent>
                       </motion.div>
@@ -1063,7 +1104,7 @@ const InspectionSheet = () => {
           <div className="flex items-center gap-3">
             <ProgressRing progress={progressPct} size={36} strokeWidth={3} />
             <div className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{totalChecked}</span>/{ALL_ITEMS.length} items
+              <span className="font-semibold text-foreground">{totalChecked}</span>/{ACTIVE_ALL_ITEMS.length} items
               {totalIssues > 0 && <span className="ml-2 text-destructive font-medium">• {totalIssues} issue{totalIssues > 1 ? "s" : ""}</span>}
             </div>
           </div>

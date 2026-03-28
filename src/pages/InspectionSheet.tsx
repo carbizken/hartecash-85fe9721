@@ -967,11 +967,11 @@ const InspectionSheet = () => {
                             </div>
                           )}
                           {inspConfig.show_brake_pad_measurements && (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                              <TireBrakeInput label="LF Brake" value={brakeDepth.lf} onChange={v => setBrakeDepth(p => ({ ...p, lf: v }))} placeholder="mm" accent />
-                              <TireBrakeInput label="RF Brake" value={brakeDepth.rf} onChange={v => setBrakeDepth(p => ({ ...p, rf: v }))} placeholder="mm" accent />
-                              <TireBrakeInput label="LR Brake" value={brakeDepth.lr} onChange={v => setBrakeDepth(p => ({ ...p, lr: v }))} placeholder="mm" accent />
-                              <TireBrakeInput label="RR Brake" value={brakeDepth.rr} onChange={v => setBrakeDepth(p => ({ ...p, rr: v }))} placeholder="mm" accent />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                              <BrakePadPicker label="Left Front" value={brakeDepth.lf} onChange={v => setBrakeDepth(p => ({ ...p, lf: v }))} />
+                              <BrakePadPicker label="Right Front" value={brakeDepth.rf} onChange={v => setBrakeDepth(p => ({ ...p, rf: v }))} />
+                              <BrakePadPicker label="Left Rear" value={brakeDepth.lr} onChange={v => setBrakeDepth(p => ({ ...p, lr: v }))} />
+                              <BrakePadPicker label="Right Rear" value={brakeDepth.rr} onChange={v => setBrakeDepth(p => ({ ...p, rr: v }))} />
                             </div>
                           )}
                         </CardContent>

@@ -281,14 +281,13 @@ const MobileInspection = () => {
             <CardTitle className="text-sm flex items-center gap-2">
               <Gauge className="h-4 w-4 text-primary" /> Brake Pad Thickness (mm)
             </CardTitle>
+            <p className="text-[10px] text-muted-foreground mt-1">Tap the measured thickness for each brake</p>
           </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="grid grid-cols-2 gap-3">
-              <MobileField label="Left Front" value={brakeLF} onChange={setBrakeLF} placeholder="mm" />
-              <MobileField label="Right Front" value={brakeRF} onChange={setBrakeRF} placeholder="mm" />
-              <MobileField label="Left Rear" value={brakeLR} onChange={setBrakeLR} placeholder="mm" />
-              <MobileField label="Right Rear" value={brakeRR} onChange={setBrakeRR} placeholder="mm" />
-            </div>
+          <CardContent className="px-4 pb-4 space-y-4">
+            <BrakePadPicker label="Left Front" value={brakeLF} onChange={setBrakeLF} />
+            <BrakePadPicker label="Right Front" value={brakeRF} onChange={setBrakeRF} />
+            <BrakePadPicker label="Left Rear" value={brakeLR} onChange={setBrakeLR} />
+            <BrakePadPicker label="Right Rear" value={brakeRR} onChange={setBrakeRR} />
           </CardContent>
         </Card>
 

@@ -1308,6 +1308,7 @@ export type Database = {
           exterior_color: string | null
           exterior_damage: string[] | null
           id: string
+          inspection_pin: string | null
           interior_damage: string[] | null
           internal_notes: string | null
           is_hot_lead: boolean
@@ -1384,6 +1385,7 @@ export type Database = {
           exterior_color?: string | null
           exterior_damage?: string[] | null
           id?: string
+          inspection_pin?: string | null
           interior_damage?: string[] | null
           internal_notes?: string | null
           is_hot_lead?: boolean
@@ -1460,6 +1462,7 @@ export type Database = {
           exterior_color?: string | null
           exterior_damage?: string[] | null
           id?: string
+          inspection_pin?: string | null
           interior_damage?: string[] | null
           internal_notes?: string | null
           is_hot_lead?: boolean
@@ -1634,6 +1637,7 @@ export type Database = {
           ai_condition_score: string
           ai_damage_summary: string
           exterior_color: string
+          inspection_pin: string
           mileage: string
           overall_condition: string
           vehicle_make: string
@@ -1720,6 +1724,10 @@ export type Database = {
           _role_id: string
         }
         Returns: undefined
+      }
+      verify_inspection_pin: {
+        Args: { _pin: string; _submission_id: string }
+        Returns: boolean
       }
     }
     Enums: {

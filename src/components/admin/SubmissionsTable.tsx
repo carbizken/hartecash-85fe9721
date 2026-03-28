@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Search, Eye, Trash2, ChevronLeft, ChevronRight, CheckCircle,
-  AlertTriangle, TrendingUp, UserCheck, XCircle,
+  AlertTriangle, TrendingUp, UserCheck, XCircle, Camera, FileText,
 } from "lucide-react";
 import type { Submission, DealerLocation } from "@/lib/adminConstants";
 import { ALL_STATUS_OPTIONS, getStatusLabel } from "@/lib/adminConstants";
@@ -244,8 +244,8 @@ const SubmissionsTable = ({
                     <th className="text-left px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap">Vehicle</th>
                     <th className="text-left px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap">VIN</th>
                     <th className="text-left px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap">Contact</th>
-                    <th className="text-left px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap">Photos</th>
                     <th className="text-left px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap">Source</th>
+                    <th className="text-right px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap">Offer</th>
                     <th className="text-left px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap min-w-[160px]">Status</th>
                     <th className="text-center px-2 py-3 font-semibold text-muted-foreground whitespace-nowrap">Age</th>
                     <th className="text-right px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap">Actions</th>
@@ -260,17 +260,14 @@ const SubmissionsTable = ({
                         <span className="flex items-center gap-1">
                           {sub.is_hot_lead && <span title="Hot Lead">🔥</span>}
                           {sub.vehicle_year && sub.vehicle_make ? `${sub.vehicle_year} ${sub.vehicle_make} ${sub.vehicle_model || ""}` : sub.plate || "—"}
+                          {sub.photos_uploaded && <span title="Photos uploaded"><Camera className="w-3 h-3 text-success ml-1 shrink-0" /></span>}
+                          {sub.docs_uploaded && <span title="Docs uploaded"><FileText className="w-3 h-3 text-primary ml-0.5 shrink-0" /></span>}
                         </span>
                       </td>
                       <td className="px-3 py-3 text-xs font-mono text-muted-foreground whitespace-nowrap">{sub.vin || "—"}</td>
                       <td className="px-3 py-3 whitespace-nowrap">
                         <div>{sub.email || "—"}</div>
                         <div className="text-muted-foreground text-xs">{formatPhone(sub.phone) || ""}</div>
-                      </td>
-                      <td className="px-3 py-3">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${sub.photos_uploaded ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}`}>
-                          {sub.photos_uploaded ? "Yes" : "No"}
-                        </span>
                       </td>
                       <td className="px-3 py-3">
                         <Badge variant={sub.lead_source === "service" ? "secondary" : sub.lead_source === "in_store_trade" || sub.lead_source === "trade" ? "default" : "outline"} className="text-xs">
@@ -280,6 +277,20 @@ const SubmissionsTable = ({
                           <p className="text-[10px] text-muted-foreground mt-0.5 truncate max-w-[120px]">
                             {dealerLocations.find(l => l.id === sub.store_location_id)?.name || "—"}
                           </p>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-right whitespace-nowrap">
+                        {sub.offered_price ? (
+                          <span className="font-semibold text-card-foreground">
+                            ${Math.floor(sub.offered_price).toLocaleString()}
+                            <span className="text-[10px] text-muted-foreground">.{String(Math.round((sub.offered_price % 1) * 100)).padStart(2, '0')}</span>
+                          </span>
+                        ) : sub.estimated_offer_high ? (
+                          <span className="text-xs text-muted-foreground" title="Estimated range">
+                            ~${Math.floor(sub.estimated_offer_high).toLocaleString()}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
                         )}
                       </td>
                       <td className="px-3 py-3">

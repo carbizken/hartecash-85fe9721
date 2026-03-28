@@ -62,12 +62,11 @@ const AdminSidebar = ({
     { key: "executive", label: "Performance", icon: BarChart3 },
   ].filter((item) => isAllowed(item.key));
 
-  // ── Team (people & access) ──
+  // ── Team (people & access) — Permissions & Access Requests merged into Staff ──
+  const teamBadgeCount = (canManageAccess ? pendingRequestCount + permissionRequestCount : 0);
   const teamItems = canManageAccess
     ? [
-        { key: "staff", label: "Staff", icon: Users },
-        { key: "permissions", label: "Permissions", icon: Shield, badge: permissionRequestCount > 0 ? String(permissionRequestCount) : undefined, badgeVariant: "destructive" as const },
-        { key: "requests", label: "Access Requests", icon: UserCheck, badge: pendingRequestCount > 0 ? String(pendingRequestCount) : undefined, badgeVariant: "destructive" as const },
+        { key: "staff", label: "Staff & Permissions", icon: Users, badge: teamBadgeCount > 0 ? String(teamBadgeCount) : undefined, badgeVariant: "destructive" as const },
       ].filter((item) => isAllowed(item.key))
     : [];
 

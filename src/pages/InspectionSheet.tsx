@@ -242,6 +242,7 @@ const InspectionSheet = () => {
   const [damageReports, setDamageReports] = useState<DamageReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showMobileQR, setShowMobileQR] = useState(false);
 
   // Tire & brake
   const [tireDepth, setTireDepth] = useState({ lf: "", rf: "", lr: "", rr: "" });

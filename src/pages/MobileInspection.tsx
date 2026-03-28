@@ -54,10 +54,10 @@ const MobileInspection = () => {
   const [tireRR, setTireRR] = useState<number | null>(null);
 
   // Other fields
-  const [brakeLF, setBrakeLF] = useState("");
-  const [brakeRF, setBrakeRF] = useState("");
-  const [brakeLR, setBrakeLR] = useState("");
-  const [brakeRR, setBrakeRR] = useState("");
+  const [brakeLF, setBrakeLF] = useState<number | null>(null);
+  const [brakeRF, setBrakeRF] = useState<number | null>(null);
+  const [brakeLR, setBrakeLR] = useState<number | null>(null);
+  const [brakeRR, setBrakeRR] = useState<number | null>(null);
   const [paintReading, setPaintReading] = useState("");
   const [oilLife, setOilLife] = useState("");
   const [batteryHealth, setBatteryHealth] = useState("");

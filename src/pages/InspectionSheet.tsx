@@ -678,7 +678,7 @@ const InspectionSheet = () => {
 
       ${tireBrakeHTML}
       ${measurementsHTML}
-      ${ALL_CHECKLIST_SECTIONS.map(s => sectionBlock(s.label, s.items)).join("")}
+      ${ACTIVE_CHECKLIST_SECTIONS.map(s => sectionBlock(s.label, s.items)).join("")}
       ${notesHTML}
 
       <div style="margin-top:32px;padding-top:16px;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;">

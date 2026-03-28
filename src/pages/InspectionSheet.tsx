@@ -426,7 +426,7 @@ const InspectionSheet = () => {
 
   // #2 — Collapsible sections (all start open)
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(
-    Object.fromEntries(SECTION_DEFS.map(s => [s.key, true]))
+    Object.fromEntries(SECTION_DEFS.map(s => [s.key, s.key !== "measurements"]))
   );
 
   // #10 — Sticky vehicle strip

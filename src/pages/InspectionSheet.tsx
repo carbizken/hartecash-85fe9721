@@ -745,7 +745,7 @@ const InspectionSheet = () => {
             {/* #4 — Progress Ring */}
             <ProgressRing progress={progressPct} size={42} strokeWidth={4} />
             <div className="hidden md:block text-xs text-right">
-              <p className="font-semibold">{totalChecked}/{ALL_ITEMS.length}</p>
+              <p className="font-semibold">{totalChecked}/{ACTIVE_ALL_ITEMS.length}</p>
               {totalIssues > 0 && <p className="text-red-300">{totalIssues} issues</p>}
             </div>
             <div className="relative">

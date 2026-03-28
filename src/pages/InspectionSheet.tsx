@@ -129,6 +129,7 @@ const InspectionSheet = () => {
             <Printer className="h-4 w-4" /> Print
           </Button>
         </div>
+      </div>
 
       <div ref={printRef} className="max-w-4xl mx-auto p-6 print:p-4 print:max-w-none space-y-6">
         {/* Print Header */}

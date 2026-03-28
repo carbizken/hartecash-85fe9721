@@ -427,9 +427,10 @@ const SubmissionDetailSheet = ({
                   const inspClass = isInspected
                     ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 border-0"
                     : "bg-gradient-to-r from-orange-400 to-amber-500 text-white hover:from-orange-500 hover:to-amber-600 border-0";
+                  const inspLabel = isInspected ? "Inspection Completed" : "Inspection Needed";
                   return (
                     <Button size="sm" className={`h-7 text-xs gap-1 ${inspClass}`} onClick={() => window.open(`${window.location.origin}/inspection/${sub.id}`, "_blank")}>
-                      <ClipboardList className="w-3.5 h-3.5" /> Inspection Sheet
+                      <ClipboardList className="w-3.5 h-3.5" /> {inspLabel}
                     </Button>
                   );
                 })()}

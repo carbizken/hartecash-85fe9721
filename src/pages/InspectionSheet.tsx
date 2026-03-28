@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Printer, Camera, AlertTriangle, CheckCircle, Car, Gauge, Wrench,
   Save, Smartphone, Eye, Zap, Paintbrush, Armchair, Shield, ThermometerSun,
+  ChevronDown, ChevronRight, CheckCheck, Sparkles,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ import { useSiteConfig } from "@/hooks/useSiteConfig";
 import PortalSkeleton from "@/components/PortalSkeleton";
 import VehicleImage from "@/components/sell-form/VehicleImage";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
 
 // ── Types ──
 interface DamageItem {
@@ -38,12 +41,13 @@ type ConditionGrade = "" | "good" | "fair" | "poor" | "damaged";
 
 const GRADE_CYCLE: ConditionGrade[] = ["", "good", "fair", "poor", "damaged"];
 
+// #9 — Dark-mode-friendly grade colors using HSL tokens
 const gradeStyle = (g: ConditionGrade) => {
   switch (g) {
-    case "good": return "bg-emerald-500/15 text-emerald-700 border-emerald-400 ring-emerald-400/30";
-    case "fair": return "bg-amber-500/15 text-amber-700 border-amber-400 ring-amber-400/30";
-    case "poor": return "bg-orange-500/15 text-orange-700 border-orange-400 ring-orange-400/30";
-    case "damaged": return "bg-red-500/15 text-red-700 border-red-400 ring-red-400/30";
+    case "good": return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-400/50 dark:border-emerald-500/40 ring-emerald-400/30";
+    case "fair": return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-400/50 dark:border-amber-500/40 ring-amber-400/30";
+    case "poor": return "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-400/50 dark:border-orange-500/40 ring-orange-400/30";
+    case "damaged": return "bg-red-500/15 text-red-600 dark:text-red-400 border-red-400/50 dark:border-red-500/40 ring-red-400/30";
     default: return "bg-muted/50 text-muted-foreground border-border";
   }
 };
@@ -60,48 +64,100 @@ const gradeIcon = (g: ConditionGrade) => {
 
 const gradeLabel = (g: ConditionGrade) => g || "Not Checked";
 
-// ── Checklist definitions ──
-const EXTERIOR_ITEMS = [
-  "Hood", "Front Bumper", "Rear Bumper", "Roof", "Trunk/Liftgate",
-  "Left Front Fender", "Right Front Fender", "Left Rear Quarter", "Right Rear Quarter",
-  "Left Front Door", "Right Front Door", "Left Rear Door", "Right Rear Door",
-  "Windshield", "Rear Glass", "Left Mirror", "Right Mirror",
-  "Left Headlight", "Right Headlight", "Left Taillight", "Right Taillight",
-  "Grille", "Wheels/Rims", "Undercarriage",
+// ── Checklist definitions (reordered: #3 — tires/mechanical first) ──
+const SECTION_DEFS = [
+  {
+    key: "tires",
+    label: "Tires & Brakes",
+    icon: Gauge,
+    gradient: "from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20",
+    borderAccent: "border-l-blue-500",
+    items: [] as string[], // special section
+  },
+  {
+    key: "measurements",
+    label: "Quick Measurements",
+    icon: ThermometerSun,
+    gradient: "from-violet-500/10 to-purple-500/10 dark:from-violet-500/20 dark:to-purple-500/20",
+    borderAccent: "border-l-violet-500",
+    items: [] as string[], // special section
+  },
+  {
+    key: "exterior",
+    label: "Exterior",
+    icon: Paintbrush,
+    gradient: "from-sky-500/10 to-blue-500/10 dark:from-sky-500/20 dark:to-blue-500/20",
+    borderAccent: "border-l-sky-500",
+    items: [
+      "Hood", "Front Bumper", "Rear Bumper", "Roof", "Trunk/Liftgate",
+      "Left Front Fender", "Right Front Fender", "Left Rear Quarter", "Right Rear Quarter",
+      "Left Front Door", "Right Front Door", "Left Rear Door", "Right Rear Door",
+      "Windshield", "Rear Glass", "Left Mirror", "Right Mirror",
+      "Left Headlight", "Right Headlight", "Left Taillight", "Right Taillight",
+      "Grille", "Wheels/Rims", "Undercarriage",
+    ],
+  },
+  {
+    key: "interior",
+    label: "Interior",
+    icon: Armchair,
+    gradient: "from-amber-500/10 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/20",
+    borderAccent: "border-l-amber-500",
+    items: [
+      "Driver Seat", "Passenger Seat", "Rear Seats", "Headliner",
+      "Dashboard", "Center Console", "Steering Wheel", "Carpet/Floor Mats",
+      "Door Panels", "Instrument Cluster", "Glove Box", "Trunk Interior",
+      "Seat Belts", "Sun Visors", "Rearview Mirror",
+    ],
+  },
+  {
+    key: "mechanical",
+    label: "Mechanical",
+    icon: Wrench,
+    gradient: "from-slate-500/10 to-zinc-500/10 dark:from-slate-500/20 dark:to-zinc-500/20",
+    borderAccent: "border-l-slate-500",
+    items: [
+      "Engine Start/Idle", "Engine Noise", "Oil Leaks", "Coolant Leaks",
+      "Transmission Shift", "Differential", "Exhaust System",
+      "Power Steering", "CV Joints/Boots", "Drive Belts",
+      "Shocks/Struts", "Ball Joints", "Tie Rods", "Wheel Bearings",
+      "Brake Rotors", "Brake Lines", "Parking Brake",
+    ],
+  },
+  {
+    key: "electrical",
+    label: "Electrical",
+    icon: Zap,
+    gradient: "from-yellow-500/10 to-amber-500/10 dark:from-yellow-500/20 dark:to-amber-500/20",
+    borderAccent: "border-l-yellow-500",
+    items: [
+      "A/C System", "Heater", "Power Windows", "Power Locks", "Power Mirrors",
+      "Radio/Infotainment", "Speakers", "Backup Camera", "Navigation",
+      "Sunroof/Moonroof", "Keyless Entry", "Remote Start",
+      "Headlights", "Turn Signals", "Brake Lights", "Interior Lights",
+      "Horn", "Wipers", "Defroster", "Charging Ports/USB",
+    ],
+  },
+  {
+    key: "glass",
+    label: "Glass & Lights",
+    icon: Eye,
+    gradient: "from-teal-500/10 to-emerald-500/10 dark:from-teal-500/20 dark:to-emerald-500/20",
+    borderAccent: "border-l-teal-500",
+    items: [
+      "Windshield Chips/Cracks", "Side Windows", "Rear Window",
+      "Headlight Clarity", "Taillight Clarity", "Fog Lights",
+    ],
+  },
 ];
 
-const INTERIOR_ITEMS = [
-  "Driver Seat", "Passenger Seat", "Rear Seats", "Headliner",
-  "Dashboard", "Center Console", "Steering Wheel", "Carpet/Floor Mats",
-  "Door Panels", "Instrument Cluster", "Glove Box", "Trunk Interior",
-  "Seat Belts", "Sun Visors", "Rearview Mirror",
-];
-
-const MECHANICAL_ITEMS = [
-  "Engine Start/Idle", "Engine Noise", "Oil Leaks", "Coolant Leaks",
-  "Transmission Shift", "Differential", "Exhaust System",
-  "Power Steering", "CV Joints/Boots", "Drive Belts",
-  "Shocks/Struts", "Ball Joints", "Tie Rods", "Wheel Bearings",
-  "Brake Rotors", "Brake Lines", "Parking Brake",
-];
-
-const ELECTRICAL_ITEMS = [
-  "A/C System", "Heater", "Power Windows", "Power Locks", "Power Mirrors",
-  "Radio/Infotainment", "Speakers", "Backup Camera", "Navigation",
-  "Sunroof/Moonroof", "Keyless Entry", "Remote Start",
-  "Headlights", "Turn Signals", "Brake Lights", "Interior Lights",
-  "Horn", "Wipers", "Defroster", "Charging Ports/USB",
-];
-
-const GLASS_LIGHTS_ITEMS = [
-  "Windshield Chips/Cracks", "Side Windows", "Rear Window",
-  "Headlight Clarity", "Taillight Clarity", "Fog Lights",
-];
+const ALL_CHECKLIST_SECTIONS = SECTION_DEFS.filter(s => s.items.length > 0);
+const ALL_ITEMS = ALL_CHECKLIST_SECTIONS.flatMap(s => s.items);
 
 const severityColor = (s: string) => {
-  if (s === "severe") return "bg-red-100 text-red-800 border-red-300";
-  if (s === "moderate") return "bg-amber-100 text-amber-800 border-amber-300";
-  return "bg-green-100 text-green-800 border-green-300";
+  if (s === "severe") return "bg-red-500/10 text-red-600 dark:text-red-400 border-red-400/50";
+  if (s === "moderate") return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-400/50";
+  return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-400/50";
 };
 
 const severityBadge = (s: string) => {
@@ -110,34 +166,83 @@ const severityBadge = (s: string) => {
   return "secondary" as const;
 };
 
-// ── Clickable Condition Item ──
+// ── #4 Progress Ring ──
+const ProgressRing = ({ progress, size = 40, strokeWidth = 4 }: { progress: number; size?: number; strokeWidth?: number }) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (progress / 100) * circumference;
+  const color = progress === 100 ? "stroke-emerald-500" : progress > 60 ? "stroke-primary" : "stroke-amber-500";
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} fill="none" className="stroke-muted/30" />
+        <circle
+          cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} fill="none"
+          className={`${color} transition-all duration-500`}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground">
+        {Math.round(progress)}%
+      </span>
+    </div>
+  );
+};
+
+// ── #5 Condition Item with quick grade (tap = Good, long-press = cycle) ──
 const ConditionItem = ({
-  label,
-  grade,
-  onCycle,
-  note,
-  onNoteChange,
+  label, grade, onCycle, onSetGrade, note, onNoteChange, flaggedByAI,
 }: {
   label: string;
   grade: ConditionGrade;
   onCycle: () => void;
+  onSetGrade: (g: ConditionGrade) => void;
   note: string;
   onNoteChange: (v: string) => void;
+  flaggedByAI?: boolean;
 }) => {
   const [showNote, setShowNote] = useState(false);
+  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didLongPress = useRef(false);
+
+  const handlePointerDown = () => {
+    didLongPress.current = false;
+    longPressRef.current = setTimeout(() => {
+      didLongPress.current = true;
+      onCycle(); // long press cycles through all grades
+    }, 400);
+  };
+
+  const handlePointerUp = () => {
+    if (longPressRef.current) clearTimeout(longPressRef.current);
+    if (!didLongPress.current) {
+      // Quick tap: toggle Good on/off, or cycle if already graded
+      if (!grade) {
+        onSetGrade("good");
+      } else {
+        onCycle();
+      }
+    }
+  };
 
   return (
     <div className="space-y-1">
       <button
         type="button"
-        onClick={onCycle}
-        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer select-none hover:ring-2 ${gradeStyle(grade)}`}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={() => { if (longPressRef.current) clearTimeout(longPressRef.current); }}
+        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer select-none hover:ring-2 active:scale-[0.98] ${gradeStyle(grade)} ${flaggedByAI ? "ring-2 ring-amber-400/50" : ""}`}
       >
         <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs font-bold flex-shrink-0"
           style={{ borderColor: "currentColor" }}>
           {gradeIcon(grade)}
         </span>
         <span className="flex-1 text-left">{label}</span>
+        {flaggedByAI && <Sparkles className="w-3 h-3 text-amber-500 flex-shrink-0" />}
         <span className="text-[10px] uppercase tracking-wider opacity-60">{gradeLabel(grade)}</span>
         {(grade === "poor" || grade === "damaged") && (
           <button
@@ -162,62 +267,98 @@ const ConditionItem = ({
   );
 };
 
-// ── Section with summary badges ──
+// ── #2 Collapsible Section with #7 gradient header & #1 Mark All Good ──
 const ChecklistSection = ({
-  icon: Icon,
-  title,
-  items,
-  grades,
-  notes,
-  onCycle,
-  onNoteChange,
+  sectionDef, grades, notes, onCycle, onSetGrade, onNoteChange, onMarkAllGood, flaggedItems,
+  isOpen, onToggle,
 }: {
-  icon: React.ElementType;
-  title: string;
-  items: string[];
+  sectionDef: typeof SECTION_DEFS[number];
   grades: Record<string, ConditionGrade>;
   notes: Record<string, string>;
   onCycle: (item: string) => void;
+  onSetGrade: (item: string, g: ConditionGrade) => void;
   onNoteChange: (item: string, v: string) => void;
+  onMarkAllGood: () => void;
+  flaggedItems: Set<string>;
+  isOpen: boolean;
+  onToggle: () => void;
 }) => {
-  const checked = items.filter(i => !!grades[i]);
-  const issues = items.filter(i => grades[i] === "poor" || grades[i] === "damaged");
+  const { items, icon: Icon, label, gradient, borderAccent } = sectionDef;
+  const checked = items.filter(i => !!grades[i]).length;
+  const issues = items.filter(i => grades[i] === "poor" || grades[i] === "damaged").length;
+  const allGood = checked === items.length && issues === 0;
 
   return (
-    <Card className="print:shadow-none print:border-foreground/30 break-inside-avoid">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Icon className="h-5 w-5 text-primary" />
-          {title}
-          <div className="ml-auto flex gap-1.5 text-xs">
-            <Badge variant="secondary" className="text-[10px]">{checked.length}/{items.length} checked</Badge>
-            {issues.length > 0 && (
-              <Badge variant="destructive" className="text-[10px]">{issues.length} issue{issues.length > 1 ? "s" : ""}</Badge>
-            )}
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-          {items.map(item => (
-            <ConditionItem
-              key={item}
-              label={item}
-              grade={grades[item] || ""}
-              onCycle={() => onCycle(item)}
-              note={notes[item] || ""}
-              onNoteChange={v => onNoteChange(item, v)}
-            />
-          ))}
-        </div>
-      </CardContent>
+    <Card className={`print:shadow-none print:border-foreground/30 break-inside-avoid border-l-4 ${borderAccent} overflow-hidden`}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`w-full text-left bg-gradient-to-r ${gradient}`}
+      >
+        <CardHeader className="pb-2 pt-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Icon className="h-5 w-5 text-primary" />
+            {label}
+            <div className="ml-auto flex items-center gap-1.5 text-xs">
+              {allGood && <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[10px]">All Good ✓</Badge>}
+              {!allGood && (
+                <Badge variant="secondary" className="text-[10px]">{checked}/{items.length}</Badge>
+              )}
+              {issues > 0 && (
+                <Badge variant="destructive" className="text-[10px]">{issues} issue{issues > 1 ? "s" : ""}</Badge>
+              )}
+              {isOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+            </div>
+          </CardTitle>
+        </CardHeader>
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <CardContent className="pt-2 pb-4">
+              {/* #1 Mark All Good */}
+              <div className="flex items-center justify-end gap-2 mb-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs gap-1 border-emerald-400/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                  onClick={e => { e.stopPropagation(); onMarkAllGood(); }}
+                >
+                  <CheckCheck className="w-3.5 h-3.5" /> Mark All Good
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                {items.map(item => (
+                  <ConditionItem
+                    key={item}
+                    label={item}
+                    grade={grades[item] || ""}
+                    onCycle={() => onCycle(item)}
+                    onSetGrade={g => onSetGrade(item, g)}
+                    note={notes[item] || ""}
+                    onNoteChange={v => onNoteChange(item, v)}
+                    flaggedByAI={flaggedItems.has(item.toLowerCase())}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 };
 
 // ── Grade Legend ──
 const GradeLegend = () => (
-  <div className="flex flex-wrap gap-3 text-xs print:text-[10px]">
+  <div className="flex flex-wrap gap-2 text-xs print:text-[10px]">
     {(["good", "fair", "poor", "damaged"] as ConditionGrade[]).map(g => (
       <div key={g} className={`flex items-center gap-1.5 px-2 py-1 rounded-md border ${gradeStyle(g)}`}>
         <span className="font-bold">{gradeIcon(g)}</span>
@@ -242,7 +383,21 @@ const InspectionSheet = () => {
   const [damageReports, setDamageReports] = useState<DamageReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [showMobileQR, setShowMobileQR] = useState(false);
+
+  // #6 — Sticky tab active section
+  const [activeTab, setActiveTab] = useState("tires");
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // #2 — Collapsible sections (all start open)
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
+    Object.fromEntries(SECTION_DEFS.map(s => [s.key, true]))
+  );
+
+  // #10 — Sticky vehicle strip
+  const [showStickyVehicle, setShowStickyVehicle] = useState(false);
+  const vehicleCardRef = useRef<HTMLDivElement>(null);
 
   // Tire & brake
   const [tireDepth, setTireDepth] = useState({ lf: "", rf: "", lr: "", rr: "" });
@@ -255,43 +410,70 @@ const InspectionSheet = () => {
   const [batteryHealth, setBatteryHealth] = useState("");
   const [overallGrade, setOverallGrade] = useState("");
 
-  // Clickable condition grades
-  const [exteriorGrades, setExteriorGrades] = useState<Record<string, ConditionGrade>>({});
-  const [interiorGrades, setInteriorGrades] = useState<Record<string, ConditionGrade>>({});
-  const [mechanicalGrades, setMechanicalGrades] = useState<Record<string, ConditionGrade>>({});
-  const [electricalGrades, setElectricalGrades] = useState<Record<string, ConditionGrade>>({});
-  const [glassGrades, setGlassGrades] = useState<Record<string, ConditionGrade>>({});
+  // Clickable condition grades — single state object for all sections
+  const [allGrades, setAllGrades] = useState<Record<string, ConditionGrade>>({});
+  const [allNotes, setAllNotes] = useState<Record<string, string>>({});
 
-  // Notes for items marked poor/damaged
-  const [exteriorNotes, setExteriorNotes] = useState<Record<string, string>>({});
-  const [interiorNotes, setInteriorNotes] = useState<Record<string, string>>({});
-  const [mechanicalNotes, setMechanicalNotes] = useState<Record<string, string>>({});
-  const [electricalNotes, setElectricalNotes] = useState<Record<string, string>>({});
-  const [glassNotes, setGlassNotes] = useState<Record<string, string>>({});
+  const cycleGrade = useCallback((item: string) => {
+    setAllGrades(prev => {
+      const cur = prev[item] || "";
+      const idx = GRADE_CYCLE.indexOf(cur);
+      const next = GRADE_CYCLE[(idx + 1) % GRADE_CYCLE.length];
+      return { ...prev, [item]: next };
+    });
+  }, []);
 
-  const cycleGrade = (setter: React.Dispatch<React.SetStateAction<Record<string, ConditionGrade>>>) =>
-    (item: string) => {
-      setter(prev => {
-        const cur = prev[item] || "";
-        const idx = GRADE_CYCLE.indexOf(cur);
-        const next = GRADE_CYCLE[(idx + 1) % GRADE_CYCLE.length];
-        return { ...prev, [item]: next };
-      });
+  const setGrade = useCallback((item: string, g: ConditionGrade) => {
+    setAllGrades(prev => ({ ...prev, [item]: g }));
+  }, []);
+
+  const setNote = useCallback((item: string, v: string) => {
+    setAllNotes(prev => ({ ...prev, [item]: v }));
+  }, []);
+
+  // #1 — Mark All Good for a section
+  const markAllGood = useCallback((items: string[]) => {
+    setAllGrades(prev => {
+      const updated = { ...prev };
+      items.forEach(i => { updated[i] = "good"; });
+      return updated;
+    });
+  }, []);
+
+  // #10 — IntersectionObserver for sticky vehicle strip
+  useEffect(() => {
+    const el = vehicleCardRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      setShowStickyVehicle(!entry.isIntersecting);
+    }, { threshold: 0 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [submission]);
+
+  // Scroll spy for tabs
+  useEffect(() => {
+    const handleScroll = () => {
+      for (const section of SECTION_DEFS) {
+        const el = sectionRefs.current[section.key];
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 200) {
+            setActiveTab(section.key);
+          }
+        }
+      }
     };
-
-  const setNote = (setter: React.Dispatch<React.SetStateAction<Record<string, string>>>) =>
-    (item: string, v: string) => {
-      setter(prev => ({ ...prev, [item]: v }));
-    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!id) return;
     const fetchData = async () => {
       setLoading(true);
-      // Wait for auth session to be restored before querying RLS-protected tables
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        // Listen for auth state change (session restoring from localStorage)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sess) => {
           if (sess) {
             subscription.unsubscribe();
@@ -300,7 +482,6 @@ const InspectionSheet = () => {
             setLoading(false);
           }
         });
-        // Timeout fallback
         setTimeout(() => { subscription.unsubscribe(); setLoading(false); }, 5000);
         return;
       }
@@ -323,14 +504,15 @@ const InspectionSheet = () => {
     fetchData();
   }, [id]);
 
+  // #8 — Animated save with confetti
   const handleSave = async () => {
     setSaving(true);
+    setSaveSuccess(false);
 
-    // Gather all checklist data into a structured note
-    const gatherSection = (title: string, items: string[], grades: Record<string, ConditionGrade>, notes: Record<string, string>) => {
+    const gatherSection = (title: string, items: string[]) => {
       const entries = items
-        .filter(i => !!grades[i])
-        .map(i => `  ${i}: ${(grades[i] || "").toUpperCase()}${notes[i] ? ` — ${notes[i]}` : ""}`);
+        .filter(i => !!allGrades[i])
+        .map(i => `  ${i}: ${(allGrades[i] || "").toUpperCase()}${allNotes[i] ? ` — ${allNotes[i]}` : ""}`);
       return entries.length > 0 ? `[${title}]\n${entries.join("\n")}` : "";
     };
 
@@ -341,11 +523,7 @@ const InspectionSheet = () => {
       paintReading && `Paint: ${paintReading}`,
       oilLife && `Oil: ${oilLife}`,
       batteryHealth && `Battery: ${batteryHealth}`,
-      gatherSection("EXTERIOR", EXTERIOR_ITEMS, exteriorGrades, exteriorNotes),
-      gatherSection("INTERIOR", INTERIOR_ITEMS, interiorGrades, interiorNotes),
-      gatherSection("MECHANICAL", MECHANICAL_ITEMS, mechanicalGrades, mechanicalNotes),
-      gatherSection("ELECTRICAL", ELECTRICAL_ITEMS, electricalGrades, electricalNotes),
-      gatherSection("GLASS & LIGHTS", GLASS_LIGHTS_ITEMS, glassGrades, glassNotes),
+      ...ALL_CHECKLIST_SECTIONS.map(s => gatherSection(s.label.toUpperCase(), s.items)),
       overallGrade && `Grade: ${overallGrade}`,
       inspectorNotes && `Notes: ${inspectorNotes}`,
     ].filter(Boolean).join("\n\n");
@@ -359,19 +537,25 @@ const InspectionSheet = () => {
     if (error) {
       toast({ title: "Error saving", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Inspection saved", description: "All condition data synced to the submission." });
+      setSaveSuccess(true);
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.95 }, colors: ["#10b981", "#3b82f6", "#f59e0b"] });
+      setTimeout(() => setSaveSuccess(false), 2500);
     }
   };
 
   const handlePrint = () => window.print();
 
+  const scrollToSection = (key: string) => {
+    setActiveTab(key);
+    setOpenSections(prev => ({ ...prev, [key]: true }));
+    sectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   if (loading) return <PortalSkeleton />;
   if (!submission) return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">
       <p className="text-muted-foreground">Submission not found. You may need to sign in first.</p>
-      <Button variant="outline" onClick={() => window.location.href = "/admin-login"}>
-        Sign In
-      </Button>
+      <Button variant="outline" onClick={() => window.location.href = "/admin-login"}>Sign In</Button>
     </div>
   );
 
@@ -381,17 +565,21 @@ const InspectionSheet = () => {
   const minorCount = allDamageItems.filter(d => d.severity === "minor").length;
   const vehicleTitle = `${submission.vehicle_year || ""} ${submission.vehicle_make || ""} ${submission.vehicle_model || ""}`.trim();
 
-  // Overall completion stats
-  const allItems = [...EXTERIOR_ITEMS, ...INTERIOR_ITEMS, ...MECHANICAL_ITEMS, ...ELECTRICAL_ITEMS, ...GLASS_LIGHTS_ITEMS];
-  const allGrades = { ...exteriorGrades, ...interiorGrades, ...mechanicalGrades, ...electricalGrades, ...glassGrades };
-  const totalChecked = allItems.filter(i => !!allGrades[i]).length;
-  const totalIssues = allItems.filter(i => allGrades[i] === "poor" || allGrades[i] === "damaged").length;
+  // #3 — AI flagged items mapped to checklist labels
+  const flaggedItems = new Set(
+    allDamageItems.flatMap(d => [d.type.replace(/_/g, " ").toLowerCase(), d.location.replace(/_/g, " ").toLowerCase()])
+  );
+
+  // Overall completion
+  const totalChecked = ALL_ITEMS.filter(i => !!allGrades[i]).length;
+  const totalIssues = ALL_ITEMS.filter(i => allGrades[i] === "poor" || allGrades[i] === "damaged").length;
+  const progressPct = ALL_ITEMS.length > 0 ? (totalChecked / ALL_ITEMS.length) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="print:hidden sticky top-0 z-40 bg-primary text-primary-foreground px-4 py-3 shadow-lg">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-background pb-24">
+      {/* ── Primary Header ── */}
+      <div className="print:hidden sticky top-0 z-50 bg-primary text-primary-foreground shadow-lg">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/admin">
               <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/20">
@@ -399,44 +587,31 @@ const InspectionSheet = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="text-lg font-bold">Vehicle Inspection</h1>
+              <h1 className="text-lg font-bold font-display">Vehicle Inspection</h1>
               <p className="text-xs opacity-80">{vehicleTitle} • VIN: {submission.vin || "N/A"}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden md:flex items-center gap-2 mr-4 text-xs">
-              <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground border-0 text-[10px]">
-                {totalChecked}/{allItems.length} checked
-              </Badge>
-              {totalIssues > 0 && (
-                <Badge variant="destructive" className="text-[10px]">
-                  {totalIssues} issue{totalIssues > 1 ? "s" : ""}
-                </Badge>
-              )}
+          <div className="flex items-center gap-3">
+            {/* #4 — Progress Ring */}
+            <ProgressRing progress={progressPct} size={42} strokeWidth={4} />
+            <div className="hidden md:block text-xs text-right">
+              <p className="font-semibold">{totalChecked}/{ALL_ITEMS.length}</p>
+              {totalIssues > 0 && <p className="text-red-300">{totalIssues} issues</p>}
             </div>
             <div className="relative">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-primary-foreground hover:bg-primary-foreground/20 gap-1"
-                onClick={() => setShowMobileQR(prev => !prev)}
-              >
+              <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/20 gap-1"
+                onClick={() => setShowMobileQR(prev => !prev)}>
                 <Smartphone className="h-4 w-4" /> Mobile
               </Button>
               {showMobileQR && (
-                <div className="absolute right-0 top-full mt-2 z-50 bg-white rounded-xl shadow-2xl p-5 w-64 text-center animate-in fade-in slide-in-from-top-2">
-                  <p className="text-sm font-bold text-gray-900 mb-1">📱 Scan to Inspect</p>
-                  <p className="text-xs text-gray-500 mb-3">Open on your phone to walk around the vehicle</p>
-                  <div className="bg-white p-3 rounded-lg inline-block border border-gray-100 shadow-sm mb-3">
+                <div className="absolute right-0 top-full mt-2 z-50 bg-card rounded-xl shadow-2xl p-5 w-64 text-center animate-in fade-in slide-in-from-top-2">
+                  <p className="text-sm font-bold text-card-foreground mb-1">📱 Scan to Inspect</p>
+                  <p className="text-xs text-muted-foreground mb-3">Open on your phone to walk around the vehicle</p>
+                  <div className="bg-white p-3 rounded-lg inline-block border shadow-sm mb-3">
                     <QRCodeSVG value={`${window.location.origin}/inspect/${id}`} size={160} level="H" />
                   </div>
-                  <p className="text-[10px] text-gray-400">Point your phone camera at the code</p>
-                  <button
-                    onClick={() => setShowMobileQR(false)}
-                    className="mt-3 text-xs text-gray-400 hover:text-gray-600 underline"
-                  >
-                    Close
-                  </button>
+                  <p className="text-[10px] text-muted-foreground">Point your phone camera at the code</p>
+                  <button onClick={() => setShowMobileQR(false)} className="mt-3 text-xs text-muted-foreground hover:text-foreground underline">Close</button>
                 </div>
               )}
             </div>
@@ -445,7 +620,54 @@ const InspectionSheet = () => {
             </Button>
           </div>
         </div>
+
+        {/* #6 — Sticky Tab Navigation */}
+        <div className="border-t border-primary-foreground/10 overflow-x-auto scrollbar-hide">
+          <div className="max-w-5xl mx-auto px-4 flex gap-0.5">
+            {SECTION_DEFS.map(s => {
+              const Icon = s.icon;
+              const isActive = activeTab === s.key;
+              return (
+                <button
+                  key={s.key}
+                  onClick={() => scrollToSection(s.key)}
+                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap transition-all border-b-2 ${
+                    isActive
+                      ? "border-primary-foreground text-primary-foreground"
+                      : "border-transparent text-primary-foreground/50 hover:text-primary-foreground/80"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
+
+      {/* #10 — Sticky Vehicle Strip (appears when vehicle card scrolls out of view) */}
+      <AnimatePresence>
+        {showStickyVehicle && (
+          <motion.div
+            initial={{ y: -40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -40, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="print:hidden sticky top-[108px] z-40 bg-card/95 backdrop-blur border-b shadow-sm"
+          >
+            <div className="max-w-5xl mx-auto px-4 py-2 flex items-center gap-3 text-sm">
+              <Car className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="font-semibold">{vehicleTitle}</span>
+              <span className="text-muted-foreground">•</span>
+              <span className="text-muted-foreground">{submission.mileage ? `${Number(submission.mileage).toLocaleString()} mi` : ""}</span>
+              <span className="text-muted-foreground">•</span>
+              <span className="text-muted-foreground capitalize">{submission.exterior_color || ""}</span>
+              <span className="text-muted-foreground text-xs ml-auto">VIN: {submission.vin || "N/A"}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Print Header */}
       <div className="hidden print:block border-b-2 border-foreground pb-4 mb-6 max-w-none px-4 pt-4">
@@ -468,32 +690,36 @@ const InspectionSheet = () => {
       </div>
 
       <div ref={printRef} className="max-w-5xl mx-auto p-4 md:p-6 print:p-4 print:max-w-none space-y-4">
-        {/* Grade Legend */}
+        {/* Grade Legend + instruction */}
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Click items to cycle condition:</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Tap = Good · Long-press = Cycle grades
+          </p>
           <GradeLegend />
         </div>
 
-        {/* Vehicle Summary - compact */}
-        <Card className="print:shadow-none print:border-foreground/30">
-          <CardContent className="py-3 px-4">
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-14 rounded overflow-hidden bg-muted flex-shrink-0">
-                <VehicleImage year={submission.vehicle_year} make={submission.vehicle_make} model={submission.vehicle_model} selectedColor={submission.exterior_color || "white"} />
+        {/* Vehicle Summary Card — observed for sticky strip */}
+        <div ref={vehicleCardRef}>
+          <Card className="print:shadow-none print:border-foreground/30">
+            <CardContent className="py-3 px-4">
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-14 rounded overflow-hidden bg-muted flex-shrink-0">
+                  <VehicleImage year={submission.vehicle_year} make={submission.vehicle_make} model={submission.vehicle_model} selectedColor={submission.exterior_color || "white"} />
+                </div>
+                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 text-sm">
+                  <InfoCell label="Vehicle" value={vehicleTitle} />
+                  <InfoCell label="VIN" value={submission.vin || "N/A"} />
+                  <InfoCell label="Mileage" value={submission.mileage ? `${Number(submission.mileage).toLocaleString()} mi` : "N/A"} />
+                  <InfoCell label="Color" value={submission.exterior_color || "N/A"} />
+                </div>
               </div>
-              <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 text-sm">
-                <InfoCell label="Vehicle" value={vehicleTitle} />
-                <InfoCell label="VIN" value={submission.vin || "N/A"} />
-                <InfoCell label="Mileage" value={submission.mileage ? `${Number(submission.mileage).toLocaleString()} mi` : "N/A"} />
-                <InfoCell label="Color" value={submission.exterior_color || "N/A"} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Customer-Reported Issues - compact */}
+        {/* Customer-Reported Issues */}
         {(submission.exterior_damage?.length || submission.interior_damage?.length || submission.mechanical_issues?.length || submission.engine_issues?.length) && (
-          <Card className="print:shadow-none print:border-foreground/30 border-amber-200 bg-amber-50/30 dark:bg-amber-950/10">
+          <Card className="print:shadow-none print:border-foreground/30 border-l-4 border-l-amber-500 bg-amber-500/5">
             <CardHeader className="pb-2 pt-3">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
@@ -503,20 +729,20 @@ const InspectionSheet = () => {
             <CardContent className="pb-3">
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  ...(submission.exterior_damage || []).map((d: string) => ({ label: d, type: "ext" })),
-                  ...(submission.interior_damage || []).map((d: string) => ({ label: d, type: "int" })),
-                  ...(submission.mechanical_issues || []).map((d: string) => ({ label: d, type: "mech" })),
-                  ...(submission.engine_issues || []).map((d: string) => ({ label: d, type: "eng" })),
-                  ...(submission.tech_issues || []).map((d: string) => ({ label: d, type: "tech" })),
+                  ...(submission.exterior_damage || []).map((d: string) => ({ label: d })),
+                  ...(submission.interior_damage || []).map((d: string) => ({ label: d })),
+                  ...(submission.mechanical_issues || []).map((d: string) => ({ label: d })),
+                  ...(submission.engine_issues || []).map((d: string) => ({ label: d })),
+                  ...(submission.tech_issues || []).map((d: string) => ({ label: d })),
                 ].map((item, i) => (
-                  <Badge key={i} variant="outline" className="text-[10px] capitalize border-amber-300 text-amber-700">
+                  <Badge key={i} variant="outline" className="text-[10px] capitalize border-amber-400/50 text-amber-600 dark:text-amber-400">
                     {item.label.replace(/_/g, " ")}
                   </Badge>
                 ))}
                 {submission.smoked_in === "yes" && <Badge variant="destructive" className="text-[10px]">Smoked In</Badge>}
                 {submission.drivable === "no" && <Badge variant="destructive" className="text-[10px]">Not Drivable</Badge>}
                 {submission.accidents && submission.accidents !== "none" && (
-                  <Badge variant="outline" className="text-[10px] border-red-300 text-red-700">Accidents: {submission.accidents}</Badge>
+                  <Badge variant="outline" className="text-[10px] border-red-400/50 text-red-600 dark:text-red-400">Accidents: {submission.accidents}</Badge>
                 )}
               </div>
             </CardContent>
@@ -525,14 +751,14 @@ const InspectionSheet = () => {
 
         {/* AI Damage Detection */}
         {damageReports.length > 0 && allDamageItems.length > 0 && (
-          <Card className="print:shadow-none print:border-foreground/30 border-blue-200 bg-blue-50/30 dark:bg-blue-950/10">
+          <Card className="print:shadow-none print:border-foreground/30 border-l-4 border-l-blue-500 bg-blue-500/5">
             <CardHeader className="pb-2 pt-3">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Camera className="h-4 w-4 text-blue-500" />
                 AI Photo Analysis
                 <div className="ml-auto flex gap-1.5">
                   {severeCount > 0 && <Badge variant="destructive" className="text-[10px]">{severeCount} Severe</Badge>}
-                  {moderateCount > 0 && <Badge variant="outline" className="border-amber-400 text-amber-700 text-[10px]">{moderateCount} Moderate</Badge>}
+                  {moderateCount > 0 && <Badge variant="outline" className="border-amber-400/50 text-amber-600 dark:text-amber-400 text-[10px]">{moderateCount} Moderate</Badge>}
                   {minorCount > 0 && <Badge variant="secondary" className="text-[10px]">{minorCount} Minor</Badge>}
                 </div>
               </CardTitle>
@@ -552,161 +778,110 @@ const InspectionSheet = () => {
           </Card>
         )}
 
-        {/* ── Clickable Condition Checklists ── */}
-        <ChecklistSection
-          icon={Paintbrush}
-          title="Exterior Condition"
-          items={EXTERIOR_ITEMS}
-          grades={exteriorGrades}
-          notes={exteriorNotes}
-          onCycle={cycleGrade(setExteriorGrades)}
-          onNoteChange={setNote(setExteriorNotes)}
-        />
-
-        <ChecklistSection
-          icon={Armchair}
-          title="Interior Condition"
-          items={INTERIOR_ITEMS}
-          grades={interiorGrades}
-          notes={interiorNotes}
-          onCycle={cycleGrade(setInteriorGrades)}
-          onNoteChange={setNote(setInteriorNotes)}
-        />
-
-        <ChecklistSection
-          icon={Wrench}
-          title="Mechanical Systems"
-          items={MECHANICAL_ITEMS}
-          grades={mechanicalGrades}
-          notes={mechanicalNotes}
-          onCycle={cycleGrade(setMechanicalGrades)}
-          onNoteChange={setNote(setMechanicalNotes)}
-        />
-
-        <ChecklistSection
-          icon={Zap}
-          title="Electrical & Technology"
-          items={ELECTRICAL_ITEMS}
-          grades={electricalGrades}
-          notes={electricalNotes}
-          onCycle={cycleGrade(setElectricalGrades)}
-          onNoteChange={setNote(setElectricalNotes)}
-        />
-
-        <ChecklistSection
-          icon={Eye}
-          title="Glass & Lights"
-          items={GLASS_LIGHTS_ITEMS}
-          grades={glassGrades}
-          notes={glassNotes}
-          onCycle={cycleGrade(setGlassGrades)}
-          onNoteChange={setNote(setGlassNotes)}
-        />
-
-        {/* ── Tire & Brake Diagram ── */}
-        <Card className="print:shadow-none print:border-foreground/30 break-inside-avoid">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Gauge className="h-5 w-5 text-primary" />
-              Tire Tread & Brake Pads
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center">
-              <div className="relative w-[320px] h-[520px]">
-                <svg viewBox="0 0 320 520" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M100 60 Q100 30 160 25 Q220 30 220 60 L225 140 Q230 160 230 180 L230 340 Q230 360 225 380 L220 460 Q220 490 160 495 Q100 490 100 460 L95 380 Q90 360 90 340 L90 180 Q90 160 95 140 Z" fill="hsl(var(--muted))" stroke="hsl(var(--foreground))" strokeWidth="2" />
-                  <path d="M115 80 Q115 65 160 62 Q205 65 205 80 L200 130 Q160 135 120 130 Z" fill="hsl(var(--primary) / 0.15)" stroke="hsl(var(--foreground))" strokeWidth="1.5" />
-                  <path d="M120 390 Q160 385 200 390 L205 430 Q205 445 160 448 Q115 445 115 430 Z" fill="hsl(var(--primary) / 0.15)" stroke="hsl(var(--foreground))" strokeWidth="1.5" />
-                  <line x1="160" y1="62" x2="160" y2="448" stroke="hsl(var(--foreground))" strokeWidth="0.5" strokeDasharray="4 4" opacity="0.3" />
-                  <ellipse cx="120" cy="48" rx="12" ry="8" fill="hsl(var(--primary) / 0.25)" stroke="hsl(var(--foreground))" strokeWidth="1" />
-                  <ellipse cx="200" cy="48" rx="12" ry="8" fill="hsl(var(--primary) / 0.25)" stroke="hsl(var(--foreground))" strokeWidth="1" />
-                  <ellipse cx="120" cy="472" rx="10" ry="6" fill="hsl(var(--destructive) / 0.3)" stroke="hsl(var(--foreground))" strokeWidth="1" />
-                  <ellipse cx="200" cy="472" rx="10" ry="6" fill="hsl(var(--destructive) / 0.3)" stroke="hsl(var(--foreground))" strokeWidth="1" />
-                  <ellipse cx="78" cy="110" rx="8" ry="5" fill="hsl(var(--muted))" stroke="hsl(var(--foreground))" strokeWidth="1" />
-                  <ellipse cx="242" cy="110" rx="8" ry="5" fill="hsl(var(--muted))" stroke="hsl(var(--foreground))" strokeWidth="1" />
-                  <rect x="60" y="95" width="28" height="55" rx="6" fill="hsl(var(--foreground) / 0.8)" stroke="hsl(var(--foreground))" strokeWidth="2" />
-                  <rect x="232" y="95" width="28" height="55" rx="6" fill="hsl(var(--foreground) / 0.8)" stroke="hsl(var(--foreground))" strokeWidth="2" />
-                  <rect x="60" y="365" width="28" height="55" rx="6" fill="hsl(var(--foreground) / 0.8)" stroke="hsl(var(--foreground))" strokeWidth="2" />
-                  <rect x="232" y="365" width="28" height="55" rx="6" fill="hsl(var(--foreground) / 0.8)" stroke="hsl(var(--foreground))" strokeWidth="2" />
-                  {[100, 110, 120, 130, 140].map(y => (
-                    <g key={`tread-f-${y}`}>
-                      <line x1="66" y1={y} x2="82" y2={y} stroke="hsl(var(--muted))" strokeWidth="1.5" />
-                      <line x1="238" y1={y} x2="254" y2={y} stroke="hsl(var(--muted))" strokeWidth="1.5" />
-                    </g>
-                  ))}
-                  {[370, 380, 390, 400, 410].map(y => (
-                    <g key={`tread-r-${y}`}>
-                      <line x1="66" y1={y} x2="82" y2={y} stroke="hsl(var(--muted))" strokeWidth="1.5" />
-                      <line x1="238" y1={y} x2="254" y2={y} stroke="hsl(var(--muted))" strokeWidth="1.5" />
-                    </g>
-                  ))}
-                  <circle cx="74" cy="122" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeDasharray="3 2" />
-                  <circle cx="246" cy="122" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeDasharray="3 2" />
-                  <circle cx="74" cy="392" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeDasharray="3 2" />
-                  <circle cx="246" cy="392" r="10" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeDasharray="3 2" />
-                  <text x="160" y="18" textAnchor="middle" className="fill-foreground text-[11px] font-bold">FRONT</text>
-                  <text x="160" y="512" textAnchor="middle" className="fill-foreground text-[11px] font-bold">REAR</text>
-                </svg>
-
-                {/* LF */}
-                <div className="absolute left-[-8px] top-[68px] w-[72px]">
-                  <label className="text-[10px] font-semibold text-muted-foreground block mb-0.5">LF Tread</label>
-                  <Input value={tireDepth.lf} onChange={e => setTireDepth(p => ({ ...p, lf: e.target.value }))} placeholder="/32" className="h-7 text-xs px-1.5 text-center" />
-                  <label className="text-[10px] font-semibold text-primary block mt-1 mb-0.5">LF Brake</label>
-                  <Input value={brakeDepth.lf} onChange={e => setBrakeDepth(p => ({ ...p, lf: e.target.value }))} placeholder="mm" className="h-7 text-xs px-1.5 text-center" />
-                </div>
-                {/* RF */}
-                <div className="absolute right-[-8px] top-[68px] w-[72px]">
-                  <label className="text-[10px] font-semibold text-muted-foreground block mb-0.5">RF Tread</label>
-                  <Input value={tireDepth.rf} onChange={e => setTireDepth(p => ({ ...p, rf: e.target.value }))} placeholder="/32" className="h-7 text-xs px-1.5 text-center" />
-                  <label className="text-[10px] font-semibold text-primary block mt-1 mb-0.5">RF Brake</label>
-                  <Input value={brakeDepth.rf} onChange={e => setBrakeDepth(p => ({ ...p, rf: e.target.value }))} placeholder="mm" className="h-7 text-xs px-1.5 text-center" />
-                </div>
-                {/* LR */}
-                <div className="absolute left-[-8px] top-[342px] w-[72px]">
-                  <label className="text-[10px] font-semibold text-muted-foreground block mb-0.5">LR Tread</label>
-                  <Input value={tireDepth.lr} onChange={e => setTireDepth(p => ({ ...p, lr: e.target.value }))} placeholder="/32" className="h-7 text-xs px-1.5 text-center" />
-                  <label className="text-[10px] font-semibold text-primary block mt-1 mb-0.5">LR Brake</label>
-                  <Input value={brakeDepth.lr} onChange={e => setBrakeDepth(p => ({ ...p, lr: e.target.value }))} placeholder="mm" className="h-7 text-xs px-1.5 text-center" />
-                </div>
-                {/* RR */}
-                <div className="absolute right-[-8px] top-[342px] w-[72px]">
-                  <label className="text-[10px] font-semibold text-muted-foreground block mb-0.5">RR Tread</label>
-                  <Input value={tireDepth.rr} onChange={e => setTireDepth(p => ({ ...p, rr: e.target.value }))} placeholder="/32" className="h-7 text-xs px-1.5 text-center" />
-                  <label className="text-[10px] font-semibold text-primary block mt-1 mb-0.5">RR Brake</label>
-                  <Input value={brakeDepth.rr} onChange={e => setBrakeDepth(p => ({ ...p, rr: e.target.value }))} placeholder="mm" className="h-7 text-xs px-1.5 text-center" />
-                </div>
+        {/* ── #3 Smart-ordered sections: Tires/Brakes first ── */}
+        {SECTION_DEFS.map(section => {
+          if (section.key === "tires") {
+            return (
+              <div key="tires" ref={el => { sectionRefs.current["tires"] = el; }}>
+                <Card className={`print:shadow-none print:border-foreground/30 break-inside-avoid border-l-4 ${section.borderAccent} overflow-hidden`}>
+                  <button type="button" onClick={() => setOpenSections(p => ({ ...p, tires: !p.tires }))}
+                    className={`w-full text-left bg-gradient-to-r ${section.gradient}`}>
+                    <CardHeader className="pb-2 pt-3">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <Gauge className="h-5 w-5 text-primary" />
+                        Tire Tread & Brake Pads
+                        <div className="ml-auto">
+                          {openSections.tires ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                  </button>
+                  <AnimatePresence>
+                    {openSections.tires && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                        <CardContent className="pt-2">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <TireBrakeInput label="LF Tread" value={tireDepth.lf} onChange={v => setTireDepth(p => ({ ...p, lf: v }))} placeholder="/32" />
+                            <TireBrakeInput label="RF Tread" value={tireDepth.rf} onChange={v => setTireDepth(p => ({ ...p, rf: v }))} placeholder="/32" />
+                            <TireBrakeInput label="LR Tread" value={tireDepth.lr} onChange={v => setTireDepth(p => ({ ...p, lr: v }))} placeholder="/32" />
+                            <TireBrakeInput label="RR Tread" value={tireDepth.rr} onChange={v => setTireDepth(p => ({ ...p, rr: v }))} placeholder="/32" />
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <TireBrakeInput label="LF Brake" value={brakeDepth.lf} onChange={v => setBrakeDepth(p => ({ ...p, lf: v }))} placeholder="mm" accent />
+                            <TireBrakeInput label="RF Brake" value={brakeDepth.rf} onChange={v => setBrakeDepth(p => ({ ...p, rf: v }))} placeholder="mm" accent />
+                            <TireBrakeInput label="LR Brake" value={brakeDepth.lr} onChange={v => setBrakeDepth(p => ({ ...p, lr: v }))} placeholder="mm" accent />
+                            <TireBrakeInput label="RR Brake" value={brakeDepth.rr} onChange={v => setBrakeDepth(p => ({ ...p, rr: v }))} placeholder="mm" accent />
+                          </div>
+                          <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                            <TreadGuide label="New" range="10-11/32" color="bg-emerald-500" />
+                            <TreadGuide label="Good" range="6-9/32" color="bg-emerald-400" />
+                            <TreadGuide label="Fair" range="4-5/32" color="bg-amber-400" />
+                            <TreadGuide label="Replace" range="≤3/32" color="bg-red-500" />
+                          </div>
+                        </CardContent>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
               </div>
-            </div>
-            <div className="mt-4 grid grid-cols-4 gap-2 text-center text-xs">
-              <TreadGuide label="New" range="10-11/32" color="bg-green-500" />
-              <TreadGuide label="Good" range="6-9/32" color="bg-emerald-400" />
-              <TreadGuide label="Fair" range="4-5/32" color="bg-amber-400" />
-              <TreadGuide label="Replace" range="≤3/32" color="bg-red-500" />
-            </div>
-          </CardContent>
-        </Card>
+            );
+          }
 
-        {/* Quick Measurements */}
-        <Card className="print:shadow-none print:border-foreground/30 break-inside-avoid">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ThermometerSun className="h-5 w-5 text-primary" />
-              Quick Measurements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <InspectionField label="Paint Meter (mil)" value={paintReading} onChange={setPaintReading} placeholder="e.g. 4.2 avg" />
-              <InspectionField label="Oil Life %" value={oilLife} onChange={setOilLife} placeholder="e.g. 65%" />
-              <InspectionField label="Battery Health" value={batteryHealth} onChange={setBatteryHealth} placeholder="e.g. Good — 12.6V" />
+          if (section.key === "measurements") {
+            return (
+              <div key="measurements" ref={el => { sectionRefs.current["measurements"] = el; }}>
+                <Card className={`print:shadow-none print:border-foreground/30 break-inside-avoid border-l-4 ${section.borderAccent} overflow-hidden`}>
+                  <button type="button" onClick={() => setOpenSections(p => ({ ...p, measurements: !p.measurements }))}
+                    className={`w-full text-left bg-gradient-to-r ${section.gradient}`}>
+                    <CardHeader className="pb-2 pt-3">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <ThermometerSun className="h-5 w-5 text-primary" />
+                        Quick Measurements
+                        <div className="ml-auto">
+                          {openSections.measurements ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                  </button>
+                  <AnimatePresence>
+                    {openSections.measurements && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                        <CardContent className="pt-2">
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <InspectionField label="Paint Meter (mil)" value={paintReading} onChange={setPaintReading} placeholder="e.g. 4.2 avg" />
+                            <InspectionField label="Oil Life %" value={oilLife} onChange={setOilLife} placeholder="e.g. 65%" />
+                            <InspectionField label="Battery Health" value={batteryHealth} onChange={setBatteryHealth} placeholder="e.g. Good — 12.6V" />
+                          </div>
+                        </CardContent>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              </div>
+            );
+          }
+
+          // Regular checklist sections
+          return (
+            <div key={section.key} ref={el => { sectionRefs.current[section.key] = el; }}>
+              <ChecklistSection
+                sectionDef={section}
+                grades={allGrades}
+                notes={allNotes}
+                onCycle={cycleGrade}
+                onSetGrade={setGrade}
+                onNoteChange={setNote}
+                onMarkAllGood={() => markAllGood(section.items)}
+                flaggedItems={flaggedItems}
+                isOpen={openSections[section.key] ?? true}
+                onToggle={() => setOpenSections(p => ({ ...p, [section.key]: !p[section.key] }))}
+              />
             </div>
-          </CardContent>
-        </Card>
+          );
+        })}
 
         {/* Final Assessment */}
-        <Card className="print:shadow-none print:border-foreground/30 border-primary/30 break-inside-avoid">
+        <Card className="print:shadow-none print:border-foreground/30 border-l-4 border-l-emerald-500 break-inside-avoid">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               <CheckCircle className="h-5 w-5 text-emerald-500" />
@@ -761,17 +936,43 @@ const InspectionSheet = () => {
         </Card>
       </div>
 
-      {/* Sticky Save Bar */}
+      {/* ── Sticky Save Bar with #8 animated confirmation ── */}
       <div className="print:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t shadow-[0_-4px_12px_rgba(0,0,0,0.1)] p-4 z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">{totalChecked}</span>/{allItems.length} items checked
-            {totalIssues > 0 && <span className="ml-2 text-destructive font-medium">• {totalIssues} issue{totalIssues > 1 ? "s" : ""}</span>}
+          <div className="flex items-center gap-3">
+            <ProgressRing progress={progressPct} size={36} strokeWidth={3} />
+            <div className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{totalChecked}</span>/{ALL_ITEMS.length} items
+              {totalIssues > 0 && <span className="ml-2 text-destructive font-medium">• {totalIssues} issue{totalIssues > 1 ? "s" : ""}</span>}
+            </div>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="gap-2 px-6">
-            {saving ? <span className="animate-spin">⏳</span> : <Save className="h-4 w-4" />}
-            {saving ? "Saving..." : "Save Inspection"}
-          </Button>
+          <AnimatePresence mode="wait">
+            {saveSuccess ? (
+              <motion.div
+                key="success"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                >
+                  <CheckCircle className="h-6 w-6" />
+                </motion.div>
+                Inspection Saved!
+              </motion.div>
+            ) : (
+              <motion.div key="save" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Button onClick={handleSave} disabled={saving} className="gap-2 px-6">
+                  {saving ? <span className="animate-spin">⏳</span> : <Save className="h-4 w-4" />}
+                  {saving ? "Saving..." : "Save Inspection"}
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
@@ -793,11 +994,18 @@ const InspectionField = ({ label, value, onChange, placeholder }: { label: strin
   </div>
 );
 
+const TireBrakeInput = ({ label, value, onChange, placeholder, accent }: { label: string; value: string; onChange: (v: string) => void; placeholder: string; accent?: boolean }) => (
+  <div>
+    <label className={`text-[10px] font-semibold mb-1 block ${accent ? "text-primary" : "text-muted-foreground"}`}>{label}</label>
+    <Input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="h-9 text-sm text-center" inputMode="decimal" />
+  </div>
+);
+
 const TreadGuide = ({ label, range, color }: { label: string; range: string; color: string }) => (
   <div className="flex flex-col items-center gap-1">
     <div className={`w-4 h-4 rounded-full ${color}`} />
-    <span className="font-semibold">{label}</span>
-    <span className="text-muted-foreground">{range}</span>
+    <span className="font-semibold text-xs">{label}</span>
+    <span className="text-muted-foreground text-[10px]">{range}</span>
   </div>
 );
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useInspectionConfig } from "@/hooks/useInspectionConfig";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Printer, Camera, AlertTriangle, CheckCircle, Car, Gauge, Wrench,

@@ -1918,28 +1918,44 @@ const AdminDashboard = () => {
       )}
 
       {/* Detail Modal */}
-      <Dialog open={!!selected} onOpenChange={() => { setSelected(null); setPhotos([]); setDocs([]); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 print:max-h-none print:overflow-visible">
-          <div className="sticky top-0 z-10 bg-primary text-primary-foreground px-6 py-4 rounded-t-lg print:static">
-            <DialogHeader>
+      <Sheet open={!!selected} onOpenChange={() => { setSelected(null); setPhotos([]); setDocs([]); }}>
+        <SheetContent side="right" className="w-full sm:max-w-3xl lg:max-w-4xl p-0 flex flex-col overflow-hidden [&>button]:hidden">
+          {/* Sticky Header */}
+          <div className="sticky top-0 z-10 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-4">
+            <SheetHeader>
               <div className="flex items-center justify-between">
-                <DialogTitle className="text-xl font-bold text-primary-foreground">
+                <SheetTitle className="text-xl font-bold text-primary-foreground font-display tracking-wide">
                   {selected?.vehicle_year} {selected?.vehicle_make} {selected?.vehicle_model || "Submission Details"}
-                </DialogTitle>
-                <Button variant="ghost" size="sm" onClick={handlePrint} className="text-primary-foreground hover:bg-primary-foreground/20 print:hidden">
-                  <Printer className="w-4 h-4 mr-1" /> Print
-                </Button>
+                </SheetTitle>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" onClick={handlePrint} className="text-primary-foreground hover:bg-primary-foreground/20 print:hidden">
+                    <Printer className="w-4 h-4 mr-1" /> Print
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => { setSelected(null); setPhotos([]); setDocs([]); }} className="text-primary-foreground hover:bg-primary-foreground/20 h-8 w-8">
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
               {selected && (
-                <p className="text-primary-foreground/80 text-sm mt-1">
-                  Submitted {new Date(selected.created_at).toLocaleDateString()} • {selected.name || "Unknown"}
-                </p>
+                <div className="flex items-center gap-3 mt-1">
+                  <p className="text-primary-foreground/80 text-sm">
+                    Submitted {new Date(selected.created_at).toLocaleDateString()} • {selected.name || "Unknown"}
+                  </p>
+                  <Badge className={`text-[10px] ${
+                    selected.progress_status === "purchase_complete" ? "bg-success/20 text-success border-success/30" :
+                    selected.progress_status === "dead_lead" ? "bg-destructive/20 text-destructive-foreground border-destructive/30" :
+                    "bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30"
+                  }`}>
+                    {getStatusLabel(selected.progress_status)}
+                  </Badge>
+                </div>
               )}
-            </DialogHeader>
+            </SheetHeader>
           </div>
 
           {selected && (
-            <div className="px-6 pb-6 space-y-5 pt-4">
+            <ScrollArea className="flex-1">
+            <div className="p-6 space-y-5">
               {/* Duplicate Warning */}
               {duplicateWarnings[selected.id] && duplicateWarnings[selected.id].length > 0 && (
                 <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 flex items-start gap-2">

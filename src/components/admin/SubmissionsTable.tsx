@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Search, Eye, Trash2, ChevronLeft, ChevronRight, CheckCircle,
-  AlertTriangle, TrendingUp, UserCheck, XCircle,
+  AlertTriangle, TrendingUp, UserCheck, XCircle, Camera, FileText,
 } from "lucide-react";
 import type { Submission, DealerLocation } from "@/lib/adminConstants";
 import { ALL_STATUS_OPTIONS, getStatusLabel } from "@/lib/adminConstants";

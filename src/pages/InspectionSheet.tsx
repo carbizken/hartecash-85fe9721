@@ -776,7 +776,7 @@ const InspectionSheet = () => {
         {/* #6 — Sticky Tab Navigation */}
         <div className="border-t border-primary-foreground/10 overflow-x-auto scrollbar-hide">
           <div className="max-w-5xl mx-auto px-4 flex gap-0.5">
-            {SECTION_DEFS.map(s => {
+            {ACTIVE_SECTION_DEFS.map(s => {
               const Icon = s.icon;
               const isActive = activeTab === s.key;
               return (

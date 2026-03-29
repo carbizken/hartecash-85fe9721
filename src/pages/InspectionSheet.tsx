@@ -67,8 +67,38 @@ const gradeIcon = (g: ConditionGrade) => {
 
 const gradeLabel = (g: ConditionGrade) => g || "Not Checked";
 
-// ── Checklist definitions (reordered: #3 — tires/mechanical first) ──
-const SECTION_DEFS = [
+// ── Inspection Mode Types ──
+type InspectionMode = "full" | "ucm";
+
+// ── UCM (Used Car Manager) abbreviated items — key stuff a non-mechanic checks ──
+const UCM_ITEMS: Record<string, string[]> = {
+  exterior: [
+    "Hood", "Front Bumper", "Rear Bumper", "Roof",
+    "Left Front Fender", "Right Front Fender",
+    "Left Front Door", "Right Front Door",
+    "Left Rear Door", "Right Rear Door",
+    "Windshield", "Wheels/Rims", "Paint Condition",
+  ],
+  interior: [
+    "Driver Seat", "Passenger Seat", "Dashboard",
+    "Steering Wheel", "Carpet/Floor Mats", "Headliner",
+    "Odor Check", "Seat Belts",
+  ],
+  mechanical: [
+    "Engine Start/Idle", "Engine Noise", "Transmission Shift",
+    "Exhaust Noise", "Visible Leaks", "A/C Blows Cold",
+  ],
+  electrical: [
+    "A/C System", "Power Windows", "Power Locks",
+    "Radio/Infotainment", "Backup Camera", "All Lights Work",
+  ],
+  glass: [
+    "Windshield Chips/Cracks", "Side Windows", "Rear Window",
+  ],
+};
+
+// ── Full Tech checklist definitions ──
+const FULL_SECTION_DEFS = [
   {
     key: "tires",
     label: "Tires & Brakes",
@@ -161,7 +191,18 @@ const SECTION_DEFS = [
   },
 ];
 
-const ALL_CHECKLIST_SECTIONS = SECTION_DEFS.filter(s => s.items.length > 0);
+const getSectionDefs = (mode: InspectionMode) => {
+  if (mode === "full") return FULL_SECTION_DEFS;
+  // UCM mode: same structure but with abbreviated items
+  return FULL_SECTION_DEFS.map(section => {
+    if (section.key === "tires" || section.key === "measurements") return section;
+    const ucmItems = UCM_ITEMS[section.key];
+    if (!ucmItems) return section;
+    return { ...section, items: ucmItems };
+  });
+};
+
+const ALL_CHECKLIST_SECTIONS = FULL_SECTION_DEFS.filter(s => s.items.length > 0);
 const ALL_ITEMS = ALL_CHECKLIST_SECTIONS.flatMap(s => s.items);
 
 const severityColor = (s: string) => {

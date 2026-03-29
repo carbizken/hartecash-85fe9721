@@ -122,6 +122,7 @@ interface OfferSettingsRow {
   mileage_tiers: MileageTier[];
   regional_adjustment_pct: number;
   retail_search_radius: number;
+  dealer_pack: number;
 }
 
 interface OfferRule {

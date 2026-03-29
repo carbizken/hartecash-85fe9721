@@ -548,19 +548,19 @@ export default function AppraisalTool() {
 
       <div className="max-w-7xl mx-auto p-6">
         {/* ═══ HUD — Key Metrics Strip ═══ */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 mb-5">
           {[
-            { label: "Customer Offer", value: `$${Math.floor(currentOffer).toLocaleString()}`, color: "text-card-foreground", bg: "bg-muted/50 border-border" },
-            { label: "New Offer", value: `$${Math.floor(finalValue).toLocaleString()}`, color: "text-primary", bg: "bg-primary/10 border-primary/30" },
-            { label: "Avg Market Value", value: retailAvg > 0 ? `$${Math.floor(retailAvg).toLocaleString()}` : "—", color: "text-card-foreground", bg: "bg-muted/50 border-border" },
-            { label: "Recon Cost", value: `$${Math.floor(activeSettings?.recon_cost || 0).toLocaleString()}`, color: "text-destructive", bg: "bg-destructive/5 border-destructive/20" },
-            { label: "Dealer Pack", value: `$${Math.floor(effectivePack).toLocaleString()}`, color: "text-destructive", bg: "bg-destructive/5 border-destructive/20" },
-            { label: "Projected Profit", value: `${projectedProfit >= 0 ? "+" : ""}$${Math.floor(Math.abs(projectedProfit)).toLocaleString()}`, color: projectedProfit >= 0 ? "text-emerald-600" : "text-destructive", bg: projectedProfit >= 0 ? "bg-emerald-500/10 border-emerald-500/30" : "bg-destructive/10 border-destructive/30" },
-            { label: "Margin %", value: `${profitMargin.toFixed(1)}%`, color: profitMargin >= 0 ? "text-emerald-600" : "text-destructive", bg: profitMargin >= 0 ? "bg-emerald-500/10 border-emerald-500/30" : "bg-destructive/10 border-destructive/30" },
+            { label: "Customer Offer", value: `$${Math.floor(currentOffer).toLocaleString()}`, color: "text-card-foreground", bg: "bg-card border-border/60 shadow-sm" },
+            { label: "New Offer", value: `$${Math.floor(finalValue).toLocaleString()}`, color: "text-primary", bg: "bg-primary/5 border-primary/25 shadow-sm shadow-primary/5" },
+            { label: "Avg Market Value", value: retailAvg > 0 ? `$${Math.floor(retailAvg).toLocaleString()}` : "—", color: "text-card-foreground", bg: "bg-card border-border/60 shadow-sm" },
+            { label: "Recon Cost", value: `$${Math.floor(activeSettings?.recon_cost || 0).toLocaleString()}`, color: "text-destructive", bg: "bg-card border-destructive/20 shadow-sm" },
+            { label: "Dealer Pack", value: `$${Math.floor(effectivePack).toLocaleString()}`, color: "text-destructive", bg: "bg-card border-destructive/20 shadow-sm" },
+            { label: "Projected Profit", value: `${projectedProfit >= 0 ? "+" : ""}$${Math.floor(Math.abs(projectedProfit)).toLocaleString()}`, color: projectedProfit >= 0 ? "text-emerald-600" : "text-destructive", bg: projectedProfit >= 0 ? "bg-emerald-500/5 border-emerald-500/25 shadow-sm shadow-emerald-500/5" : "bg-destructive/5 border-destructive/25 shadow-sm" },
+            { label: "Margin %", value: `${profitMargin.toFixed(1)}%`, color: profitMargin >= 0 ? "text-emerald-600" : "text-destructive", bg: profitMargin >= 0 ? "bg-emerald-500/5 border-emerald-500/25 shadow-sm shadow-emerald-500/5" : "bg-destructive/5 border-destructive/25 shadow-sm" },
           ].map(metric => (
-            <div key={metric.label} className={`rounded-xl border p-3 text-center ${metric.bg}`}>
-              <div className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground">{metric.label}</div>
-              <div className={`text-lg font-bold ${metric.color}`}>{metric.value}</div>
+            <div key={metric.label} className={`rounded-xl border p-3 text-center transition-all hover:shadow-md ${metric.bg}`}>
+              <div className="text-[9px] uppercase tracking-[0.08em] font-bold text-muted-foreground mb-0.5">{metric.label}</div>
+              <div className={`text-lg font-black tracking-tight ${metric.color}`}>{metric.value}</div>
             </div>
           ))}
         </div>

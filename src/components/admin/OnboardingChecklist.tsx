@@ -31,7 +31,7 @@ const OnboardingChecklist = ({ onNavigate }: OnboardingChecklistProps) => {
   const checkAll = async () => {
     // Fetch all data in parallel
     const [configRes, locRes, notifRes, staffRes, accountRes] = await Promise.all([
-      supabase.from("site_config").select("dealership_name, logo_url, logo_white_url, favicon_url, phone, email, address, website_url, primary_color, hero_headline").eq("dealership_id", "default").maybeSingle(),
+      supabase.from("site_config").select("dealership_name, logo_url, logo_white_url, favicon_url, phone, email, address, website_url, primary_color, hero_headline, business_hours, facebook_url, instagram_url, google_review_url").eq("dealership_id", "default").maybeSingle(),
       supabase.from("dealership_locations").select("id").eq("is_active", true),
       supabase.from("notification_settings").select("email_recipients, sms_recipients").eq("dealership_id", "default").maybeSingle(),
       supabase.from("user_roles").select("id"),

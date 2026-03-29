@@ -11,7 +11,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TreadDepthPicker from "@/components/inspection/TreadDepthPicker";
-import BrakePadPicker from "@/components/inspection/BrakePadPicker";
+import BrakePadDepthWidget from "@/components/inspection/BrakePadDepthWidget";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -976,11 +976,19 @@ const InspectionSheet = () => {
                             </div>
                           )}
                           {inspConfig.show_brake_pad_measurements && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                              <BrakePadPicker label="Left Front" value={brakeDepth.lf} onChange={v => setBrakeDepth(p => ({ ...p, lf: v }))} />
-                              <BrakePadPicker label="Right Front" value={brakeDepth.rf} onChange={v => setBrakeDepth(p => ({ ...p, rf: v }))} />
-                              <BrakePadPicker label="Left Rear" value={brakeDepth.lr} onChange={v => setBrakeDepth(p => ({ ...p, lr: v }))} />
-                              <BrakePadPicker label="Right Rear" value={brakeDepth.rr} onChange={v => setBrakeDepth(p => ({ ...p, rr: v }))} />
+                            <div className="mb-4">
+                              <BrakePadDepthWidget
+                                depths={{
+                                  leftFront: brakeDepth.lf,
+                                  rightFront: brakeDepth.rf,
+                                  leftRear: brakeDepth.lr,
+                                  rightRear: brakeDepth.rr,
+                                }}
+                                onChange={(id, depth) => {
+                                  const map: Record<string, string> = { leftFront: "lf", rightFront: "rf", leftRear: "lr", rightRear: "rr" };
+                                  setBrakeDepth(p => ({ ...p, [map[id]]: depth }));
+                                }}
+                              />
                             </div>
                           )}
                         </CardContent>

@@ -323,7 +323,7 @@ const ChecklistSection = ({
   sectionDef, grades, notes, onCycle, onSetGrade, onNoteChange, onMarkAllGood, flaggedItems,
   isOpen, onToggle,
 }: {
-  sectionDef: typeof SECTION_DEFS[number];
+  sectionDef: typeof FULL_SECTION_DEFS[number];
   grades: Record<string, ConditionGrade>;
   notes: Record<string, string>;
   onCycle: (item: string) => void;

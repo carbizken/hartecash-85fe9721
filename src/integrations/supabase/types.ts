@@ -1392,6 +1392,10 @@ export type Database = {
           bb_tradein_avg: number | null
           bb_transmission: string | null
           bb_wholesale_avg: number | null
+          brake_lf: number | null
+          brake_lr: number | null
+          brake_rf: number | null
+          brake_rr: number | null
           check_request_done: boolean
           created_at: string
           docs_uploaded: boolean
@@ -1474,6 +1478,10 @@ export type Database = {
           bb_tradein_avg?: number | null
           bb_transmission?: string | null
           bb_wholesale_avg?: number | null
+          brake_lf?: number | null
+          brake_lr?: number | null
+          brake_rf?: number | null
+          brake_rr?: number | null
           check_request_done?: boolean
           created_at?: string
           docs_uploaded?: boolean
@@ -1556,6 +1564,10 @@ export type Database = {
           bb_tradein_avg?: number | null
           bb_transmission?: string | null
           bb_wholesale_avg?: number | null
+          brake_lf?: number | null
+          brake_lr?: number | null
+          brake_rf?: number | null
+          brake_rr?: number | null
           check_request_done?: boolean
           created_at?: string
           docs_uploaded?: boolean

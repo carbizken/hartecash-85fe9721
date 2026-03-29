@@ -90,24 +90,32 @@ serve(async (req) => {
       const vUvc = v.uvc as string;
       if (!vUvc) return [];
       try {
-        const colorUrl = `${BB_COLOR_BASE}?uvc=${encodeURIComponent(vUvc)}&category=Exterior%20Colors&country=U`;
-        console.log(`Fetching BB colors: ${colorUrl}`);
-        const colorRes = await fetch(colorUrl, {
-          headers: {
-            "Authorization": `Basic ${credentials}`,
-            "Accept": "application/json",
-          },
-        });
-        console.log(`BB colors response status: ${colorRes.status}`);
-        if (!colorRes.ok) {
-          const errBody = await colorRes.text();
-          console.log(`BB colors error body: ${errBody}`);
+        // Try multiple URL patterns to find the working one
+        let colorData: Record<string, unknown> | null = null;
+        for (const urlBuilder of BB_COLOR_URLS) {
+          const colorUrl = `${urlBuilder(vUvc)}?category=Exterior%20Colors&country=U`;
+          console.log(`Trying BB colors URL: ${colorUrl}`);
+          const colorRes = await fetch(colorUrl, {
+            headers: {
+              "Authorization": `Basic ${credentials}`,
+              "Accept": "application/json",
+            },
+          });
+          console.log(`BB colors status: ${colorRes.status}`);
+          if (colorRes.ok) {
+            colorData = await colorRes.json();
+            console.log(`BB colors SUCCESS! Keys: ${JSON.stringify(Object.keys(colorData!))}`);
+            console.log(`BB colors sample: ${JSON.stringify(colorData).substring(0, 800)}`);
+            break;
+          } else {
+            await colorRes.text(); // consume body
+          }
+        }
+        
+        if (!colorData) {
+          console.log(`All BB color URL patterns returned 404 for UVC ${vUvc}`);
           return [];
         }
-        const colorData = await colorRes.json();
-        console.log(`BB colors raw keys: ${JSON.stringify(Object.keys(colorData))}`);
-        console.log(`BB colors sample: ${JSON.stringify(colorData).substring(0, 500)}`);
-        
         // Try multiple possible response structures
         const categories = colorData.color_categories?.color_category_list 
           || colorData.used_vehicle_colors?.color_category_list

@@ -66,6 +66,9 @@ export default function RetailMarketPanel({ vin, uvc, zipcode, radiusMiles = 100
   const [error, setError] = useState<string | null>(null);
   const [fetched, setFetched] = useState(false);
   const [showListings, setShowListings] = useState(false);
+  const [radius, setRadius] = useState(radiusMiles);
+
+  useEffect(() => { setRadius(radiusMiles); }, [radiusMiles]);
 
   const fetchStats = useCallback(async () => {
     if (!vin && !uvc) return;

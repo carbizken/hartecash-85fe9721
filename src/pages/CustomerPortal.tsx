@@ -323,6 +323,7 @@ const CustomerPortal = () => {
               <div className="sticky top-6 space-y-5">
                 <PortalOfferCard {...offerCardProps} />
                 <PortalVehicleSummary {...vehicleSummaryProps} />
+                <EquipmentValueImpact submissionId={s.id} />
                 <DealerContactCard />
                 <CommunicationPreferences token={s.token} email={s.email} phone={s.phone} />
               </div>

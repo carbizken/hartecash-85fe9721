@@ -740,6 +740,7 @@ const InspectionSheet = () => {
   const handlePrint = () => {
     const vTitle = `${submission.vehicle_year || ""} ${submission.vehicle_make || ""} ${submission.vehicle_model || ""}`.trim();
     const dealerName = config?.dealership_name || "Dealership";
+    const logoUrl = config?.logo_url || "";
     const isStandard = inspectionMode === "ucm";
     const formTitle = isStandard ? "Standard Vehicle Inspection" : "Full Technical Inspection";
 

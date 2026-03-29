@@ -524,27 +524,25 @@ export default function AppraisalTool() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-4 shadow-lg">
+      <div className="sticky top-0 z-20 bg-gradient-to-br from-primary via-[hsl(210,100%,28%)] to-[hsl(215,90%,22%)] text-primary-foreground px-6 py-4 shadow-xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")} className="text-primary-foreground hover:bg-primary-foreground/20">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")} className="text-primary-foreground hover:bg-primary-foreground/10 rounded-xl">
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div>
-              <h1 className="text-xl font-bold tracking-wide">
-                Appraisal Tool — {sub.vehicle_year} {sub.vehicle_make} {sub.vehicle_model}
+            <div className="border-l border-primary-foreground/15 pl-4">
+              <h1 className="font-display text-xl tracking-wide">
+                {sub.vehicle_year} {sub.vehicle_make} {sub.vehicle_model}
               </h1>
-              <p className="text-primary-foreground/70 text-sm">
-                {sub.name} • {sub.vin || "No VIN"} • {sub.mileage ? `${Number(sub.mileage).toLocaleString()} mi` : "—"}
+              <p className="text-primary-foreground/60 text-sm mt-0.5">
+                {sub.name} · {sub.vin || "No VIN"} · {sub.mileage ? `${Number(sub.mileage).toLocaleString()} mi` : "—"}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button onClick={handleSave} disabled={saving} className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
-              Save ACV
-            </Button>
-          </div>
+          <Button onClick={handleSave} disabled={saving} className="bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground rounded-xl border border-primary-foreground/10 shadow-lg">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Save className="w-4 h-4 mr-1.5" />}
+            Save ACV
+          </Button>
         </div>
       </div>
 

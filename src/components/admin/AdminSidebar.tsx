@@ -164,6 +164,7 @@ const AdminSidebar = ({
         {renderGroup("Pipeline", pipelineItems)}
         {renderGroup("Team", teamItems)}
         {renderGroup("Lead Flow", leadFlowItems)}
+        {renderGroup("Standards", standardsItems)}
         {renderGroup("Storefront", storefrontItems)}
         {renderGroup("Compliance", complianceItems)}
         {renderGroup("Tools", toolsItems)}

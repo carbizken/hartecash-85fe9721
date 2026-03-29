@@ -138,7 +138,9 @@ serve(async (req) => {
       console.log("BB Retail Listings URL:", listUrl);
 
       const listRes = await fetch(listUrl, { headers: authHeaders });
-      const listData = await listRes.json();
+      const listText = await listRes.text();
+      let listData: Record<string, unknown> = {};
+      try { listData = JSON.parse(listText); } catch { console.error("BB Listings parse error:", listText.substring(0, 300)); }
 
       if (listData.error_count === 0 && listData.listings) {
         listings = (listData.listings as Array<Record<string, unknown>>).map((l) => ({

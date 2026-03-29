@@ -231,7 +231,7 @@ const StepVehicleBuild = ({ formData, update, vehicleInfo, bbVehicle, selectedAd
 
       {(!formConfig || formConfig.q_exterior_color) && (
         <FormField label="What color is your vehicle?">
-          <ColorDropdown value={formData.exteriorColor} onChange={(v) => update("exteriorColor", v)} />
+          <ColorDropdown value={formData.exteriorColor} onChange={(v) => update("exteriorColor", v)} bbColors={bbVehicle?.exterior_colors} />
         </FormField>
       )}
 

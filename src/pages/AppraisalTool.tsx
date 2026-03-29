@@ -502,7 +502,7 @@ export default function AppraisalTool() {
 
   const hasTires = !!(sub.tire_lf && sub.tire_rf && sub.tire_lr && sub.tire_rr);
   const avgTireDepth = hasTires ? ((sub.tire_lf! + sub.tire_rf! + sub.tire_lr! + sub.tire_rr!) / 4).toFixed(1) : null;
-  const hasInspection = !!(hasTires || inspectionData);
+  const hasInspection = !!(hasTires || hasBrakes || inspectionData);
 
   return (
     <div className="min-h-screen bg-background">

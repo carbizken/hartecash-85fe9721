@@ -258,6 +258,10 @@ export default function AppraisalTool() {
       const { data: rulesData } = await supabase.from("offer_rules").select("*").eq("dealership_id", "default").eq("is_active", true);
       if (rulesData) setRules(rulesData as any);
 
+      // Load depth policies
+      const { data: policiesData } = await supabase.from("depth_policies").select("*").eq("dealership_id", "default").eq("is_active", true).order("sort_order");
+      if (policiesData) setDepthPolicies(policiesData as any);
+
       // Do a live BB lookup to get full tier data
       if (s.vin) {
         setBbLoading(true);

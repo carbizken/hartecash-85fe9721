@@ -848,8 +848,20 @@ export default function AppraisalTool() {
                 <span className="text-[11px] font-bold text-card-foreground uppercase tracking-wider">Manual ACV Override</span>
               </div>
               <div className="flex items-center gap-3">
-                <Input type="number" value={acvOverride ?? ""} onChange={e => setAcvOverride(e.target.value ? Number(e.target.value) : null)}
-                  placeholder="Enter final ACV" className="h-10 text-lg font-bold flex-1" />
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-muted-foreground">$</span>
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    value={acvOverride != null ? acvOverride.toLocaleString("en-US") : ""}
+                    onChange={e => {
+                      const raw = e.target.value.replace(/[^0-9]/g, "");
+                      setAcvOverride(raw ? Number(raw) : null);
+                    }}
+                    placeholder="Enter final ACV"
+                    className="h-10 text-lg font-bold pl-8"
+                  />
+                </div>
                 <Button onClick={handleSave} disabled={saving} size="lg">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
                   Save

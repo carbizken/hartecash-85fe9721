@@ -83,22 +83,12 @@ serve(async (req) => {
       console.log("BB raw vehicle keys:", Object.keys(vehicleList[0]).join(", "));
     }
 
-    // Fetch exterior colors AND vehicle specs for each vehicle UVC via GraphQL
+    // Fetch exterior colors for each vehicle UVC via GraphQL + parse specs from price_includes
     const gqlFetches = vehicleList.map(async (v: Record<string, unknown>) => {
       const vUvc = v.uvc as string;
-      if (!vUvc) return { colors: [], specs: {} };
+      if (!vUvc) return { colors: [] };
       try {
-        // Combined query: colors + vehicle specs
-        const gqlQuery = `{
-          colors(uvc:"${vUvc}" category:"Exterior Colors" country:UNITED_STATES) {
-            colors { name color_list { name swatch_list } }
-          }
-          drilldown(uvc:"${vUvc}") {
-            drilldown {
-              drivetrain engine_description fuel_type transmission_description
-            }
-          }
-        }`;
+        const gqlQuery = `{ colors(uvc:"${vUvc}" category:"Exterior Colors" country:UNITED_STATES) { colors { name color_list { name swatch_list } } } }`;
         const gqlRes = await fetch(BB_GRAPHQL, {
           method: "POST",
           headers: {
@@ -110,11 +100,9 @@ serve(async (req) => {
         });
         if (!gqlRes.ok) {
           console.error(`BB GraphQL returned ${gqlRes.status}`);
-          return { colors: [], specs: {} };
+          return { colors: [] };
         }
         const gqlData = await gqlRes.json();
-
-        // Extract colors
         const categories = gqlData?.data?.colors?.colors || [];
         const exteriorCat = categories.find((c: Record<string, unknown>) =>
           ((c.name as string) || "").toLowerCase().includes("exterior")
@@ -123,30 +111,56 @@ serve(async (req) => {
           ? (exteriorCat.color_list || []) as Array<{ name: string; swatch_list: string[] }>
           : [];
         console.log(`Found ${colorList.length} exterior colors for UVC ${vUvc}`);
-        const colors = colorList.map((c) => ({
-          code: "",
-          name: c.name || "",
-          hex: c.swatch_list?.[0] || "",
-        }));
-
-        // Extract specs from drilldown
-        const dd = gqlData?.data?.drilldown?.drilldown;
-        const specs = dd ? {
-          drivetrain: dd.drivetrain || "",
-          engine: dd.engine_description || "",
-          fuel_type: dd.fuel_type || "",
-          transmission: dd.transmission_description || "",
-        } : {};
-        if (dd) console.log(`Vehicle specs for UVC ${vUvc}:`, JSON.stringify(specs));
-
-        return { colors, specs };
+        return {
+          colors: colorList.map((c) => ({
+            code: "",
+            name: c.name || "",
+            hex: c.swatch_list?.[0] || "",
+          })),
+        };
       } catch (e) {
         console.error(`BB GraphQL fetch error for UVC ${vUvc}:`, (e as Error).message);
-        return { colors: [], specs: {} };
+        return { colors: [] };
       }
     });
 
     const allGqlResults = await Promise.all(gqlFetches);
+
+    // Parse vehicle specs from style and price_includes fields
+    const parseSpecs = (style: string, priceIncludes: string) => {
+      const pi = (priceIncludes || "").toUpperCase();
+      const st = (style || "").toUpperCase();
+
+      // Drivetrain from style
+      let drivetrain = "";
+      if (st.includes("4WD") || st.includes("AWD")) drivetrain = "AWD/4WD";
+      else if (st.includes("2WD") || st.includes("FWD")) drivetrain = "FWD";
+      else if (st.includes("RWD")) drivetrain = "RWD";
+
+      // Transmission from price_includes
+      let transmission = "";
+      if (pi.includes("AT") || pi.includes("AUTO")) transmission = "Automatic";
+      else if (pi.includes("MT") || pi.includes("MANUAL")) transmission = "Manual";
+      else if (pi.includes("CVT")) transmission = "CVT";
+
+      // Engine from price_includes
+      let engine = "";
+      const cylMatch = pi.match(/(\d)CY/);
+      if (cylMatch) engine = `${cylMatch[1]}-Cylinder`;
+      if (pi.includes("TURBO") || pi.includes("TB")) engine += engine ? " Turbo" : "Turbo";
+      if (pi.includes("HYBRID") || pi.includes("HY")) engine = "Hybrid " + engine;
+      if (pi.includes("ELECTRIC") || pi.includes("EV")) engine = "Electric";
+
+      // Fuel type from price_includes
+      let fuel_type = "";
+      if (pi.includes("DIESEL") || pi.includes("DSL")) fuel_type = "Diesel";
+      else if (pi.includes("ELECTRIC") || pi.includes("EV")) fuel_type = "Electric";
+      else if (pi.includes("HYBRID") || pi.includes("HY")) fuel_type = "Hybrid";
+      else if (pi.includes("FLEX")) fuel_type = "Flex Fuel";
+      else if (engine) fuel_type = "Gasoline";
+
+      return { drivetrain, transmission, engine, fuel_type };
+    };
 
     // Transform each vehicle into a comprehensive response
     const vehicles = vehicleList.map((v: Record<string, unknown>, i: number) => {

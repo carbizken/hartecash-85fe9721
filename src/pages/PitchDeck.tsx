@@ -1168,7 +1168,7 @@ export default function PitchDeck() {
               Built This Month.<br /><span className="text-blue-400">Already Live.</span>
             </motion.h2>
             <motion.p variants={fadeUp} custom={1} className="text-lg text-white/50 max-w-3xl mb-14">
-              We ship fast. These eight features were designed, built, and deployed in the last two weeks — and they're already running in production.
+              We ship fast. These features were designed, built, and deployed recently — and they're already running in production.
             </motion.p>
             <motion.div variants={fadeUp} custom={2} className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
               {[

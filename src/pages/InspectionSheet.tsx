@@ -1124,6 +1124,22 @@ const InspectionSheet = () => {
   const minorCount = allDamageItems.filter(d => d.severity === "minor").length;
   const vehicleTitle = `${submission.vehicle_year || ""} ${submission.vehicle_make || ""} ${submission.vehicle_model || ""}`.trim();
 
+  // Compute applicable depth policies for this vehicle
+  const applicablePolicies = depthPolicies.filter(p => {
+    if (!p.all_brands && p.oem_brands.length > 0 && submission.vehicle_make) {
+      if (!p.oem_brands.some((b: string) => submission.vehicle_make.toLowerCase().includes(b.toLowerCase()))) return false;
+    }
+    if (p.max_vehicle_age_years != null && submission.vehicle_year) {
+      const age = new Date().getFullYear() - parseInt(submission.vehicle_year);
+      if (age > p.max_vehicle_age_years) return false;
+    }
+    if (p.max_mileage != null && submission.mileage) {
+      const miles = parseInt(String(submission.mileage).replace(/[^0-9]/g, ""));
+      if (miles > p.max_mileage) return false;
+    }
+    return true;
+  });
+
   // #3 — AI flagged items mapped to checklist labels
   const flaggedItems = new Set(
     allDamageItems.flatMap(d => [d.type.replace(/_/g, " ").toLowerCase(), d.location.replace(/_/g, " ").toLowerCase()])

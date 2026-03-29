@@ -17,6 +17,7 @@ import LoanPayoffCard from "@/components/portal/LoanPayoffCard";
 import CommunicationPreferences from "@/components/portal/CommunicationPreferences";
 import InspectionDisclosure from "@/components/portal/InspectionDisclosure";
 import WhatToExpect from "@/components/portal/WhatToExpect";
+import EquipmentValueImpact from "@/components/portal/EquipmentValueImpact";
 
 import ProgressSteps, { mapStatusToStepIndex } from "@/components/portal/ProgressSteps";
 import PortalOfferCard from "@/components/portal/PortalOfferCard";
@@ -322,6 +323,7 @@ const CustomerPortal = () => {
               <div className="sticky top-6 space-y-5">
                 <PortalOfferCard {...offerCardProps} />
                 <PortalVehicleSummary {...vehicleSummaryProps} />
+                <EquipmentValueImpact submissionId={s.id} />
                 <DealerContactCard />
                 <CommunicationPreferences token={s.token} email={s.email} phone={s.phone} />
               </div>
@@ -355,6 +357,7 @@ const CustomerPortal = () => {
           <VehiclePhotos token={s.token} photosUploaded={s.photos_uploaded} />
           
           <PortalVehicleSummary {...vehicleSummaryProps} />
+          <EquipmentValueImpact submissionId={s.id} />
           <PaymentInfoCard />
           {s.loan_status && ["has_loan", "lease"].includes(s.loan_status) && <LoanPayoffCard />}
           {stepIdx >= 2 && !isComplete && (

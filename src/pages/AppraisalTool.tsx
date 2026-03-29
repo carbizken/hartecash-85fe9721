@@ -52,6 +52,7 @@ interface Submission {
   brake_lf: number | null; brake_rf: number | null; brake_lr: number | null; brake_rr: number | null;
   ai_condition_score: string | null; ai_damage_summary: string | null;
   appraised_by: string | null; zip: string | null;
+  inspector_grade: string | null;
 }
 
 const CONDITIONS = ["excellent", "good", "fair", "rough"] as const;

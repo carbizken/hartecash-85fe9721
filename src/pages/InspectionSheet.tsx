@@ -749,10 +749,12 @@ const InspectionSheet = () => {
       @page { size: letter; margin: 0.4in 0.5in; }
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #1a1a1a; font-size: 11px; line-height: 1.4; }
-      .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #111; padding-bottom: 10px; margin-bottom: 14px; }
-      .header h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
-      .header .subtitle { font-size: 12px; color: #555; font-weight: 500; margin-top: 2px; }
-      .header .right { text-align: right; font-size: 10px; color: #666; }
+      .header { display: flex; align-items: center; border-bottom: 3px solid #111; padding-bottom: 10px; margin-bottom: 14px; position: relative; }
+      .header .logo { height: 44px; flex-shrink: 0; }
+      .header .center { flex: 1; text-align: center; }
+      .header .center h1 { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+      .header .center .subtitle { font-size: 11px; color: #555; font-weight: 500; margin-top: 2px; }
+      .header .right { text-align: right; font-size: 10px; color: #666; flex-shrink: 0; }
       .header .right .date { font-weight: 700; font-size: 11px; color: #111; }
       .vehicle-bar { display: flex; gap: 2px; margin-bottom: 14px; border: 1.5px solid #222; border-radius: 6px; overflow: hidden; }
       .vehicle-bar .cell { flex: 1; padding: 6px 10px; border-right: 1px solid #ddd; }

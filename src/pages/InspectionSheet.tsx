@@ -527,6 +527,85 @@ const InspectionSheet = () => {
       await loadSubmission();
     };
 
+    // Map AI damage locations to inspection checklist items
+    const AI_LOCATION_TO_ITEMS: Record<string, string[]> = {
+      front_bumper: ["Front Bumper"],
+      rear_bumper: ["Rear Bumper"],
+      hood: ["Hood"],
+      roof: ["Roof"],
+      trunk: ["Trunk/Liftgate"],
+      liftgate: ["Trunk/Liftgate"],
+      driver_door: ["Left Front Door"],
+      passenger_door: ["Right Front Door"],
+      left_front_door: ["Left Front Door"],
+      right_front_door: ["Right Front Door"],
+      left_rear_door: ["Left Rear Door"],
+      right_rear_door: ["Right Rear Door"],
+      driver_fender: ["Left Front Fender"],
+      left_front_fender: ["Left Front Fender"],
+      right_front_fender: ["Right Front Fender"],
+      left_rear_quarter: ["Left Rear Quarter"],
+      right_rear_quarter: ["Right Rear Quarter"],
+      rear_quarter_panel: ["Left Rear Quarter", "Right Rear Quarter"],
+      windshield: ["Windshield", "Windshield Chips/Cracks"],
+      rear_glass: ["Rear Glass", "Rear Window"],
+      left_mirror: ["Left Mirror"],
+      right_mirror: ["Right Mirror"],
+      left_headlight: ["Left Headlight"],
+      right_headlight: ["Right Headlight"],
+      left_taillight: ["Left Taillight"],
+      right_taillight: ["Right Taillight"],
+      grille: ["Grille"],
+      wheels: ["Wheels/Rims"],
+      rims: ["Wheels/Rims"],
+      undercarriage: ["Undercarriage"],
+      dashboard: ["Dashboard"],
+      driver_seat: ["Driver Seat"],
+      passenger_seat: ["Passenger Seat"],
+      rear_seats: ["Rear Seats"],
+      headliner: ["Headliner"],
+      steering_wheel: ["Steering Wheel"],
+      carpet: ["Carpet/Floor Mats"],
+      center_console: ["Center Console"],
+      door_panels: ["Door Panels"],
+    };
+
+    const severityToGrade = (severity: string): ConditionGrade => {
+      if (severity === "severe") return "damaged";
+      if (severity === "moderate") return "poor";
+      return "fair";
+    };
+
+    const prefillGradesFromAI = (reports: DamageReport[]) => {
+      const items = reports.flatMap(r => r.damage_items || []);
+      if (items.length === 0) return;
+
+      const newGrades: Record<string, ConditionGrade> = {};
+      const newNotes: Record<string, string> = {};
+      const gradeRank: Record<ConditionGrade, number> = { "": 0, good: 1, fair: 2, poor: 3, damaged: 4 };
+
+      for (const dmg of items) {
+        const loc = dmg.location.toLowerCase().replace(/ /g, "_");
+        const matchedItems = AI_LOCATION_TO_ITEMS[loc] || [];
+        const grade = severityToGrade(dmg.severity);
+        const noteText = `AI: ${dmg.description}`;
+
+        for (const item of matchedItems) {
+          // Only upgrade severity, never downgrade
+          if ((gradeRank[grade] || 0) > (gradeRank[newGrades[item]] || 0)) {
+            newGrades[item] = grade;
+          }
+          // Append notes
+          newNotes[item] = newNotes[item] ? `${newNotes[item]}; ${noteText}` : noteText;
+        }
+      }
+
+      if (Object.keys(newGrades).length > 0) {
+        setAllGrades(prev => ({ ...newGrades, ...prev }));
+        setAllNotes(prev => ({ ...newNotes, ...prev }));
+      }
+    };
+
     const loadSubmission = async () => {
       const [subRes, dmgRes] = await Promise.all([
         supabase.from("submissions").select("*").eq("id", id).maybeSingle(),
@@ -536,7 +615,12 @@ const InspectionSheet = () => {
         setSubmission(subRes.data);
         setOverallGrade(subRes.data.overall_condition || "");
       }
-      if (dmgRes.data) setDamageReports(dmgRes.data as unknown as DamageReport[]);
+      if (dmgRes.data) {
+        const reports = dmgRes.data as unknown as DamageReport[];
+        setDamageReports(reports);
+        // Pre-populate inspection grades from AI damage findings
+        prefillGradesFromAI(reports);
+      }
       setLoading(false);
     };
 

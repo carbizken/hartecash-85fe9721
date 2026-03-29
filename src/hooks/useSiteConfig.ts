@@ -51,6 +51,12 @@ export interface SiteConfig {
   service_hero_subtext: string;
   trade_hero_headline: string;
   trade_hero_subtext: string;
+  business_hours: { days: string; hours: string }[];
+  facebook_url: string;
+  instagram_url: string;
+  google_review_url: string;
+  tiktok_url: string;
+  youtube_url: string;
 }
 
 const DEFAULTS: SiteConfig = {

@@ -673,7 +673,7 @@ const InspectionSheet = () => {
         setCustomerGrade(subRes.data.overall_condition || "");
         setOverallGrade(subRes.data.overall_condition || "");
         setInspectorGrade((subRes.data as any).inspector_grade || "");
-        // Pre-populate tire/brake depths from saved mobile inspection data
+        // Pre-populate tire/brake depths from saved data
         if (subRes.data.tire_lf != null) setTireDepth(prev => ({ ...prev, lf: subRes.data.tire_lf }));
         if (subRes.data.tire_rf != null) setTireDepth(prev => ({ ...prev, rf: subRes.data.tire_rf }));
         if (subRes.data.tire_lr != null) setTireDepth(prev => ({ ...prev, lr: subRes.data.tire_lr }));
@@ -682,8 +682,17 @@ const InspectionSheet = () => {
         if (subRes.data.brake_rf != null) setBrakeDepth(prev => ({ ...prev, rf: subRes.data.brake_rf }));
         if (subRes.data.brake_lr != null) setBrakeDepth(prev => ({ ...prev, lr: subRes.data.brake_lr }));
         if (subRes.data.brake_rr != null) setBrakeDepth(prev => ({ ...prev, rr: subRes.data.brake_rr }));
-        // Pre-populate inspector notes from saved data
+        // Restore inspector notes (only user-typed notes now)
         if (subRes.data.internal_notes) setInspectorNotes(subRes.data.internal_notes);
+        // Restore saved inspection form data (grades, item notes, measurements)
+        const saved = (subRes.data as any).inspection_data;
+        if (saved && typeof saved === "object") {
+          if (saved.grades) setAllGrades(saved.grades);
+          if (saved.itemNotes) setAllNotes(saved.itemNotes);
+          if (saved.paintReading) setPaintReading(saved.paintReading);
+          if (saved.oilLife) setOilLife(saved.oilLife);
+          if (saved.batteryHealth) setBatteryHealth(saved.batteryHealth);
+        }
       }
       if (dmgRes.data) {
         const reports = dmgRes.data as unknown as DamageReport[];

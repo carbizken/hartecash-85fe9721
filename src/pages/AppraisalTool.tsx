@@ -262,7 +262,7 @@ export default function AppraisalTool() {
       engine: sub.bb_engine || "",
       transmission: sub.bb_transmission || "",
       fuel_type: sub.bb_fuel_type || "",
-      msrp: String(sub.bb_msrp || 0),
+      msrp: Number(sub.bb_msrp || 0),
       wholesale: {
         avg: sub.bb_wholesale_avg || 0,
         clean: 0, rough: 0, xclean: 0,

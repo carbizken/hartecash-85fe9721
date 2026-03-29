@@ -992,7 +992,7 @@ const InspectionSheet = () => {
               <p className="text-[10px] text-muted-foreground mt-1">Scan to fill digitally →</p>
             </div>
             <div className="border border-foreground/20 rounded p-1">
-              <QRCodeSVG value={`${window.location.origin}/inspect/${id}`} size={64} level="M" />
+              <QRCodeSVG value={`${window.location.origin}/inspect/${id}?mode=${inspectionMode === "full" ? "full" : "standard"}`} size={64} level="M" />
             </div>
           </div>
         </div>

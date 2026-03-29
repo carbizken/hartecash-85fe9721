@@ -212,7 +212,7 @@ serve(async (req) => {
         avg: v.adjusted_retail_avg || v.final_retail_avg || 0,
         rough: v.adjusted_retail_rough || v.final_retail_rough || 0,
       },
-    }));
+    };});
 
     return new Response(JSON.stringify({ error: null, vehicles }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" }

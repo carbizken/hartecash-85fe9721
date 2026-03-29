@@ -942,6 +942,22 @@ export default function AppraisalTool() {
                       </div>
                     </div>
                   )}
+                  {hasBrakes && brakeDepths && (
+                    <div>
+                      <div className="text-[10px] font-semibold text-muted-foreground uppercase mb-1">Brake Pad Depth</div>
+                      <div className="grid grid-cols-4 gap-2">
+                        <BrakePadDisplay label="LF" depth={brakeDepths.lf} />
+                        <BrakePadDisplay label="RF" depth={brakeDepths.rf} />
+                        <BrakePadDisplay label="LR" depth={brakeDepths.lr} />
+                        <BrakePadDisplay label="RR" depth={brakeDepths.rr} />
+                      </div>
+                      {avgBrakeDepth != null && (
+                        <div className="mt-1.5 px-1">
+                          <span className="text-[10px] text-muted-foreground">Avg: {avgBrakeDepth.toFixed(1)}mm</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {inspectionData && (
                     <Collapsible>
                       <CollapsibleTrigger asChild>

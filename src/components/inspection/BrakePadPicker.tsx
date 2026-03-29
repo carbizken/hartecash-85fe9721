@@ -161,7 +161,7 @@ const BrakePadPicker = ({ label, value, onChange }: BrakePadPickerProps) => {
             fill="hsl(var(--muted-foreground))"
             fontSize="7"
           >
-            mm
+            /32"
           </text>
         </svg>
       </div>

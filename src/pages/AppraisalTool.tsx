@@ -201,6 +201,7 @@ export default function AppraisalTool() {
   const [settings, setSettings] = useState<OfferSettings | null>(null);
   const [rules, setRules] = useState<OfferRule[]>([]);
   const [dealerPack, setDealerPack] = useState(0);
+  const [hidePackFromAppraisal, setHidePackFromAppraisal] = useState(false);
   const [expandedBlock, setExpandedBlock] = useState<string | null>(null);
 
   // Editable overrides (mirror Offer Builder controls)

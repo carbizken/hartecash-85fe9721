@@ -6,7 +6,12 @@ const corsHeaders = {
 };
 
 const BB_BASE = "https://service.blackbookcloud.com/UsedCarWS/UsedCarWS/UsedVehicle";
-const BB_COLOR_BASE = "https://service.blackbookcloud.com/UsedCarWS/UsedCarWS/UsedVehicle/Colors/uvc";
+// Try multiple possible BB Colors API endpoints
+const BB_COLOR_URLS = [
+  (uvc: string) => `https://service.blackbookcloud.com/UsedCarWS/UsedCarWS/UsedVehicle/VehicleColor/UVC/${uvc}`,
+  (uvc: string) => `https://service.blackbookcloud.com/UsedCarWS/UsedCarWS/VehicleColors/UVC/${uvc}`,
+  (uvc: string) => `https://service.blackbookcloud.com/UsedCarWS/UsedCarWS/UsedVehicle/Color/UVC/${uvc}`,
+];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -85,27 +90,59 @@ serve(async (req) => {
       const vUvc = v.uvc as string;
       if (!vUvc) return [];
       try {
-        const colorUrl = `${BB_COLOR_BASE}/${encodeURIComponent(vUvc)}?category=Exterior%20Colors&country=U`;
-        const colorRes = await fetch(colorUrl, {
-          headers: {
-            "Authorization": `Basic ${credentials}`,
-            "Accept": "application/json",
-          },
-        });
-        if (!colorRes.ok) return [];
-        const colorData = await colorRes.json();
-        const categories = colorData.color_categories?.color_category_list || [];
+        // Try multiple URL patterns to find the working one
+        let colorData: Record<string, unknown> | null = null;
+        for (const urlBuilder of BB_COLOR_URLS) {
+          const colorUrl = `${urlBuilder(vUvc)}?category=Exterior%20Colors&country=U`;
+          console.log(`Trying BB colors URL: ${colorUrl}`);
+          const colorRes = await fetch(colorUrl, {
+            headers: {
+              "Authorization": `Basic ${credentials}`,
+              "Accept": "application/json",
+            },
+          });
+          console.log(`BB colors status: ${colorRes.status}`);
+          if (colorRes.ok) {
+            colorData = await colorRes.json();
+            console.log(`BB colors SUCCESS! Keys: ${JSON.stringify(Object.keys(colorData!))}`);
+            console.log(`BB colors sample: ${JSON.stringify(colorData).substring(0, 800)}`);
+            break;
+          } else {
+            await colorRes.text(); // consume body
+          }
+        }
+        
+        if (!colorData) {
+          console.log(`All BB color URL patterns returned 404 for UVC ${vUvc}`);
+          return [];
+        }
+        // Try multiple possible response structures
+        const categories = colorData.color_categories?.color_category_list 
+          || colorData.used_vehicle_colors?.color_category_list
+          || [];
+        
+        if (categories.length === 0) {
+          console.log(`No color categories found in response`);
+          return [];
+        }
+        
         const exteriorCat = categories.find((c: Record<string, unknown>) =>
           (c.category_name as string || "").toLowerCase().includes("exterior")
         );
-        if (!exteriorCat) return [];
-        const colorList = (exteriorCat.colors?.color_list || []) as Array<Record<string, unknown>>;
+        if (!exteriorCat) {
+          console.log(`No exterior category found. Categories: ${categories.map((c: Record<string, unknown>) => c.category_name).join(', ')}`);
+          return [];
+        }
+        
+        const colorList = (exteriorCat.colors?.color_list || exteriorCat.color_list || []) as Array<Record<string, unknown>>;
+        console.log(`Found ${colorList.length} exterior colors`);
         return colorList.map((c) => ({
-          code: c.color_code || "",
-          name: c.color_name || "",
-          rgb: c.rgb_value || "",
+          code: c.color_code || c.code || "",
+          name: c.color_name || c.name || "",
+          rgb: c.rgb_value || c.rgb || "",
         }));
-      } catch {
+      } catch (e) {
+        console.error(`BB color fetch error for UVC ${vUvc}:`, (e as Error).message);
         return [];
       }
     });

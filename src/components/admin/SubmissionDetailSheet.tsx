@@ -15,6 +15,7 @@ import { QRCodeSVG } from "qrcode.react";
 import VehicleImage from "@/components/sell-form/VehicleImage";
 import StaffFileUpload from "@/components/admin/StaffFileUpload";
 import FollowUpPanel from "@/components/admin/FollowUpPanel";
+import RetailMarketPanel from "@/components/admin/RetailMarketPanel";
 import {
   X, Printer, Users, Car, Search, DollarSign, Info, FileText, Gauge, Palette,
   Settings2, Wrench, Key, Wind, Cigarette, CircleDot, Sparkles, TrendingUp,

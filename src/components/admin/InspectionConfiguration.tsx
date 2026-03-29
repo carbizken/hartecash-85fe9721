@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Save, GripVertical, Plus, Trash2, ChevronDown, ChevronRight,
   Gauge, ThermometerSun, Paintbrush, Armchair, Wrench, Zap, Eye,
-  Camera, StickyNote, Loader2,
+  Camera, StickyNote, Loader2, ClipboardCheck,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -97,6 +97,7 @@ const InspectionConfiguration = () => {
 
   // Tire credit/deduction policy
   const [enableTireAdjustments, setEnableTireAdjustments] = useState(false);
+  const [defaultInspectionMode, setDefaultInspectionMode] = useState<"standard" | "full">("standard");
   const [tireAdjustmentMode, setTireAdjustmentMode] = useState<"whole" | "per_tire">("whole");
   const [tireCreditThreshold, setTireCreditThreshold] = useState(6);
   const [tireDeductThreshold, setTireDeductThreshold] = useState(3);
@@ -150,6 +151,7 @@ const InspectionConfiguration = () => {
         setTireCreditPer32((data as any).tire_credit_per_32 ?? 25);
         setTireDeductPer32((data as any).tire_deduct_per_32 ?? 50);
         setTireAdjustmentMode((data as any).tire_adjustment_mode || 'whole');
+        setDefaultInspectionMode((data as any).default_inspection_mode === 'full' ? 'full' : 'standard');
       }
       setLoading(false);
     };
@@ -184,6 +186,7 @@ const InspectionConfiguration = () => {
         tire_credit_per_32: tireCreditPer32,
         tire_deduct_per_32: tireDeductPer32,
         tire_adjustment_mode: tireAdjustmentMode,
+        default_inspection_mode: defaultInspectionMode,
         updated_at: new Date().toISOString(),
       } as any)
       .eq("id", configId);
@@ -268,6 +271,48 @@ const InspectionConfiguration = () => {
           Save Changes
         </Button>
       </div>
+
+      {/* Default Inspection Mode */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <ClipboardCheck className="w-4 h-4 text-primary" />
+            Default Inspection Mode
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Choose the default inspection type when opening a new inspection. High-line stores may prefer Full Inspection.
+          </p>
+        </CardHeader>
+        <CardContent className="pb-4">
+          <div className="flex items-center gap-1 bg-muted rounded-lg p-1 w-fit">
+            <button
+              onClick={() => setDefaultInspectionMode("standard")}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                defaultInspectionMode === "standard"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Standard Inspection
+            </button>
+            <button
+              onClick={() => setDefaultInspectionMode("full")}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                defaultInspectionMode === "full"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Full Inspection
+            </button>
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2">
+            {defaultInspectionMode === "standard"
+              ? "Abbreviated checklist for managers & sales staff — covers key items without deep mechanical checks."
+              : "Full mechanic-aided deep inspection — all checklist items for thorough evaluation."}
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Section Cards — ordered by drag order */}
       <div className="space-y-3">

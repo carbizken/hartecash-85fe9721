@@ -21,6 +21,7 @@ export interface InspectionConfig {
   require_photos: Record<string, boolean>;
   require_notes: Record<string, boolean>;
   custom_items: { section: string; label: string; sort_order: number }[];
+  default_inspection_mode: "standard" | "full";
 }
 
 const DEFAULTS: InspectionConfig = {
@@ -43,6 +44,7 @@ const DEFAULTS: InspectionConfig = {
   require_photos: {},
   require_notes: {},
   custom_items: [],
+  default_inspection_mode: "standard",
 };
 
 export const useInspectionConfig = () => {
@@ -77,6 +79,7 @@ export const useInspectionConfig = () => {
           require_photos: (data.require_photos as any) || {},
           require_notes: (data.require_notes as any) || {},
           custom_items: (data.custom_items as any) || [],
+          default_inspection_mode: ((data as any).default_inspection_mode === "full" ? "full" : "standard") as "standard" | "full",
         });
       }
       setLoading(false);

@@ -473,7 +473,7 @@ export default function AppraisalTool() {
   // Parse brake pad depths from inspection notes
   const brakeDepths = useMemo(() => {
     if (!inspectionData) return null;
-    const match = inspectionData.match(/Brakes\s*\(mm\):\s*LF:(\d+|—)\s*RF:(\d+|—)\s*LR:(\d+|—)\s*RR:(\d+|—)/);
+    const match = inspectionData.match(/Brakes\s*\((?:mm|\/32)\):\s*LF:(\d+|—)\s*RF:(\d+|—)\s*LR:(\d+|—)\s*RR:(\d+|—)/);
     if (!match) return null;
     const parse = (v: string) => v === "—" ? null : parseInt(v, 10);
     return { lf: parse(match[1]), rf: parse(match[2]), lr: parse(match[3]), rr: parse(match[4]) };

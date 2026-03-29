@@ -11,6 +11,7 @@ interface Props {
   selectedColor: string;
   compact?: boolean;
   uvc?: string;
+  hideColorLabel?: boolean;
 }
 
 // Preload an image and resolve when ready
@@ -22,7 +23,7 @@ const preloadImage = (url: string): Promise<string> =>
     img.src = url;
   });
 
-const VehicleImage = ({ year, make, model, style, selectedColor, compact = false, uvc }: Props) => {
+const VehicleImage = ({ year, make, model, style, selectedColor, compact = false, uvc, hideColorLabel = false }: Props) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -192,20 +193,22 @@ const VehicleImage = ({ year, make, model, style, selectedColor, compact = false
       </AnimatePresence>
 
       {/* Color label chip */}
-      <AnimatePresence mode="wait">
-        {selectedColor && imageUrl && !loading && (
-          <motion.div
-            key={selectedColor}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
-            className="absolute bottom-2 right-3 flex items-center gap-1.5 bg-card/90 backdrop-blur-sm border border-border rounded-full px-2.5 py-1 shadow-sm"
-          >
-            <span className="text-xs font-medium text-card-foreground">{selectedColor}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {!hideColorLabel && (
+        <AnimatePresence mode="wait">
+          {selectedColor && imageUrl && !loading && (
+            <motion.div
+              key={selectedColor}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+              className="absolute bottom-2 right-3 flex items-center gap-1.5 bg-card/90 backdrop-blur-sm border border-border rounded-full px-2.5 py-1 shadow-sm"
+            >
+              <span className="text-xs font-medium text-card-foreground">{selectedColor}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   );
 };

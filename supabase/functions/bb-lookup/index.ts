@@ -83,13 +83,23 @@ serve(async (req) => {
       console.log("BB raw vehicle keys:", Object.keys(vehicleList[0]).join(", "));
     }
 
-    // Fetch exterior colors for each vehicle UVC via GraphQL
-    const colorFetches = vehicleList.map(async (v: Record<string, unknown>) => {
+    // Fetch exterior colors AND vehicle specs for each vehicle UVC via GraphQL
+    const gqlFetches = vehicleList.map(async (v: Record<string, unknown>) => {
       const vUvc = v.uvc as string;
-      if (!vUvc) return [];
+      if (!vUvc) return { colors: [], specs: {} };
       try {
-        const gqlQuery = `{ colors(uvc:"${vUvc}" category:"Exterior Colors" country:UNITED_STATES) { colors { name color_list { name swatch_list } } } }`;
-        const colorRes = await fetch(BB_GRAPHQL, {
+        // Combined query: colors + vehicle specs
+        const gqlQuery = `{
+          colors(uvc:"${vUvc}" category:"Exterior Colors" country:UNITED_STATES) {
+            colors { name color_list { name swatch_list } }
+          }
+          drilldown(uvc:"${vUvc}") {
+            drilldown {
+              drivetrain engine_description fuel_type transmission_description
+            }
+          }
+        }`;
+        const gqlRes = await fetch(BB_GRAPHQL, {
           method: "POST",
           headers: {
             "Authorization": `Basic ${credentials}`,
@@ -98,30 +108,45 @@ serve(async (req) => {
           },
           body: JSON.stringify({ query: gqlQuery }),
         });
-        if (!colorRes.ok) {
-          console.error(`BB colors GraphQL returned ${colorRes.status}`);
-          return [];
+        if (!gqlRes.ok) {
+          console.error(`BB GraphQL returned ${gqlRes.status}`);
+          return { colors: [], specs: {} };
         }
-        const colorData = await colorRes.json();
-        const categories = colorData?.data?.colors?.colors || [];
+        const gqlData = await gqlRes.json();
+
+        // Extract colors
+        const categories = gqlData?.data?.colors?.colors || [];
         const exteriorCat = categories.find((c: Record<string, unknown>) =>
           ((c.name as string) || "").toLowerCase().includes("exterior")
         );
-        if (!exteriorCat) return [];
-        const colorList = (exteriorCat.color_list || []) as Array<{ name: string; swatch_list: string[] }>;
+        const colorList = exteriorCat
+          ? (exteriorCat.color_list || []) as Array<{ name: string; swatch_list: string[] }>
+          : [];
         console.log(`Found ${colorList.length} exterior colors for UVC ${vUvc}`);
-        return colorList.map((c) => ({
+        const colors = colorList.map((c) => ({
           code: "",
           name: c.name || "",
           hex: c.swatch_list?.[0] || "",
         }));
+
+        // Extract specs from drilldown
+        const dd = gqlData?.data?.drilldown?.drilldown;
+        const specs = dd ? {
+          drivetrain: dd.drivetrain || "",
+          engine: dd.engine_description || "",
+          fuel_type: dd.fuel_type || "",
+          transmission: dd.transmission_description || "",
+        } : {};
+        if (dd) console.log(`Vehicle specs for UVC ${vUvc}:`, JSON.stringify(specs));
+
+        return { colors, specs };
       } catch (e) {
-        console.error(`BB color fetch error for UVC ${vUvc}:`, (e as Error).message);
-        return [];
+        console.error(`BB GraphQL fetch error for UVC ${vUvc}:`, (e as Error).message);
+        return { colors: [], specs: {} };
       }
     });
 
-    const allColors = await Promise.all(colorFetches);
+    const allGqlResults = await Promise.all(gqlFetches);
 
     // Transform each vehicle into a comprehensive response
     const vehicles = vehicleList.map((v: Record<string, unknown>, i: number) => ({

@@ -927,6 +927,17 @@ const InspectionSheet = () => {
         <div style="padding:4px 10px;font-size:9px;color:#888;background:#fafafa;border-top:1px solid #e5e5e5;">
           Tire Brand: __________________ &nbsp;&nbsp; Tire Size: __________________ &nbsp;&nbsp; Match: ☐ Yes ☐ No &nbsp;&nbsp; Spare Present: ☐ Yes ☐ No
         </div>
+        ${applicablePolicies.length > 0 ? `
+        <div style="padding:8px 10px;border-top:1px solid #e5e5e5;background:#f0f7ff;">
+          <div style="font-size:9px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;color:#1e40af;margin-bottom:4px;">⛨ Certification Depth Requirements</div>
+          ${applicablePolicies.map(p => {
+            const typeLabels: Record<string, string> = { manufacturer_cpo: "Mfr CPO", limited_cpo: "Ltd CPO", internal_cert: "Internal", custom: "Custom", standard: "Standard" };
+            return `<div style="font-size:10px;padding:2px 0;color:#333;">
+              <strong>${typeLabels[p.policy_type] || p.policy_type}:</strong> ${p.name} — Tires ≥ ${p.min_tire_depth}/32″, Brakes ≥ ${p.min_brake_depth}/32″
+              ${p.max_vehicle_age_years ? ` — ≤${p.max_vehicle_age_years}yr` : ""}${p.max_mileage ? ` — ≤${p.max_mileage.toLocaleString()}mi` : ""}
+            </div>`;
+          }).join("")}
+        </div>` : ""}
       </div>`;
 
     // ── Measurements Section (Full only) ──

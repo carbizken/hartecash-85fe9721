@@ -17,6 +17,7 @@ import LoanPayoffCard from "@/components/portal/LoanPayoffCard";
 import CommunicationPreferences from "@/components/portal/CommunicationPreferences";
 import InspectionDisclosure from "@/components/portal/InspectionDisclosure";
 import WhatToExpect from "@/components/portal/WhatToExpect";
+import EquipmentValueImpact from "@/components/portal/EquipmentValueImpact";
 
 import ProgressSteps, { mapStatusToStepIndex } from "@/components/portal/ProgressSteps";
 import PortalOfferCard from "@/components/portal/PortalOfferCard";

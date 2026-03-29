@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDown, CheckCircle, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import FormField from "./FormField";
 import RadioOption from "./RadioOption";
 import CheckboxOption from "./CheckboxOption";
 import VehicleImage from "./VehicleImage";
-import type { FormData, VehicleInfo, BBVehicle } from "./types";
+import type { FormData, VehicleInfo, BBVehicle, BBColor } from "./types";
 import type { FormConfig } from "@/hooks/useFormConfig";
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
   formConfig?: FormConfig;
 }
 
-const COLOR_OPTIONS = [
+const FALLBACK_COLOR_OPTIONS = [
   { label: "White", hex: "#f5f5f5" },
   { label: "Gray", hex: "#808080" },
   { label: "Silver", hex: "#c0c0c0" },
@@ -33,7 +33,23 @@ const COLOR_OPTIONS = [
   { label: "Other", hex: "none" },
 ];
 
-const ColorDropdown = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+/** Map a BB rgb string like "255,255,255" to a hex color */
+const rgbToHex = (rgb: string): string => {
+  if (!rgb) return "#888";
+  const parts = rgb.split(",").map((p) => parseInt(p.trim(), 10));
+  if (parts.length < 3 || parts.some(isNaN)) return "#888";
+  return `#${parts.map((p) => p.toString(16).padStart(2, "0")).join("")}`;
+};
+
+const ColorDropdown = ({
+  value,
+  onChange,
+  bbColors,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  bbColors?: BBColor[];
+}) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -45,7 +61,25 @@ const ColorDropdown = ({ value, onChange }: { value: string; onChange: (v: strin
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const selected = COLOR_OPTIONS.find((c) => c.label === value);
+  // Deduplicate BB colors by name (keep first occurrence)
+  const colorOptions = useMemo(() => {
+    if (bbColors && bbColors.length > 0) {
+      const seen = new Set<string>();
+      const opts = bbColors
+        .filter((c) => {
+          const key = c.name.toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .map((c) => ({ label: c.name, hex: rgbToHex(c.rgb) }));
+      opts.push({ label: "Other", hex: "none" });
+      return opts;
+    }
+    return FALLBACK_COLOR_OPTIONS;
+  }, [bbColors]);
+
+  const selected = colorOptions.find((c) => c.label === value);
 
   return (
     <div ref={ref} className="relative">
@@ -74,7 +108,7 @@ const ColorDropdown = ({ value, onChange }: { value: string; onChange: (v: strin
 
       {open && (
         <div className="absolute z-50 mt-1 w-full bg-card border border-border rounded-xl shadow-xl max-h-64 overflow-y-auto">
-          {COLOR_OPTIONS.map((color) => (
+          {colorOptions.map((color) => (
             <button
               key={color.label}
               type="button"
@@ -197,7 +231,7 @@ const StepVehicleBuild = ({ formData, update, vehicleInfo, bbVehicle, selectedAd
 
       {(!formConfig || formConfig.q_exterior_color) && (
         <FormField label="What color is your vehicle?">
-          <ColorDropdown value={formData.exteriorColor} onChange={(v) => update("exteriorColor", v)} />
+          <ColorDropdown value={formData.exteriorColor} onChange={(v) => update("exteriorColor", v)} bbColors={bbVehicle?.exterior_colors} />
         </FormField>
       )}
 

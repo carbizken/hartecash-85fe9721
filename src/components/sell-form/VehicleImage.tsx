@@ -10,6 +10,7 @@ interface Props {
   style?: string;
   selectedColor: string;
   compact?: boolean;
+  uvc?: string;
 }
 
 // Preload an image and resolve when ready

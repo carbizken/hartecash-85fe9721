@@ -121,6 +121,7 @@ interface OfferSettingsRow {
   age_tiers: AgeTier[];
   mileage_tiers: MileageTier[];
   regional_adjustment_pct: number;
+  retail_search_radius: number;
 }
 
 interface OfferRule {

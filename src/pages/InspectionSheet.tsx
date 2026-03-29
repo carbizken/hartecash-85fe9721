@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Printer, Camera, AlertTriangle, CheckCircle, Car, Gauge, Wrench,
   Save, Smartphone, Eye, Zap, Paintbrush, Armchair, Shield, ThermometerSun,
-  ChevronDown, ChevronRight, CheckCheck, Sparkles,
+  ChevronDown, ChevronRight, CheckCheck, Sparkles, ClipboardCheck,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
@@ -67,8 +67,38 @@ const gradeIcon = (g: ConditionGrade) => {
 
 const gradeLabel = (g: ConditionGrade) => g || "Not Checked";
 
-// ── Checklist definitions (reordered: #3 — tires/mechanical first) ──
-const SECTION_DEFS = [
+// ── Inspection Mode Types ──
+type InspectionMode = "full" | "ucm";
+
+// ── UCM (Used Car Manager) abbreviated items — key stuff a non-mechanic checks ──
+const UCM_ITEMS: Record<string, string[]> = {
+  exterior: [
+    "Hood", "Front Bumper", "Rear Bumper", "Roof",
+    "Left Front Fender", "Right Front Fender",
+    "Left Front Door", "Right Front Door",
+    "Left Rear Door", "Right Rear Door",
+    "Windshield", "Wheels/Rims", "Paint Condition",
+  ],
+  interior: [
+    "Driver Seat", "Passenger Seat", "Dashboard",
+    "Steering Wheel", "Carpet/Floor Mats", "Headliner",
+    "Odor Check", "Seat Belts",
+  ],
+  mechanical: [
+    "Engine Start/Idle", "Engine Noise", "Transmission Shift",
+    "Exhaust Noise", "Visible Leaks", "A/C Blows Cold",
+  ],
+  electrical: [
+    "A/C System", "Power Windows", "Power Locks",
+    "Radio/Infotainment", "Backup Camera", "All Lights Work",
+  ],
+  glass: [
+    "Windshield Chips/Cracks", "Side Windows", "Rear Window",
+  ],
+};
+
+// ── Full Tech checklist definitions ──
+const FULL_SECTION_DEFS = [
   {
     key: "tires",
     label: "Tires & Brakes",
@@ -161,7 +191,18 @@ const SECTION_DEFS = [
   },
 ];
 
-const ALL_CHECKLIST_SECTIONS = SECTION_DEFS.filter(s => s.items.length > 0);
+const getSectionDefs = (mode: InspectionMode) => {
+  if (mode === "full") return FULL_SECTION_DEFS;
+  // UCM mode: same structure but with abbreviated items
+  return FULL_SECTION_DEFS.map(section => {
+    if (section.key === "tires" || section.key === "measurements") return section;
+    const ucmItems = UCM_ITEMS[section.key];
+    if (!ucmItems) return section;
+    return { ...section, items: ucmItems };
+  });
+};
+
+const ALL_CHECKLIST_SECTIONS = FULL_SECTION_DEFS.filter(s => s.items.length > 0);
 const ALL_ITEMS = ALL_CHECKLIST_SECTIONS.flatMap(s => s.items);
 
 const severityColor = (s: string) => {
@@ -282,7 +323,7 @@ const ChecklistSection = ({
   sectionDef, grades, notes, onCycle, onSetGrade, onNoteChange, onMarkAllGood, flaggedItems,
   isOpen, onToggle,
 }: {
-  sectionDef: typeof SECTION_DEFS[number];
+  sectionDef: typeof FULL_SECTION_DEFS[number];
   grades: Record<string, ConditionGrade>;
   notes: Record<string, string>;
   onCycle: (item: string) => void;
@@ -397,6 +438,10 @@ const InspectionSheet = () => {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showMobileQR, setShowMobileQR] = useState(false);
+  const [inspectionMode, setInspectionMode] = useState<InspectionMode>("full");
+
+  // Get section defs based on inspection mode
+  const SECTION_DEFS = getSectionDefs(inspectionMode);
 
   // Build config-aware section definitions
   const sectionToggleMap: Record<string, boolean> = {
@@ -422,7 +467,7 @@ const InspectionSheet = () => {
         .map(ci => ci.label);
       return { ...def, items: [...filteredItems, ...customForSection] };
     })
-    .filter(Boolean) as typeof SECTION_DEFS;
+    .filter(Boolean) as typeof FULL_SECTION_DEFS;
 
   const ACTIVE_CHECKLIST_SECTIONS = ACTIVE_SECTION_DEFS.filter(s => s.items.length > 0);
   const ACTIVE_ALL_ITEMS = ACTIVE_CHECKLIST_SECTIONS.flatMap(s => s.items);
@@ -952,6 +997,37 @@ const InspectionSheet = () => {
       </div>
 
       <div ref={printRef} className="max-w-5xl mx-auto p-4 md:p-6 print:p-4 print:max-w-none space-y-4">
+        {/* Inspection Mode Toggle */}
+        <div className="flex items-center justify-between flex-wrap gap-3 print:hidden">
+          <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+            <button
+              onClick={() => setInspectionMode("full")}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                inspectionMode === "full"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Wrench className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
+              Full Inspection
+            </button>
+            <button
+              onClick={() => setInspectionMode("ucm")}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                inspectionMode === "ucm"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ClipboardCheck className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
+              Manager Walk-Around
+            </button>
+          </div>
+          <p className="text-[10px] text-muted-foreground">
+            {inspectionMode === "full" ? "Full tech-level deep inspection" : "Abbreviated check for used car managers"}
+          </p>
+        </div>
+
         {/* Grade Legend + instruction */}
         <div className="flex items-center justify-between flex-wrap gap-2">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">

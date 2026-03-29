@@ -950,9 +950,70 @@ const InspectionSheet = () => {
         </div>
       </div>`;
 
+    // ── Equipment Verification Section ──
+    const addDeducts: any[] = (() => {
+      try {
+        const raw = submission.bb_add_deducts;
+        if (Array.isArray(raw)) return raw;
+        if (typeof raw === "string") return JSON.parse(raw);
+        return [];
+      } catch { return []; }
+    })();
+    const customerSelected: string[] = submission.bb_selected_options || [];
+    const autoEquip = addDeducts.filter((ad: any) => ad.auto !== "N");
+    const customerOptional = addDeducts.filter((ad: any) => ad.auto === "N" && customerSelected.includes(ad.uoc));
+    const hasPowertrain = submission.bb_drivetrain || submission.bb_transmission || submission.bb_engine || submission.bb_fuel_type;
+
+    const equipmentSection = (hasPowertrain || autoEquip.length > 0 || customerOptional.length > 0) ? `
+      <div class="section">
+        <div class="section-header" style="border-bottom-color:#7c3aed;">
+          <h2>🔧 Equipment & Powertrain Verification</h2>
+          <span class="badge">Verify all items match the physical vehicle</span>
+        </div>
+        ${hasPowertrain ? `
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #e5e5e5;">
+          ${[
+            { label: "Drivetrain", value: submission.bb_drivetrain },
+            { label: "Transmission", value: submission.bb_transmission },
+            { label: "Engine", value: submission.bb_engine },
+            { label: "Fuel Type", value: submission.bb_fuel_type },
+          ].filter(s => s.value).map(s => `
+            <div style="padding:6px 10px;border-right:1px solid #e5e5e5;">
+              <div style="font-size:8px;text-transform:uppercase;letter-spacing:0.8px;color:#888;font-weight:600;">${s.label}</div>
+              <div style="font-size:11px;font-weight:700;margin-top:1px;">${s.value}</div>
+            </div>
+          `).join("")}
+        </div>` : ""}
+        ${autoEquip.length > 0 ? `
+        <div style="padding:6px 10px;border-bottom:1px solid #e5e5e5;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#888;margin-bottom:4px;">Factory Equipment (from VIN)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            ${autoEquip.map((ad: any) => `
+              <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;padding:2px 6px;color:#166534;">
+                ✓ ${ad.name}${ad.avg ? ` ($${ad.avg > 0 ? "+" : ""}${ad.avg})` : ""}
+              </span>
+            `).join("")}
+          </div>
+        </div>` : ""}
+        ${customerOptional.length > 0 ? `
+        <div style="padding:8px 10px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#b45309;margin-bottom:6px;">⚠ Customer-Claimed Optional Equipment — VERIFY PRESENT</div>
+          <div class="grid-2">
+            ${customerOptional.map((ad: any) => `
+              <div class="item" style="border:1.5px dashed #f59e0b;background:#fffbeb;margin:2px;border-radius:4px;">
+                <div class="cb" style="border-color:#f59e0b;"></div>
+                <span class="item-label" style="font-weight:600;">${ad.name}</span>
+                ${ad.avg ? `<span style="font-size:9px;color:#92400e;font-weight:600;">($${ad.avg > 0 ? "+" : ""}${ad.avg})</span>` : ""}
+              </div>
+            `).join("")}
+          </div>
+        </div>` : ""}
+      </div>` : "";
+
     // ── Compose Body ──
     let body = "";
 
+    body += equipmentSection;
     body += tireBrakeSection;
 
     if (isStandard) {

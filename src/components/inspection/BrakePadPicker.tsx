@@ -48,7 +48,7 @@ const BrakePadPicker = ({ label, value, onChange }: BrakePadPickerProps) => {
         <span className="text-xs font-semibold text-muted-foreground">{label}</span>
         {value !== null && info && (
           <span className={cn("text-xs font-bold", info.text)}>
-            {value}mm · {info.label}
+            {value}/32 · {info.label}
           </span>
         )}
       </div>

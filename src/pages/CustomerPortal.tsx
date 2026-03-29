@@ -70,6 +70,10 @@ interface PortalSubmission {
   brake_rf: number | null;
   brake_lr: number | null;
   brake_rr: number | null;
+  tire_lf: number | null;
+  tire_rf: number | null;
+  tire_lr: number | null;
+  tire_rr: number | null;
 }
 
 const STAGE_MAPPING: Record<string, string> = {

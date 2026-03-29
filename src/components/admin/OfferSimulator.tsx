@@ -878,6 +878,17 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
                   <div className="rounded-lg border border-border bg-muted/20 p-4">
                     <MarketContextPanel bbVehicle={liveBbVehicle} offerHigh={liveResult.high} />
                   </div>
+
+                  {/* Live Retail Market Data */}
+                  <div className="rounded-lg border border-border bg-muted/20 p-4">
+                    <RetailMarketPanel
+                      vin={liveVin}
+                      uvc={liveBbVehicle.uvc}
+                      zipcode={liveZip}
+                      radiusMiles={(activeSettings as any).retail_search_radius || 100}
+                      offerHigh={liveResult.high}
+                    />
+                  </div>
                 </>
               )}
 

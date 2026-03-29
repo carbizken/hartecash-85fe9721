@@ -24,6 +24,7 @@ import RetailMarketPanel from "@/components/admin/RetailMarketPanel";
 import BrakePadDepthWidget from "@/components/inspection/BrakePadDepthWidget";
 import { calculateOffer, type OfferSettings, type OfferRule, type OfferEstimate } from "@/lib/offerCalculator";
 import type { FormData, BBVehicle, BBAddDeduct } from "@/components/sell-form/types";
+import { formatGrade } from "@/lib/formatGrade";
 
 // ── Types ──
 interface Submission {

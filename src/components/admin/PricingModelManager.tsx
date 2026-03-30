@@ -203,7 +203,7 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
   };
 
   const handleCreateNew = () => {
-    setEditModel({ ...DEFAULT_MODEL_SETTINGS, dealership_id: "default", name: "New Model", description: "", is_default: false, is_active: false, schedule_start: null, schedule_end: null, priority: 0, created_by: null } as any);
+    setEditModel({ ...DEFAULT_MODEL_SETTINGS, dealership_id: dealershipId, name: "New Model", description: "", is_default: false, is_active: false, schedule_start: null, schedule_end: null, priority: 0, created_by: null } as any);
     setSelectedModelId(null);
   };
 

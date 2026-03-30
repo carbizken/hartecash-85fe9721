@@ -109,44 +109,50 @@ const STANDARD_SECTIONS = [
   },
 ];
 
-// ── Tappable Check Item ──
+// ── 3-State Check: gray (unchecked) → green (pass) → yellow (caution) → red (fail) → gray ──
+type CheckState = "" | "pass" | "caution" | "fail";
+const CHECK_CYCLE: CheckState[] = ["", "pass", "caution", "fail"];
+
+const checkStyle = (state: CheckState) => {
+  switch (state) {
+    case "pass": return { bg: "bg-emerald-500", border: "border-emerald-500", text: "text-white", icon: "✓" };
+    case "caution": return { bg: "bg-amber-500", border: "border-amber-500", text: "text-white", icon: "~" };
+    case "fail": return { bg: "bg-red-500", border: "border-red-500", text: "text-white", icon: "✗" };
+    default: return { bg: "bg-background", border: "border-muted-foreground/30", text: "", icon: "" };
+  }
+};
+
 const CheckItem = ({
   label,
-  checked,
-  issue,
-  onToggle,
-  onIssueToggle,
+  state,
+  onCycle,
 }: {
   label: string;
-  checked: boolean;
-  issue: boolean;
-  onToggle: () => void;
-  onIssueToggle: () => void;
-}) => (
-  <div className="flex items-center gap-2 py-1.5 border-b border-border/50 last:border-0">
-    <button
-      onClick={onToggle}
-      className={`w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-        checked
-          ? "bg-emerald-500 border-emerald-500 text-white"
-          : "border-muted-foreground/30 bg-background"
-      }`}
-    >
-      {checked && <CheckCircle className="w-4 h-4" />}
-    </button>
-    <span className={`text-sm flex-1 ${checked ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
-    <button
-      onClick={onIssueToggle}
-      className={`text-[10px] px-2 py-0.5 rounded-full border transition-all ${
-        issue
-          ? "bg-red-500/10 text-red-600 border-red-300 font-semibold"
-          : "bg-muted text-muted-foreground border-transparent"
-      }`}
-    >
-      {issue ? "Issue" : "Flag"}
-    </button>
-  </div>
-);
+  state: CheckState;
+  onCycle: () => void;
+}) => {
+  const s = checkStyle(state);
+  return (
+    <div className="flex items-center gap-2 py-1.5 border-b border-border/50 last:border-0">
+      <button
+        onClick={onCycle}
+        className={`w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${s.bg} ${s.border} ${s.text}`}
+      >
+        {s.icon && <span className="text-xs font-bold">{s.icon}</span>}
+      </button>
+      <span className={`text-sm flex-1 ${state ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
+      {state && (
+        <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium capitalize ${
+          state === "pass" ? "bg-emerald-500/10 text-emerald-600 border-emerald-300" :
+          state === "caution" ? "bg-amber-500/10 text-amber-600 border-amber-300" :
+          "bg-red-500/10 text-red-600 border-red-300"
+        }`}>
+          {state === "pass" ? "Pass" : state === "caution" ? "Caution" : "Fail"}
+        </span>
+      )}
+    </div>
+  );
+};
 
 const MobileInspection = () => {
   const { id } = useParams<{ id: string }>();

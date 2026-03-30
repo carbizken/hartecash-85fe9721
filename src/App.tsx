@@ -38,6 +38,7 @@ const ExecutiveDashboard = lazy(() => import("./pages/ExecutiveDashboard"));
 const InspectionSheet = lazy(() => import("./pages/InspectionSheet"));
 const MobileInspection = lazy(() => import("./pages/MobileInspection"));
 const AppraisalTool = lazy(() => import("./pages/AppraisalTool"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 
 const queryClient = new QueryClient();
 

@@ -88,7 +88,7 @@ export const useInspectionConfig = () => {
       setLoading(false);
     };
     fetch();
-  }, []);
+  }, [dealershipId]);
 
   return { config, loading };
 };

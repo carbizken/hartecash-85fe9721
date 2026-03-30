@@ -87,5 +87,5 @@ export function useFormConfig() {
 }
 
 export function clearFormConfigCache() {
-  cachedFormConfig = null;
+  cachedFormConfig = {};
 }

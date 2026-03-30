@@ -79,7 +79,7 @@ function Arrow({ side, color }: { side: "left" | "right"; color: string }) {
   );
 }
 
-function Readout({ depth, status, minMm }: { depth: number; status: ReturnType<typeof getStatus>; minMm?: number }) {
+function Readout({ depth, status }: { depth: number; status: ReturnType<typeof getStatus> }) {
   const mm = toMm(depth);
   return (
     <div className="text-center">

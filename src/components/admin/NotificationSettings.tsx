@@ -122,7 +122,9 @@ const CUSTOMER_TRIGGERS = [
 
 export default function NotificationSettings() {
   const { toast } = useToast();
-  const [config, setConfig] = useState<NotificationConfig>(DEFAULTS);
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
+  const [config, setConfig] = useState<NotificationConfig>({ ...DEFAULTS, dealership_id: dealershipId });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -137,7 +139,7 @@ export default function NotificationSettings() {
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [dealershipId]);
 
   const fetchSettings = async () => {
     setLoading(true);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { DEFAULT_TEMPLATES, PLACEHOLDER_VARS, type TemplateDefaults } from "@/lib/notificationDefaults";
 import {
@@ -45,6 +46,8 @@ interface Props {
 
 export default function NotificationTemplateEditor({ open, onOpenChange, triggerKey, triggerLabel }: Props) {
   const { toast } = useToast();
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
   const defaults = DEFAULT_TEMPLATES[triggerKey];
 
   const [emailSubject, setEmailSubject] = useState("");
@@ -71,7 +74,7 @@ export default function NotificationTemplateEditor({ open, onOpenChange, trigger
     const { data } = await supabase
       .from("notification_templates")
       .select("*")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", dealershipId)
       .eq("trigger_key", triggerKey);
 
     const emailRow = data?.find((r: any) => r.channel === "email");
@@ -108,7 +111,7 @@ export default function NotificationTemplateEditor({ open, onOpenChange, trigger
             channel: "email",
             subject: emailSubject,
             body: emailBody,
-            dealership_id: "default",
+            dealership_id: dealershipId,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "trigger_key,channel,dealership_id" }
@@ -120,7 +123,7 @@ export default function NotificationTemplateEditor({ open, onOpenChange, trigger
         .delete()
         .eq("trigger_key", triggerKey)
         .eq("channel", "email")
-        .eq("dealership_id", "default");
+        .eq("dealership_id", dealershipId);
     }
 
     // Save SMS template
@@ -133,7 +136,7 @@ export default function NotificationTemplateEditor({ open, onOpenChange, trigger
             channel: "sms",
             subject: null,
             body: smsBody,
-            dealership_id: "default",
+            dealership_id: dealershipId,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "trigger_key,channel,dealership_id" }
@@ -144,7 +147,7 @@ export default function NotificationTemplateEditor({ open, onOpenChange, trigger
         .delete()
         .eq("trigger_key", triggerKey)
         .eq("channel", "sms")
-        .eq("dealership_id", "default");
+        .eq("dealership_id", dealershipId);
     }
 
     setSaving(false);

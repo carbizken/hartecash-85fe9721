@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,7 +76,9 @@ interface DealerOnboardingProps {
 }
 
 const DealerOnboarding = ({ isAdmin = false, onNavigate }: DealerOnboardingProps) => {
-  const [account, setAccount] = useState<Omit<DealerAccount, "id">>(DEFAULT_ACCOUNT);
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
+  const [account, setAccount] = useState<Omit<DealerAccount, "id">>({ ...DEFAULT_ACCOUNT, dealership_id: dealershipId });
   const [existingId, setExistingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -87,14 +90,14 @@ const DealerOnboarding = ({ isAdmin = false, onNavigate }: DealerOnboardingProps
 
   useEffect(() => {
     fetchAccount();
-  }, []);
+  }, [dealershipId]);
 
   const fetchAccount = async () => {
     setLoading(true);
     const { data } = await supabase
       .from("dealer_accounts")
       .select("*")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", dealershipId)
       .maybeSingle();
     if (data) {
       setExistingId(data.id);
@@ -170,7 +173,7 @@ const DealerOnboarding = ({ isAdmin = false, onNavigate }: DealerOnboardingProps
     const { error } = await supabase
       .from("site_config")
       .update(updates)
-      .eq("dealership_id", "default");
+      .eq("dealership_id", dealershipId);
 
     setApplying(false);
     if (error) {

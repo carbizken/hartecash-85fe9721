@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatPhone } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,7 +122,9 @@ const CUSTOMER_TRIGGERS = [
 
 export default function NotificationSettings() {
   const { toast } = useToast();
-  const [config, setConfig] = useState<NotificationConfig>(DEFAULTS);
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
+  const [config, setConfig] = useState<NotificationConfig>({ ...DEFAULTS, dealership_id: dealershipId });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -136,14 +139,14 @@ export default function NotificationSettings() {
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [dealershipId]);
 
   const fetchSettings = async () => {
     setLoading(true);
     const { data } = await supabase
       .from("notification_settings")
       .select("*")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", dealershipId)
       .maybeSingle();
     if (data) {
       const d = data as any;
@@ -182,13 +185,13 @@ export default function NotificationSettings() {
 
   const handleSave = async () => {
     setSaving(true);
-    const payload = { ...config, updated_at: new Date().toISOString() };
+    const payload = { ...config, dealership_id: dealershipId, updated_at: new Date().toISOString() };
     delete (payload as any).id;
 
     const { data: existing } = await supabase
       .from("notification_settings")
       .select("id")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", dealershipId)
       .maybeSingle();
 
     let error;

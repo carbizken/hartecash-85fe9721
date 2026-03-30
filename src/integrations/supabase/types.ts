@@ -307,6 +307,7 @@ export type Database = {
           city: string
           coverage_radius_miles: number | null
           created_at: string
+          dealership_id: string
           excluded_oem_brands: string[]
           id: string
           is_active: boolean
@@ -327,6 +328,7 @@ export type Database = {
           city: string
           coverage_radius_miles?: number | null
           created_at?: string
+          dealership_id?: string
           excluded_oem_brands?: string[]
           id?: string
           is_active?: boolean
@@ -347,6 +349,7 @@ export type Database = {
           city?: string
           coverage_radius_miles?: number | null
           created_at?: string
+          dealership_id?: string
           excluded_oem_brands?: string[]
           id?: string
           is_active?: boolean

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Check, X, Minus } from "lucide-react";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/contexts/TenantContext";
 import { motion, useInView } from "framer-motion";
 
 interface ComparisonFeature {
@@ -11,6 +12,7 @@ interface ComparisonFeature {
 
 const CompetitorComparison = () => {
   const { config } = useSiteConfig();
+  const { tenant } = useTenant();
   const name = config.dealership_name || "Harte Auto Group";
   const shortName = name.split(" ")[0];
   const animate = config.enable_animations;
@@ -26,7 +28,7 @@ const CompetitorComparison = () => {
     supabase
       .from("site_config")
       .select("competitor_columns, comparison_features")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", tenant.dealership_id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {

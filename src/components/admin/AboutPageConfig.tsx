@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,11 +52,14 @@ const AboutPageConfig = () => {
   const [milestonesOpen, setMilestonesOpen] = useState(false);
   const [valuesOpen, setValuesOpen] = useState(false);
 
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
+
   useEffect(() => {
     supabase
       .from("site_config")
       .select("about_hero_headline, about_hero_subtext, about_story, about_milestones, about_values")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", dealershipId)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
@@ -68,7 +72,7 @@ const AboutPageConfig = () => {
         }
         setLoading(false);
       });
-  }, []);
+  }, [dealershipId]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -81,7 +85,7 @@ const AboutPageConfig = () => {
         about_milestones: milestones,
         about_values: values,
       } as any)
-      .eq("dealership_id", "default");
+      .eq("dealership_id", dealershipId);
 
     if (error) {
       toast({ title: "Error saving", description: error.message, variant: "destructive" });

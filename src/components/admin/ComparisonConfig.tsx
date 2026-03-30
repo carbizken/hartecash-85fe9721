@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,16 +28,19 @@ const ComparisonConfig = () => {
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const { toast } = useToast();
 
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
+
   useEffect(() => {
     fetchConfig();
-  }, []);
+  }, [dealershipId]);
 
   const fetchConfig = async () => {
     setLoading(true);
     const { data } = await supabase
       .from("site_config")
       .select("competitor_columns, comparison_features")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", dealershipId)
       .maybeSingle();
 
     if (data) {
@@ -55,7 +59,7 @@ const ComparisonConfig = () => {
         comparison_features: features as any,
         updated_at: new Date().toISOString(),
       })
-      .eq("dealership_id", "default");
+      .eq("dealership_id", dealershipId);
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });

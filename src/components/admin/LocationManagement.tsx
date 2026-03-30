@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,8 @@ interface Location {
 }
 
 const LocationManagement = () => {
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
   const { toast } = useToast();
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,12 +49,13 @@ const LocationManagement = () => {
     const { data, error } = await supabase
       .from("dealership_locations" as any)
       .select("*")
+      .eq("dealership_id", dealershipId)
       .order("sort_order");
     if (!error && data) setLocations(data as unknown as Location[]);
     setLoading(false);
   };
 
-  useEffect(() => { fetchLocations(); }, []);
+  useEffect(() => { fetchLocations(); }, [dealershipId]);
 
   const toggleExpanded = (id: string) => {
     setExpandedIds(prev => {

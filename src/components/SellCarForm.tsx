@@ -375,6 +375,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
           loan_payment: formData.loanPayment || null,
           next_step: "photos",
           lead_source: leadSource,
+          dealership_id: tenant.dealership_id,
           bb_tradein_avg: bbSelectedVehicle?.tradein?.avg || null,
           bb_wholesale_avg: bbSelectedVehicle?.wholesale?.avg || null,
           estimated_offer_low: estimate?.low || null,

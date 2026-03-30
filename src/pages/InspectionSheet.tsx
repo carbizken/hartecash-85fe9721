@@ -630,9 +630,9 @@ const InspectionSheet = () => {
     };
 
     const severityToGrade = (severity: string): ConditionGrade => {
-      if (severity === "severe") return "damaged";
-      if (severity === "moderate") return "poor";
-      return "fair";
+      if (severity === "severe") return "fail";
+      if (severity === "moderate") return "fail";
+      return "caution";
     };
 
     const prefillGradesFromAI = (reports: DamageReport[]) => {
@@ -641,7 +641,7 @@ const InspectionSheet = () => {
 
       const newGrades: Record<string, ConditionGrade> = {};
       const newNotes: Record<string, string> = {};
-      const gradeRank: Record<ConditionGrade, number> = { "": 0, good: 1, fair: 2, poor: 3, damaged: 4 };
+      const gradeRank: Record<ConditionGrade, number> = { "": 0, pass: 1, caution: 2, fail: 3 };
 
       for (const dmg of items) {
         const loc = dmg.location.toLowerCase().replace(/ /g, "_");

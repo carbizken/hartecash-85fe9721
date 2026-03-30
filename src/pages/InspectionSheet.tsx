@@ -408,10 +408,10 @@ const ChecklistSection = ({
 // ── Grade Legend ──
 const GradeLegend = () => (
   <div className="flex flex-wrap gap-2 text-xs print:text-[10px]">
-    {(["good", "fair", "poor", "damaged"] as ConditionGrade[]).map(g => (
+    {(["pass", "caution", "fail"] as ConditionGrade[]).map(g => (
       <div key={g} className={`flex items-center gap-1.5 px-2 py-1 rounded-md border ${gradeStyle(g)}`}>
         <span className="font-bold">{gradeIcon(g)}</span>
-        <span className="capitalize font-medium">{g}</span>
+        <span className="font-medium">{gradeLabel(g)}</span>
       </div>
     ))}
     <div className="flex items-center gap-1.5 px-2 py-1 rounded-md border bg-muted/50 text-muted-foreground border-border">

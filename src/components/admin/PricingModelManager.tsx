@@ -214,7 +214,7 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
     }
     setSaving(true);
     const payload = {
-      dealership_id: "default",
+      dealership_id: dealershipId,
       name: editModel.name,
       description: editModel.description || "",
       is_default: editModel.is_default || false,

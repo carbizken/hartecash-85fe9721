@@ -143,7 +143,7 @@ const AdminDashboard = () => {
   };
 
   const fetchAppointments = async () => {
-    const { data } = await supabase.from("appointments").select("*").order("preferred_date", { ascending: true });
+    const { data } = await supabase.from("appointments").select("*").eq("dealership_id", tenant.dealership_id).order("preferred_date", { ascending: true });
     if (data) setAppointments(data);
   };
 

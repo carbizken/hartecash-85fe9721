@@ -9,7 +9,7 @@ import {
   AlertTriangle, TrendingUp, UserCheck, XCircle, Camera, FileText,
 } from "lucide-react";
 import type { Submission, DealerLocation } from "@/lib/adminConstants";
-import { ALL_STATUS_OPTIONS, getStatusLabel } from "@/lib/adminConstants";
+import { ALL_STATUS_OPTIONS, getStatusLabel, isAcceptedWithAppointment, isAcceptedWithoutAppointment, isOfferPendingSubmission } from "@/lib/adminConstants";
 import DashboardAnalytics from "@/components/admin/DashboardAnalytics";
 
 interface SubmissionsTableProps {
@@ -281,19 +281,16 @@ const SubmissionsTable = ({
                       </td>
                       <td className="px-3 py-3 text-right whitespace-nowrap">
                         {(() => {
-                          const ACCEPTED_APPT_STATUSES = ["inspection_scheduled", "inspection_completed", "deal_finalized", "title_ownership_verified", "check_request_submitted", "purchase_complete"];
-                          const isAcceptedAppt = (sub.progress_status === "offer_accepted" && sub.appointment_set) || ACCEPTED_APPT_STATUSES.includes(sub.progress_status);
-                          const isAcceptedNoAppt = sub.progress_status === "offer_accepted" && !sub.appointment_set;
-                          const hasOffer = (sub.offered_price != null && sub.offered_price > 0) || (sub.estimated_offer_high != null && sub.estimated_offer_high > 0);
-                          const isPending = hasOffer && !isAcceptedNoAppt && !isAcceptedAppt && !["offer_accepted"].includes(sub.progress_status);
+                          const isAcceptedAppt = isAcceptedWithAppointment(sub);
+                          const isAcceptedNoAppt = isAcceptedWithoutAppointment(sub);
+                          const isPending = isOfferPendingSubmission(sub);
 
-                          // Color: gray=no offer, yellow=pending, green=accepted, blue=accepted+appt
                           const bubbleClass = isAcceptedAppt
-                            ? "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-400/40"
+                            ? "bg-primary/15 text-primary border-primary/30"
                             : isAcceptedNoAppt
-                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-400/40"
+                            ? "bg-success/15 text-success border-success/30"
                             : isPending
-                            ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-400/40"
+                            ? "bg-warning/15 text-warning-foreground border-warning/30"
                             : "";
 
                           const offerValue = sub.offered_price || sub.estimated_offer_high;
@@ -330,8 +327,8 @@ const SubmissionsTable = ({
                             </SelectContent>
                           </Select>
                           {sub.progress_status === "partial" && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600">⚠ Abandoned — needs follow-up</span>}
-                          {sub.progress_status === "offer_accepted" && (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700/50 rounded-full px-2.5 py-0.5">
+                          {isAcceptedWithoutAppointment(sub) && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-success bg-success/15 border border-success/30 rounded-full px-2.5 py-0.5">
                               <CheckCircle className="w-3 h-3" /> Offer Accepted
                             </span>
                           )}

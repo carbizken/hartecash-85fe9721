@@ -31,11 +31,21 @@ export const PROGRESS_STAGES_ACCEPTED: ProgressStage[] = [
   { key: "dead_lead", label: "Dead Deal", dbKeys: ["dead_lead"], icon: XCircle },
 ];
 
+export const ACCEPTED_NO_APPOINTMENT_STATUSES = ["offer_accepted", "appraisal_completed", "price_agreed"] as const;
+export const ACCEPTED_WITH_APPOINTMENT_STATUSES = [
+  "inspection_scheduled",
+  "inspection_completed",
+  "deal_finalized",
+  "title_ownership_verified",
+  "check_request_submitted",
+  "purchase_complete",
+] as const;
+
 export const PROGRESS_STAGES = PROGRESS_STAGES_NOT_ACCEPTED;
 
 export const getProgressStages = (sub: { offered_price?: number | null; progress_status: string }) => {
-  const ACCEPTED_STATUSES = ['offer_accepted', 'inspection_scheduled', 'inspection_completed', 'deal_finalized', 'title_ownership_verified', 'check_request_submitted', 'purchase_complete'];
-  const isAccepted = !!sub.offered_price || ACCEPTED_STATUSES.includes(sub.progress_status);
+  const ACCEPTED_STATUSES = [...ACCEPTED_NO_APPOINTMENT_STATUSES, ...ACCEPTED_WITH_APPOINTMENT_STATUSES];
+  const isAccepted = !!sub.offered_price || ACCEPTED_STATUSES.includes(sub.progress_status as any);
   return isAccepted ? PROGRESS_STAGES_ACCEPTED : PROGRESS_STAGES_NOT_ACCEPTED;
 };
 
@@ -46,10 +56,13 @@ export const getStageIndex = (dbStatus: string): number => {
 
 export const ALL_STATUS_OPTIONS = [
   { key: "new", label: "New Lead" },
+  { key: "contacted", label: "Contacted" },
   { key: "offer_accepted", label: "Offer Accepted" },
   { key: "no_contact", label: "Unable to Reach" },
   { key: "inspection_scheduled", label: "Inspection Scheduled" },
   { key: "inspection_completed", label: "Inspection Completed" },
+  { key: "appraisal_completed", label: "Final Appraisal Completed" },
+  { key: "price_agreed", label: "Price Agreed" },
   { key: "deal_finalized", label: "Deal Finalized" },
   { key: "title_ownership_verified", label: "Title / Ownership Verified" },
   { key: "check_request_submitted", label: "Check Request Submitted" },
@@ -143,6 +156,25 @@ export interface Submission {
   review_requested?: boolean;
   review_requested_at?: string | null;
 }
+
+export type SubmissionPipelineState = Pick<Submission, "progress_status" | "appointment_set" | "offered_price" | "estimated_offer_high">;
+
+export const submissionHasOffer = (sub: Pick<Submission, "offered_price" | "estimated_offer_high">) =>
+  (sub.offered_price != null && sub.offered_price > 0) || (sub.estimated_offer_high != null && sub.estimated_offer_high > 0);
+
+export const isAcceptedWithAppointment = (sub: SubmissionPipelineState) =>
+  (submissionHasOffer(sub) && Boolean(sub.appointment_set)) ||
+  ACCEPTED_WITH_APPOINTMENT_STATUSES.includes(sub.progress_status as any);
+
+export const isAcceptedWithoutAppointment = (sub: SubmissionPipelineState) =>
+  submissionHasOffer(sub) &&
+  !isAcceptedWithAppointment(sub) &&
+  ACCEPTED_NO_APPOINTMENT_STATUSES.includes(sub.progress_status as any);
+
+export const isOfferPendingSubmission = (sub: SubmissionPipelineState) =>
+  submissionHasOffer(sub) &&
+  !isAcceptedWithoutAppointment(sub) &&
+  !isAcceptedWithAppointment(sub);
 
 export interface DealerLocation {
   id: string;

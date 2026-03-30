@@ -146,20 +146,33 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch site config
+    // Fetch submission data if provided (needed to derive dealership_id)
+    let sub: any = null;
+    let dealershipId = "default";
+    if (submission_id) {
+      const { data } = await supabase
+        .from("submissions")
+        .select("*")
+        .eq("id", submission_id)
+        .single();
+      sub = data;
+      if (sub?.dealership_id) dealershipId = sub.dealership_id;
+    }
+
+    // Fetch site config scoped to tenant
     const { data: siteConfig } = await supabase
       .from("site_config")
       .select("dealership_name, price_guarantee_days")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", dealershipId)
       .maybeSingle();
     const dealerName = siteConfig?.dealership_name || "Our Dealership";
     const guaranteeDays = String(siteConfig?.price_guarantee_days || 8);
 
-    // Fetch notification settings
+    // Fetch notification settings scoped to tenant
     const { data: notifSettings } = await supabase
       .from("notification_settings")
       .select("*")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", dealershipId)
       .maybeSingle();
 
     // Check if this trigger is enabled

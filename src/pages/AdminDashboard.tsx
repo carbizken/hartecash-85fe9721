@@ -343,7 +343,7 @@ const AdminDashboard = () => {
                   showFilterPanel={showFilterPanel} onToggleFilterPanel={() => setShowFilterPanel(!showFilterPanel)}
                   page={0} total={submissions.filter(s =>
                     (["offer_accepted"].includes(s.progress_status) && s.appointment_set) ||
-                    ["inspection_scheduled", "inspection_completed", "deal_finalized", "title_ownership_verified", "check_request_submitted", "purchase_complete"].includes(s.progress_status)
+                     ["inspection_scheduled", "inspection_completed", "appraisal_completed", "price_agreed", "deal_finalized", "title_ownership_verified", "check_request_submitted", "purchase_complete"].includes(s.progress_status)
                   ).length} pageSize={PAGE_SIZE} onPageChange={() => {}}
                   dealerLocations={dealerLocations} canApprove={canApprove} canDelete={canDelete}
                   auditLabel={auditLabel} userName={userName}

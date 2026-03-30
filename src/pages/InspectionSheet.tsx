@@ -302,7 +302,7 @@ const ConditionItem = ({
         <span className="flex-1 text-left">{label}</span>
         {flaggedByAI && <Sparkles className="w-3 h-3 text-amber-500 flex-shrink-0" />}
         <span className="text-[10px] uppercase tracking-wider opacity-60">{gradeLabel(grade)}</span>
-        {(grade === "poor" || grade === "damaged") && (
+      {(grade === "caution" || grade === "fail") && (
           <button
             type="button"
             onClick={e => { e.stopPropagation(); setShowNote(!showNote); }}
@@ -312,7 +312,7 @@ const ConditionItem = ({
           </button>
         )}
       </button>
-      {showNote && (grade === "poor" || grade === "damaged") && (
+      {showNote && (grade === "caution" || grade === "fail") && (
         <Input
           value={note}
           onChange={e => onNoteChange(e.target.value)}

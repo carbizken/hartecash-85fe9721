@@ -280,17 +280,35 @@ const SubmissionsTable = ({
                         )}
                       </td>
                       <td className="px-3 py-3 text-right whitespace-nowrap">
-                        {sub.offered_price ? (
-                          <span className="font-semibold text-card-foreground">
-                            ${Math.floor(sub.offered_price).toLocaleString()}
-                          </span>
-                        ) : sub.estimated_offer_high ? (
-                          <span className="text-xs text-muted-foreground" title="Estimated range">
-                            ~${Math.floor(sub.estimated_offer_high).toLocaleString()}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
+                        {(() => {
+                          const ACCEPTED_APPT_STATUSES = ["inspection_scheduled", "inspection_completed", "deal_finalized", "title_ownership_verified", "check_request_submitted", "purchase_complete"];
+                          const isAcceptedAppt = (sub.progress_status === "offer_accepted" && sub.appointment_set) || ACCEPTED_APPT_STATUSES.includes(sub.progress_status);
+                          const isAcceptedNoAppt = sub.progress_status === "offer_accepted" && !sub.appointment_set;
+                          const hasOffer = (sub.offered_price != null && sub.offered_price > 0) || (sub.estimated_offer_high != null && sub.estimated_offer_high > 0);
+                          const isPending = hasOffer && !isAcceptedNoAppt && !isAcceptedAppt && !["offer_accepted"].includes(sub.progress_status);
+
+                          // Color: gray=no offer, yellow=pending, green=accepted, blue=accepted+appt
+                          const bubbleClass = isAcceptedAppt
+                            ? "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-400/40"
+                            : isAcceptedNoAppt
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-400/40"
+                            : isPending
+                            ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-400/40"
+                            : "";
+
+                          const offerValue = sub.offered_price || sub.estimated_offer_high;
+                          if (!offerValue) return <span className="text-xs text-muted-foreground">—</span>;
+
+                          const displayVal = sub.offered_price
+                            ? `$${Math.floor(sub.offered_price).toLocaleString()}`
+                            : `~$${Math.floor(sub.estimated_offer_high!).toLocaleString()}`;
+
+                          return (
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${bubbleClass || "bg-muted/50 text-muted-foreground border-border"}`}>
+                              {displayVal}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-3 py-3">
                         <div className="flex flex-col gap-1">

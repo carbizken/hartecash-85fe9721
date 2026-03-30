@@ -285,20 +285,23 @@ const AdminDashboard = () => {
 
             {activeSection === "offer-pending" && (
               <SubmissionsTable
-                submissions={submissions.filter(s =>
-                  s.offered_price != null && s.offered_price > 0 &&
-                  !["offer_accepted", "inspection_scheduled", "inspection_completed", "deal_finalized", "title_ownership_verified", "check_request_submitted", "purchase_complete"].includes(s.progress_status)
-                )}
+                submissions={submissions.filter(s => {
+                  // Has an offer (manual or estimated) but NOT accepted
+                  const hasOffer = (s.offered_price != null && s.offered_price > 0) || (s.estimated_offer_high != null && s.estimated_offer_high > 0);
+                  const isAccepted = ["offer_accepted", "inspection_scheduled", "inspection_completed", "deal_finalized", "title_ownership_verified", "check_request_submitted", "purchase_complete"].includes(s.progress_status);
+                  return hasOffer && !isAccepted;
+                })}
                 loading={loading} search={search} onSearchChange={setSearch}
                 statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
                 sourceFilter={sourceFilter} onSourceFilterChange={setSourceFilter}
                 storeFilter={storeFilter} onStoreFilterChange={setStoreFilter}
                 dateRangeFilter={dateRangeFilter} onDateRangeFilterChange={setDateRangeFilter}
                 showFilterPanel={showFilterPanel} onToggleFilterPanel={() => setShowFilterPanel(!showFilterPanel)}
-                page={0} total={submissions.filter(s =>
-                  s.offered_price != null && s.offered_price > 0 &&
-                  !["offer_accepted", "inspection_scheduled", "inspection_completed", "deal_finalized", "title_ownership_verified", "check_request_submitted", "purchase_complete"].includes(s.progress_status)
-                ).length} pageSize={PAGE_SIZE} onPageChange={() => {}}
+                page={0} total={submissions.filter(s => {
+                  const hasOffer = (s.offered_price != null && s.offered_price > 0) || (s.estimated_offer_high != null && s.estimated_offer_high > 0);
+                  const isAccepted = ["offer_accepted", "inspection_scheduled", "inspection_completed", "deal_finalized", "title_ownership_verified", "check_request_submitted", "purchase_complete"].includes(s.progress_status);
+                  return hasOffer && !isAccepted;
+                }).length} pageSize={PAGE_SIZE} onPageChange={() => {}}
                 dealerLocations={dealerLocations} canApprove={canApprove} canDelete={canDelete}
                 auditLabel={auditLabel} userName={userName}
                 onView={handleView} onDelete={handleDelete} onInlineStatusChange={handleInlineStatusChange}

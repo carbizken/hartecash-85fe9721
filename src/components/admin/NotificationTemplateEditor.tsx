@@ -111,7 +111,7 @@ export default function NotificationTemplateEditor({ open, onOpenChange, trigger
             channel: "email",
             subject: emailSubject,
             body: emailBody,
-            dealership_id: "default",
+            dealership_id: dealershipId,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "trigger_key,channel,dealership_id" }

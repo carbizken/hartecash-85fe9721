@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/contexts/TenantContext";
 import {
   TrendingUp, TrendingDown, Users, DollarSign, Target, UserCheck, Building2, AlertTriangle
 } from "lucide-react";

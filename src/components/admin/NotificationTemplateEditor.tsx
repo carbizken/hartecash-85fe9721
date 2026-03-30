@@ -46,6 +46,8 @@ interface Props {
 
 export default function NotificationTemplateEditor({ open, onOpenChange, triggerKey, triggerLabel }: Props) {
   const { toast } = useToast();
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
   const defaults = DEFAULT_TEMPLATES[triggerKey];
 
   const [emailSubject, setEmailSubject] = useState("");

@@ -258,7 +258,7 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
     if (!saveAsName.trim() || !editModel) return;
     setSaving(true);
     const payload = {
-      dealership_id: "default",
+      dealership_id: dealershipId,
       name: saveAsName,
       description: saveAsDesc,
       is_default: false,

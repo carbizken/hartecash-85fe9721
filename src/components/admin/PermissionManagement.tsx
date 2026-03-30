@@ -105,7 +105,7 @@ const PermissionManagement = () => {
     const [{ data: groupData }, { data: reqData }, { data: configData }] = await Promise.all([
       supabase.from("permission_groups" as any).select("*").order("name"),
       supabase.from("permission_access_requests" as any).select("*").eq("status", "pending").order("created_at", { ascending: false }),
-      supabase.from("site_config").select("show_request_access").eq("dealership_id", "default").maybeSingle(),
+      supabase.from("site_config").select("show_request_access").eq("dealership_id", dealershipId).maybeSingle(),
     ]);
 
     setGroups((groupData as any[] || []) as PermissionGroup[]);

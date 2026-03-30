@@ -52,11 +52,14 @@ const AboutPageConfig = () => {
   const [milestonesOpen, setMilestonesOpen] = useState(false);
   const [valuesOpen, setValuesOpen] = useState(false);
 
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
+
   useEffect(() => {
     supabase
       .from("site_config")
       .select("about_hero_headline, about_hero_subtext, about_story, about_milestones, about_values")
-      .eq("dealership_id", "default")
+      .eq("dealership_id", dealershipId)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
@@ -69,7 +72,7 @@ const AboutPageConfig = () => {
         }
         setLoading(false);
       });
-  }, []);
+  }, [dealershipId]);
 
   const handleSave = async () => {
     setSaving(true);

@@ -76,7 +76,9 @@ interface DealerOnboardingProps {
 }
 
 const DealerOnboarding = ({ isAdmin = false, onNavigate }: DealerOnboardingProps) => {
-  const [account, setAccount] = useState<Omit<DealerAccount, "id">>(DEFAULT_ACCOUNT);
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
+  const [account, setAccount] = useState<Omit<DealerAccount, "id">>({ ...DEFAULT_ACCOUNT, dealership_id: dealershipId });
   const [existingId, setExistingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -88,7 +90,7 @@ const DealerOnboarding = ({ isAdmin = false, onNavigate }: DealerOnboardingProps
 
   useEffect(() => {
     fetchAccount();
-  }, []);
+  }, [dealershipId]);
 
   const fetchAccount = async () => {
     setLoading(true);

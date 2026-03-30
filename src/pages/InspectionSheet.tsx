@@ -279,7 +279,7 @@ const ConditionItem = ({
     if (!didLongPress.current) {
       // Quick tap: toggle Good on/off, or cycle if already graded
       if (!grade) {
-        onSetGrade("good");
+        onSetGrade("pass");
       } else {
         onCycle();
       }

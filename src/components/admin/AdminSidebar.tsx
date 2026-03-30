@@ -49,6 +49,7 @@ const AdminSidebar = ({
   onRequestAccess,
   locationCount = 0,
   userRole = "",
+  dealershipId = "default",
 }: AdminSidebarProps) => {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";

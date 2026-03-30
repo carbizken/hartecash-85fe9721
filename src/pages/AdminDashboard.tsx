@@ -38,7 +38,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UserCheck, UserX } from "lucide-react";
 
 import type { Submission, DealerLocation, Appointment } from "@/lib/adminConstants";
-import { ROLE_LABELS, PAGE_SIZE, getStatusLabel } from "@/lib/adminConstants";
+import { ROLE_LABELS, PAGE_SIZE, getStatusLabel, isAcceptedWithAppointment, isAcceptedWithoutAppointment, isOfferPendingSubmission } from "@/lib/adminConstants";
 
 interface PendingRequest {
   id: string;

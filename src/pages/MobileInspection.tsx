@@ -282,16 +282,20 @@ const MobileInspection = () => {
     if (!isFullMode) {
       // Standard checklist results
       const passed: string[] = [];
-      const flagged: string[] = [];
+      const cautions: string[] = [];
+      const failed: string[] = [];
       STANDARD_SECTIONS.forEach(section => {
         section.items.forEach(item => {
           const key = `${section.key}::${item}`;
-          if (issueItems[key]) flagged.push(`⚠ ${item}`);
-          else if (checkedItems[key]) passed.push(`✓ ${item}`);
+          const st = checkStates[key] || "";
+          if (st === "fail") failed.push(`✗ ${item}`);
+          else if (st === "caution") cautions.push(`~ ${item}`);
+          else if (st === "pass") passed.push(`✓ ${item}`);
         });
       });
       if (passed.length) parts.push(`PASSED:\n${passed.join("\n")}`);
-      if (flagged.length) parts.push(`ISSUES FOUND:\n${flagged.join("\n")}`);
+      if (cautions.length) parts.push(`CAUTION:\n${cautions.join("\n")}`);
+      if (failed.length) parts.push(`FAILED:\n${failed.join("\n")}`);
     } else {
       if (paintReading) parts.push(`Paint: ${paintReading}`);
       if (oilLife) parts.push(`Oil: ${oilLife}`);

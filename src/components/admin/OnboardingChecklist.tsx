@@ -22,6 +22,8 @@ interface OnboardingChecklistProps {
 }
 
 const OnboardingChecklist = ({ onNavigate }: OnboardingChecklistProps) => {
+  const { tenant } = useTenant();
+  const dealershipId = tenant.dealership_id;
   const [items, setItems] = useState<CheckItem[]>([]);
   const [loading, setLoading] = useState(true);
 

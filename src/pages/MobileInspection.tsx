@@ -488,13 +488,17 @@ const MobileInspection = () => {
               </div>
               <span className="text-xs text-muted-foreground font-medium">{checkedCount}/{totalCheckItems}</span>
               {issueCount > 0 && (
-                <Badge variant="destructive" className="text-[10px]">{issueCount} issue{issueCount > 1 ? "s" : ""}</Badge>
+                <Badge variant="destructive" className="text-[10px]">{issueCount} fail{issueCount > 1 ? "s" : ""}</Badge>
+              )}
+              {cautionCount > 0 && (
+                <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30 text-[10px]">{cautionCount} caution{cautionCount > 1 ? "s" : ""}</Badge>
               )}
             </div>
 
             {STANDARD_SECTIONS.map(section => {
               const Icon = section.icon;
-              const sectionChecked = section.items.filter(item => checkedItems[`${section.key}::${item}`]).length;
+              const sectionChecked = section.items.filter(item => checkStates[`${section.key}::${item}`]).length;
+              const allPass = section.items.every(item => checkStates[`${section.key}::${item}`] === "pass");
               return (
                 <Card key={section.key}>
                   <CardHeader className="pb-2 pt-4 px-4">
@@ -502,8 +506,21 @@ const MobileInspection = () => {
                       <span className="flex items-center gap-2">
                         <Icon className="h-4 w-4 text-primary" /> {section.label}
                       </span>
-                      <span className="text-[10px] text-muted-foreground font-normal">
-                        {sectionChecked}/{section.items.length}
+                      <span className="flex items-center gap-2">
+                        {/* Section all-pass toggle circle */}
+                        <button
+                          onClick={() => markSectionAllPass(section.key, section.items)}
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                            allPass
+                              ? "bg-emerald-500 border-emerald-500 text-white"
+                              : "border-muted-foreground/30 bg-background"
+                          }`}
+                        >
+                          {allPass && <span className="text-xs font-bold">✓</span>}
+                        </button>
+                        <span className="text-[10px] text-muted-foreground font-normal">
+                          {sectionChecked}/{section.items.length}
+                        </span>
                       </span>
                     </CardTitle>
                   </CardHeader>
@@ -514,10 +531,8 @@ const MobileInspection = () => {
                         <CheckItem
                           key={key}
                           label={item}
-                          checked={!!checkedItems[key]}
-                          issue={!!issueItems[key]}
-                          onToggle={() => toggleChecked(key)}
-                          onIssueToggle={() => toggleIssue(key)}
+                          state={checkStates[key] || ""}
+                          onCycle={() => cycleCheck(key)}
                         />
                       );
                     })}

@@ -128,6 +128,13 @@ const PhotoConfiguration = () => {
           sort_order: row.sort_order,
         }).eq("id", row.id);
       }
+      // Save overlay color settings to site_config
+      if (siteConfigId) {
+        await supabase.from("site_config").update({
+          photo_overlay_color: overlayColor,
+          photo_allow_color_change: allowColorChange,
+        }).eq("id", siteConfigId);
+      }
       toast({ title: "Photo config saved" });
     } catch {
       toast({ title: "Save failed", variant: "destructive" });

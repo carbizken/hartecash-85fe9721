@@ -178,7 +178,7 @@ const PhotoConfiguration = () => {
               <GhostCarSilhouette
                 archetype={previewArchetype}
                 shotId={previewShot}
-                color={OVERLAY_COLOR}
+                color={overlayColor}
                 width={480}
                 height={270}
               />

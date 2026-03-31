@@ -88,6 +88,7 @@ const AdminSidebar = ({
   const standardsItems = canManageAccess
     ? [
         { key: "inspection-config", label: "Inspection Sheet", icon: Shield },
+        { key: "photo-config", label: "Photo Requirements", icon: Camera },
         { key: "depth-policies", label: "Depth Policies", icon: Gauge },
       ].filter((item) => isAllowed(item.key))
     : [];

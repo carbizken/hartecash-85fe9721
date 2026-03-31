@@ -61,7 +61,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
     const roofL = W * sh.roofStart;
     const roofR = W * sh.roofEnd;
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <path d={`M${W * 0.06},${bodyBot} L${W * 0.06},${bodyBot - H * 0.04} L${roofL},${bodyBot - H * 0.04} L${roofL + W * 0.06},${bodyTop} L${roofR - W * 0.06},${bodyTop} L${roofR},${bodyBot - H * 0.04} L${W * 0.94},${bodyBot - H * 0.04} L${W * 0.94},${bodyBot} Z`}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.6} />
         <circle cx={frontWheel} cy={bodyBot} r={wheelR} fill="none" stroke={color} strokeWidth={sw} opacity={0.5} />

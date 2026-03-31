@@ -144,7 +144,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Engine Bay
   if (shotId === "hood") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <rect x={W * 0.1} y={H * 0.15} width={W * 0.8} height={H * 0.65}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.5} rx={10} />
         <line x1={W * 0.35} y1={H * 0.15} x2={W * 0.35} y2={H * 0.8} stroke={color} strokeWidth={1} opacity={0.25} />

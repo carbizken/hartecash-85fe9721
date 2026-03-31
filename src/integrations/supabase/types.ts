@@ -1105,6 +1105,48 @@ export type Database = {
         }
         Relationships: []
       }
+      photo_config: {
+        Row: {
+          created_at: string
+          dealership_id: string
+          description: string
+          id: string
+          is_enabled: boolean
+          is_required: boolean
+          label: string
+          orientation: string
+          shot_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dealership_id?: string
+          description?: string
+          id?: string
+          is_enabled?: boolean
+          is_required?: boolean
+          label: string
+          orientation?: string
+          shot_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dealership_id?: string
+          description?: string
+          id?: string
+          is_enabled?: boolean
+          is_required?: boolean
+          label?: string
+          orientation?: string
+          shot_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pricing_model_access_requests: {
         Row: {
           approved_by: string | null

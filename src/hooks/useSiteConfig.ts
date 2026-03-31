@@ -58,6 +58,8 @@ export interface SiteConfig {
   google_review_url: string;
   tiktok_url: string;
   youtube_url: string;
+  photo_overlay_color: string;
+  photo_allow_color_change: boolean;
 }
 
 const DEFAULTS: SiteConfig = {

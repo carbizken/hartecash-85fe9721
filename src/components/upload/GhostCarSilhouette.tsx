@@ -216,7 +216,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Damage close-up — simple crosshair
   if (shotId === "damage") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <line x1={W / 2} y1={H * 0.15} x2={W / 2} y2={H * 0.85} stroke={color} strokeWidth={1.5} opacity={0.4} />
         <line x1={W * 0.15} y1={H / 2} x2={W * 0.85} y2={H / 2} stroke={color} strokeWidth={1.5} opacity={0.4} />
         <circle cx={W / 2} cy={H / 2} r={Math.min(W, H) * 0.2} fill="none" stroke={color} strokeWidth={sw} opacity={0.5} />

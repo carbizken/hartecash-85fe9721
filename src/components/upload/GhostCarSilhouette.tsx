@@ -166,7 +166,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Driver Door Interior
   if (shotId === "driver_door") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <rect x={W * 0.15} y={H * 0.1} width={W * 0.7} height={H * 0.78}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.5} rx={10} />
         {/* Seat shape */}

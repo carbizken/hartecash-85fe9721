@@ -29,7 +29,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
       const cabEnd = W * sh.roofEnd;
       const cabStart = W * sh.roofStart;
       return (
-        <svg width={W} height={H} className="absolute inset-0">
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
           {/* Bed */}
           <rect x={W * 0.08} y={bodyBot - H * 0.15} width={cabStart - W * 0.08} height={H * 0.15}
             fill="none" stroke={color} strokeWidth={sw} opacity={0.6} rx={4} />
@@ -47,7 +47,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
 
     if (sh.isVan) {
       return (
-        <svg width={W} height={H} className="absolute inset-0">
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
           <rect x={W * 0.06} y={bodyTop} width={W * 0.88} height={bodyBot - bodyTop}
             fill="none" stroke={color} strokeWidth={sw} opacity={0.6} rx={8} />
           <line x1={W * 0.06} y1={bodyBot} x2={W * 0.94} y2={bodyBot} stroke={color} strokeWidth={sw} opacity={0.4} />
@@ -61,7 +61,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
     const roofL = W * sh.roofStart;
     const roofR = W * sh.roofEnd;
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <path d={`M${W * 0.06},${bodyBot} L${W * 0.06},${bodyBot - H * 0.04} L${roofL},${bodyBot - H * 0.04} L${roofL + W * 0.06},${bodyTop} L${roofR - W * 0.06},${bodyTop} L${roofR},${bodyBot - H * 0.04} L${W * 0.94},${bodyBot - H * 0.04} L${W * 0.94},${bodyBot} Z`}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.6} />
         <circle cx={frontWheel} cy={bodyBot} r={wheelR} fill="none" stroke={color} strokeWidth={sw} opacity={0.5} />
@@ -78,7 +78,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
     const bT = H * 0.25;
     const bH = H * 0.50;
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <rect x={bL} y={bT} width={bW} height={bH} rx={12}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.6} />
         {archetype !== "van" && !sh.hasBed && (
@@ -95,7 +95,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Rocker panel
   if (shotId === "driver_rocker" || shotId === "pass_rocker") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <rect x={W * 0.08} y={H * 0.35} width={W * 0.84} height={H * 0.30}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.5} rx={6} />
         <text x={W / 2} y={H * 0.52} textAnchor="middle" fill={color} fontSize={14} fontWeight={600} opacity={0.7}>
@@ -108,7 +108,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Windshield
   if (shotId === "windshield") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <path d={`M${W * 0.12},${H * 0.75} L${W * 0.25},${H * 0.18} L${W * 0.75},${H * 0.18} L${W * 0.88},${H * 0.75} Z`}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.5} />
         <text x={W / 2} y={H * 0.52} textAnchor="middle" fill={color} fontSize={12} fontWeight={600} opacity={0.6}>
@@ -125,7 +125,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
     const cx = W / 2;
     const cy = H / 2;
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={sw} opacity={0.5} />
         <circle cx={cx} cy={cy} r={ri} fill="none" stroke={color} strokeWidth={1.5} opacity={0.3} />
         {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => {
@@ -144,7 +144,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Engine Bay
   if (shotId === "hood") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <rect x={W * 0.1} y={H * 0.15} width={W * 0.8} height={H * 0.65}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.5} rx={10} />
         <line x1={W * 0.35} y1={H * 0.15} x2={W * 0.35} y2={H * 0.8} stroke={color} strokeWidth={1} opacity={0.25} />
@@ -156,7 +156,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Trunk
   if (shotId === "trunk") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <rect x={W * 0.12} y={H * 0.1} width={W * 0.76} height={H * 0.75}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.5} rx={8} />
       </svg>
@@ -166,7 +166,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Driver Door Interior
   if (shotId === "driver_door") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <rect x={W * 0.15} y={H * 0.1} width={W * 0.7} height={H * 0.78}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.5} rx={10} />
         {/* Seat shape */}
@@ -179,7 +179,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Dashboard
   if (shotId === "dashboard") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <rect x={W * 0.08} y={H * 0.2} width={W * 0.84} height={H * 0.55}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.5} rx={8} />
         {/* Odometer area */}
@@ -198,7 +198,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
     const cy = H / 2;
     const r = Math.min(W, H) * 0.38;
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={sw} opacity={0.5} />
         {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(deg => {
           const rad = deg * Math.PI / 180;
@@ -216,7 +216,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Damage close-up — simple crosshair
   if (shotId === "damage") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <line x1={W / 2} y1={H * 0.15} x2={W / 2} y2={H * 0.85} stroke={color} strokeWidth={1.5} opacity={0.4} />
         <line x1={W * 0.15} y1={H / 2} x2={W * 0.85} y2={H / 2} stroke={color} strokeWidth={1.5} opacity={0.4} />
         <circle cx={W / 2} cy={H / 2} r={Math.min(W, H) * 0.2} fill="none" stroke={color} strokeWidth={sw} opacity={0.5} />

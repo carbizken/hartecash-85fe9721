@@ -415,22 +415,32 @@ const UploadPhotos = () => {
         </p>
       </div>
 
-      {/* Guided camera capture overlay for mobile */}
-      {cameraCategory && (() => {
-        const shot = enabledShots.find(s => s.shot_id === cameraCategory);
-        return shot ? (
-          <VehicleCameraCapture
-            categoryId={shot.shot_id}
-            categoryLabel={shot.label}
-            categoryDesc={shot.description}
-            vehicleArchetype={vehicleArchetype}
-            defaultOverlayColor={config.photo_overlay_color}
-            allowColorChange={config.photo_allow_color_change}
-            onCapture={handleCameraCapture}
-            onClose={() => setCameraCategory(null)}
-          />
-        ) : null;
-      })()}
+      {/* Guided camera capture overlay — GitHub GhostCar component */}
+      {cameraCategory && (
+        <div className="fixed inset-0 z-50 bg-black">
+          <div className="relative h-full overflow-auto">
+            <button
+              onClick={() => setCameraCategory(null)}
+              className="absolute top-3 right-3 z-[60] text-white bg-black/60 rounded-full p-1.5"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <GhostCar
+              vehicleType={vehicleArchetype}
+              enabledShots={enabledShots.map(s => s.shot_id)}
+              onComplete={(captured: Record<string, boolean>) => {
+                // Mark all captured shots as done and close
+                const updates: CategoryUploads = {};
+                for (const shotId of Object.keys(captured)) {
+                  updates[shotId] = { uploaded: true };
+                }
+                setCategoryUploads(prev => ({ ...prev, ...updates }));
+                setCameraCategory(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

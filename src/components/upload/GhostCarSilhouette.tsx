@@ -95,7 +95,7 @@ const GhostCarSilhouette = ({ archetype, shotId, color, width: W, height: H }: G
   // Rocker panel
   if (shotId === "driver_rocker" || shotId === "pass_rocker") {
     return (
-      <svg width={W} height={H} className="absolute inset-0">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" className="absolute inset-0">
         <rect x={W * 0.08} y={H * 0.35} width={W * 0.84} height={H * 0.30}
           fill="none" stroke={color} strokeWidth={sw} opacity={0.5} rx={6} />
         <text x={W / 2} y={H * 0.52} textAnchor="middle" fill={color} fontSize={14} fontWeight={600} opacity={0.7}>

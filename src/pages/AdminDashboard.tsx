@@ -25,6 +25,7 @@ import ReportsExport from "@/components/admin/ReportsExport";
 import PermissionManagement from "@/components/admin/PermissionManagement";
 import ExecutiveKPIHub from "@/components/admin/ExecutiveKPIHub";
 import InspectionConfiguration from "@/components/admin/InspectionConfiguration";
+import PhotoConfiguration from "@/components/admin/PhotoConfiguration";
 import DepthPolicyManager from "@/components/admin/DepthPolicyManager";
 import RequestAccessDialog from "@/components/admin/RequestAccessDialog";
 import SubmissionsTable from "@/components/admin/SubmissionsTable";
@@ -417,6 +418,7 @@ const AdminDashboard = () => {
             {activeSection === "notifications" && canManageAccess && <NotificationSettings />}
             {activeSection === "form-config" && canManageAccess && <FormConfiguration />}
             {activeSection === "inspection-config" && canManageAccess && <InspectionConfiguration />}
+            {activeSection === "photo-config" && canManageAccess && <PhotoConfiguration />}
             {activeSection === "depth-policies" && canManageAccess && <DepthPolicyManager />}
             {activeSection === "testimonials" && canManageAccess && <TestimonialManagement />}
             {activeSection === "locations" && canManageAccess && <LocationManagement />}

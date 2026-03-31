@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Inbox, CalendarDays, Users, ShieldCheck, SlidersHorizontal,
-  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin, Car, ScrollText, Newspaper, Shield, Lock, Wrench, MessageCircle, Rocket, Gauge, Network
+  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, UserCheck, MapPin, Car, ScrollText, Newspaper, Shield, Lock, Wrench, MessageCircle, Rocket, Gauge, Network, Camera
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -88,6 +88,7 @@ const AdminSidebar = ({
   const standardsItems = canManageAccess
     ? [
         { key: "inspection-config", label: "Inspection Sheet", icon: Shield },
+        { key: "photo-config", label: "Photo Requirements", icon: Camera },
         { key: "depth-policies", label: "Depth Policies", icon: Gauge },
       ].filter((item) => isAllowed(item.key))
     : [];

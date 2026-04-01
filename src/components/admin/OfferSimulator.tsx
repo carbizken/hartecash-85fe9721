@@ -705,13 +705,13 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2">
-                        {(["excellent", "good", "fair", "rough"] as const).map(grade => {
-                          const mult = localSettings.condition_multipliers[grade];
+                        {(["excellent", "very_good", "good", "fair"] as const).map(grade => {
+                          const mult = localSettings.condition_multipliers?.[grade] ?? 1.0;
                           const isActive = grade === liveCondition;
                           return (
                             <div key={grade} className={`space-y-1 rounded-md p-1.5 ${isActive ? "bg-primary/10 ring-1 ring-primary/20" : ""}`}>
                               <div className="flex items-center justify-between">
-                                <Label className="capitalize text-[10px] font-semibold">{grade}</Label>
+                                <Label className="text-[10px] font-semibold">{CONDITION_LABELS[grade]}</Label>
                                 {isActive && <span className="text-[7px] bg-primary text-primary-foreground px-1 rounded">ACTIVE</span>}
                               </div>
                               <Input

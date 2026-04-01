@@ -302,8 +302,8 @@ const OfferDisclosure = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="How We Calculate Your Offer | Harte Auto Group"
-        description="Full transparency on how Harte Auto Group determines your vehicle's cash offer — inspection factors, valuation methodology, and price guarantee details."
+        title={`How We Calculate Your Offer | ${name}`}
+        description={`Full transparency on how ${name} determines your vehicle's cash offer — inspection factors, valuation methodology, and price guarantee details.`}
         path="/disclosure"
       />
       {/* Hero */}

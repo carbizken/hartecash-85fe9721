@@ -312,7 +312,7 @@ const ServiceLanding = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[hsl(222,47%,5%)]/90 backdrop-blur-md border-b border-[hsl(217,33%,17%)] overflow-visible">
         <div className="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between">
-          <img src={serviceLogo} alt="Harte Auto Group" className="h-32 -my-8" />
+          {siteConfig.logo_white_url ? <img src={siteConfig.logo_white_url} alt={siteConfig.dealership_name} className="h-32 -my-8" /> : <span className="text-xl font-bold">{siteConfig.dealership_name}</span>}
           <span className="text-sm font-semibold text-[hsl(215,20%,65%)] tracking-wider uppercase">Service Customer Exclusive</span>
         </div>
       </header>

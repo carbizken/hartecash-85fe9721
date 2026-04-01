@@ -115,7 +115,13 @@ interface ConditionBasisMap {
   fair: string;
 }
 
-interface OfferSettingsRow {
+interface ConditionEquipmentMap {
+  excellent: boolean;
+  very_good: boolean;
+  good: boolean;
+  fair: boolean;
+}
+
   id: string;
   dealership_id: string;
   bb_value_basis: string;

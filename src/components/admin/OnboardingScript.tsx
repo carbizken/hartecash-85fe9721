@@ -1,13 +1,10 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer, QrCode, CheckSquare, Square } from "lucide-react";
+import { Printer, Save, CheckCircle2, Square } from "lucide-react";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
-
-/**
- * Printable / tablet-friendly onboarding questionnaire.
- * Groups every dealer-configurable option into fill-in-the-blank or
- * check-box sections a rep can walk through with a new client.
- */
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import SignaturePad from "./SignaturePad";
 
 interface QuestionItem {
   label: string;
@@ -217,10 +214,55 @@ const SECTIONS: Section[] = [
 export default function OnboardingScript() {
   const printRef = useRef<HTMLDivElement>(null);
   const { config } = useSiteConfig();
+  const [dealerSig, setDealerSig] = useState<string | null>(null);
+  const [staffSig, setStaffSig] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
 
-  const handlePrint = () => {
-    window.print();
+  // Load existing signatures
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("dealer_accounts")
+        .select("onboarding_signature_dealer, onboarding_signature_staff, onboarding_signed_at")
+        .eq("dealership_id", "default")
+        .maybeSingle();
+      if (data) {
+        setDealerSig(data.onboarding_signature_dealer);
+        setStaffSig(data.onboarding_signature_staff);
+        if (data.onboarding_signed_at) {
+          setSavedAt(new Date(data.onboarding_signed_at).toLocaleString());
+        }
+      }
+    };
+    load();
+  }, []);
+
+  const handleSave = async () => {
+    if (!dealerSig && !staffSig) {
+      toast.error("At least one signature is required");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("dealer_accounts")
+      .update({
+        onboarding_signature_dealer: dealerSig,
+        onboarding_signature_staff: staffSig,
+        onboarding_signed_at: new Date().toISOString(),
+      } as any)
+      .eq("dealership_id", "default");
+
+    if (error) {
+      toast.error("Failed to save signatures");
+    } else {
+      setSavedAt(new Date().toLocaleString());
+      toast.success("Signatures saved successfully");
+    }
+    setSaving(false);
   };
+
+  const handlePrint = () => window.print();
 
   return (
     <div className="max-w-4xl">
@@ -232,10 +274,12 @@ export default function OnboardingScript() {
             Walk through every customization option with the dealer. Print or use on a tablet.
           </p>
         </div>
-        <Button onClick={handlePrint} size="sm" className="gap-2">
-          <Printer className="w-4 h-4" />
-          Print / PDF
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={handlePrint} size="sm" variant="outline" className="gap-2">
+            <Printer className="w-4 h-4" />
+            Print / PDF
+          </Button>
+        </div>
       </div>
 
       {/* Printable content */}
@@ -299,20 +343,55 @@ export default function OnboardingScript() {
           </div>
         ))}
 
-        {/* Signature block */}
+        {/* Digital Signature Block */}
         <div className="border rounded-lg p-6 print:break-inside-avoid print:mt-8">
-          <h3 className="text-sm font-bold mb-4">Sign-Off</h3>
-          <div className="grid grid-cols-2 gap-8">
-            <div>
-              <p className="text-xs text-muted-foreground mb-8">Dealer Representative</p>
+          <h3 className="text-sm font-bold mb-1">Sign-Off</h3>
+          <p className="text-xs text-muted-foreground mb-4">
+            Both parties sign below to confirm the onboarding configuration is agreed upon.
+          </p>
+
+          {savedAt && (
+            <div className="flex items-center gap-2 text-xs text-success mb-4 print:hidden">
+              <CheckCircle2 className="w-4 h-4" />
+              Last signed: {savedAt}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Print fallback lines */}
+            <div className="hidden print:block">
+              <p className="text-xs text-muted-foreground mb-16">Dealer Representative</p>
               <div className="border-b-2 border-muted-foreground/30 mb-1" />
               <p className="text-xs text-muted-foreground">Signature & Date</p>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-8">Onboarding Specialist</p>
+            <div className="hidden print:block">
+              <p className="text-xs text-muted-foreground mb-16">Onboarding Specialist</p>
               <div className="border-b-2 border-muted-foreground/30 mb-1" />
               <p className="text-xs text-muted-foreground">Signature & Date</p>
             </div>
+
+            {/* Digital signature pads — screen only */}
+            <div className="print:hidden">
+              <SignaturePad
+                label="Dealer Representative"
+                value={dealerSig}
+                onChange={setDealerSig}
+              />
+            </div>
+            <div className="print:hidden">
+              <SignaturePad
+                label="Onboarding Specialist"
+                value={staffSig}
+                onChange={setStaffSig}
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 print:hidden">
+            <Button onClick={handleSave} disabled={saving} className="gap-2">
+              <Save className="w-4 h-4" />
+              {saving ? "Saving…" : "Save Signatures"}
+            </Button>
           </div>
         </div>
       </div>

@@ -72,7 +72,7 @@ const sections: Section[] = [
         </div>
         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4">
           <p className="text-[13px] text-destructive leading-relaxed">
-            If an ineligible title brand or designation is discovered at inspection that was not disclosed at the time of submission, HarteCash reserves the right to immediately withdraw the Offer at no cost to either party. See Section 02 for your full disclosure obligations prior to submission.
+            If an ineligible title brand or designation is discovered at inspection that was not disclosed at the time of submission, we reserve the right to immediately withdraw the Offer at no cost to either party. See Section 02 for your full disclosure obligations prior to submission.
           </p>
         </div>
       </>

@@ -269,6 +269,8 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
       if (!formData.loanStatus) missing.push("Sell or Trade-In");
     }
 
+    // In offer-first mode, the last step is History — no contact validation needed
+
     if (missing.length > 0) {
       toast({
         title: "Please complete all fields",

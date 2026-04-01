@@ -12,6 +12,8 @@ import { getTaxRateFromZip, calcTradeInValue, STATE_NAMES } from "@/lib/salesTax
 import VehicleImage from "@/components/sell-form/VehicleImage";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { InlineEdit } from "@/components/offer/InlineEdit";
+import OfferConditionBlock, { buildConditionItems } from "@/components/offer/OfferConditionBlock";
+import OfferPrintLayout from "@/components/offer/OfferPrintLayout";
 import { recalculateFromSubmission, type SubmissionCondition } from "@/lib/recalculateOffer";
 import type { OfferSettings, OfferRule } from "@/lib/offerCalculator";
 import { resolveEffectiveSettings } from "@/lib/resolvePricingModel";

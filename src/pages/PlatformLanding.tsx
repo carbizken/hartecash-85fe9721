@@ -65,7 +65,7 @@ function LightBadge({ label }: { label: string }) {
 function Section({ dark, children, className = "", id }: { dark?: boolean; children: React.ReactNode; className?: string; id?: string }) {
   const bg = dark ? "bg-[hsl(220,25%,6%)] text-white" : "bg-white text-gray-900";
   return (
-    <section className={`min-h-screen flex items-center justify-center ${bg} ${className} relative overflow-hidden`}>
+    <section id={id} className={`min-h-screen flex items-center justify-center ${bg} ${className} relative overflow-hidden`}>
       {dark && (
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: "linear-gradient(hsl(210 100% 60%) 1px, transparent 1px), linear-gradient(90deg, hsl(210 100% 60%) 1px, transparent 1px)",

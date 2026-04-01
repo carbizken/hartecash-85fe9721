@@ -28,7 +28,13 @@ interface Props {
   onSettingsChange?: (settings: OfferSettings) => void;
 }
 
-const CONDITIONS = ["excellent", "good", "fair", "rough"] as const;
+const CONDITIONS = ["excellent", "very_good", "good", "fair"] as const;
+const CONDITION_LABELS: Record<string, string> = {
+  excellent: "Excellent",
+  very_good: "Very Good",
+  good: "Good",
+  fair: "Fair",
+};
 
 const BB_VALUE_OPTIONS = [
   { value: "wholesale_xclean", label: "Wholesale – Extra Clean" },
@@ -506,7 +512,22 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
               <div className="bg-gradient-to-r from-primary/5 to-transparent rounded-lg border border-primary/20 p-3">
                 <div className="flex items-center gap-1.5 mb-2">
                   <DollarSign className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[11px] font-bold text-card-foreground uppercase tracking-wider">① Select Starting Value</span>
+                  <span className="text-[11px] font-bold text-card-foreground uppercase tracking-wider">① Select Starting Value Per Condition</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground mb-3">
+                  Click the Black Book value to use as the base price when a customer selects each condition grade.
+                </p>
+                {/* 4-column condition-mapped grid */}
+                <div className="grid grid-cols-4 gap-2 mb-2">
+                  {CONDITIONS.map(cond => (
+                    <div key={cond} className="text-center">
+                      <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 px-2 py-0.5 rounded ${
+                        cond === liveCondition ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                      }`}>
+                        {CONDITION_LABELS[cond]}
+                      </div>
+                    </div>
+                  ))}
                 </div>
                 {BB_CATEGORIES.map(cat => {
                   const data = liveBbVehicle[cat.dataKey] as Record<string, number> | undefined;
@@ -514,29 +535,39 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
                   return (
                     <div key={cat.label} className="mb-1.5">
                       <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block mb-0.5">{cat.label}</span>
-                      <div className="grid grid-cols-4 gap-1">
-                        {cat.tiers.map(tier => {
-                          const value = data[tier.tierKey] || 0;
-                          const isSelected = localSettings.bb_value_basis === tier.key;
-                          if (value <= 0) return null;
-                          return (
-                            <button
-                              key={tier.key}
-                              onClick={() => updateLocalSetting("bb_value_basis", tier.key)}
-                              className={`rounded-md px-2 py-1.5 text-center transition-all border ${
-                                isSelected
-                                  ? "bg-primary text-primary-foreground border-primary ring-2 ring-primary/30 shadow-sm"
-                                  : "bg-muted/40 border-border hover:border-primary/40 hover:bg-primary/5 text-card-foreground"
-                              }`}
-                            >
-                              <div className="text-[9px] font-medium opacity-80">{tier.short}</div>
-                              <div className={`text-sm font-bold ${isSelected ? "" : "text-card-foreground"}`}>
-                                ${value.toLocaleString()}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
+                      {cat.tiers.map(tier => {
+                        const value = data[tier.tierKey] || 0;
+                        if (value <= 0) return null;
+                        return (
+                          <div key={tier.key} className="grid grid-cols-4 gap-2 mb-0.5">
+                            {CONDITIONS.map(cond => {
+                              const basisMap = localSettings.condition_basis_map || {};
+                              const isSelected = (basisMap as Record<string, string>)[cond] === tier.key;
+                              return (
+                                <button
+                                  key={`${cond}-${tier.key}`}
+                                  onClick={() => updateLocalSetting("condition_basis_map", {
+                                    excellent: "retail_xclean",
+                                    very_good: "tradein_clean",
+                                    good: "tradein_avg",
+                                    fair: "wholesale_rough",
+                                    ...(localSettings.condition_basis_map || {}),
+                                    [cond]: tier.key,
+                                  } as any)}
+                                  className={`rounded-md px-1 py-1 text-center transition-all border text-[10px] ${
+                                    isSelected
+                                      ? "bg-primary text-primary-foreground border-primary ring-1 ring-primary/30 shadow-sm font-bold"
+                                      : "bg-muted/40 border-border hover:border-primary/40 hover:bg-primary/5 text-card-foreground"
+                                  }`}
+                                >
+                                  <div className="text-[8px] opacity-70">{tier.short}</div>
+                                  <div className="font-semibold">${value.toLocaleString()}</div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 })}
@@ -554,7 +585,7 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
                     <Select value={liveCondition} onValueChange={setLiveCondition}>
                       <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {CONDITIONS.map(c => <SelectItem key={c} value={c} className="capitalize text-xs">{c}</SelectItem>)}
+                        {CONDITIONS.map(c => <SelectItem key={c} value={c} className="text-xs">{CONDITION_LABELS[c]}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -674,13 +705,13 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2">
-                        {(["excellent", "good", "fair", "rough"] as const).map(grade => {
-                          const mult = localSettings.condition_multipliers[grade];
+                        {(["excellent", "very_good", "good", "fair"] as const).map(grade => {
+                          const mult = localSettings.condition_multipliers?.[grade] ?? 1.0;
                           const isActive = grade === liveCondition;
                           return (
                             <div key={grade} className={`space-y-1 rounded-md p-1.5 ${isActive ? "bg-primary/10 ring-1 ring-primary/20" : ""}`}>
                               <div className="flex items-center justify-between">
-                                <Label className="capitalize text-[10px] font-semibold">{grade}</Label>
+                                <Label className="text-[10px] font-semibold">{CONDITION_LABELS[grade]}</Label>
                                 {isActive && <span className="text-[7px] bg-primary text-primary-foreground px-1 rounded">ACTIVE</span>}
                               </div>
                               <Input

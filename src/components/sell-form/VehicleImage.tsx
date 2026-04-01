@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 interface Props {
   year?: string;

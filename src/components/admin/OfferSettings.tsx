@@ -103,16 +103,9 @@ interface MileageTier {
 
 interface ConditionMultipliers {
   excellent: number;
-  very_good: number;
   good: number;
   fair: number;
-}
-
-interface ConditionBasisMap {
-  excellent: string;
-  very_good: string;
-  good: string;
-  fair: string;
+  rough: number;
 }
 
 interface OfferSettingsRow {
@@ -123,7 +116,6 @@ interface OfferSettingsRow {
   deductions_config: DeductionsConfig;
   deduction_amounts: DeductionAmounts;
   condition_multipliers: ConditionMultipliers;
-  condition_basis_map: ConditionBasisMap;
   recon_cost: number;
   offer_floor: number;
   offer_ceiling: number | null;
@@ -212,7 +204,7 @@ const DEFAULT_DEDUCTION_AMOUNTS: DeductionAmounts = {
 };
 
 const DEFAULT_CONDITION_MULTIPLIERS: ConditionMultipliers = {
-  excellent: 1.0, very_good: 1.0, good: 1.0, fair: 1.0,
+  excellent: 1.05, good: 1.0, fair: 0.90, rough: 0.78,
 };
 
 const emptyRule: Omit<OfferRule, "id" | "dealership_id"> = {
@@ -266,7 +258,6 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
         ...d,
         deduction_amounts: d.deduction_amounts || DEFAULT_DEDUCTION_AMOUNTS,
         condition_multipliers: d.condition_multipliers || DEFAULT_CONDITION_MULTIPLIERS,
-        condition_basis_map: d.condition_basis_map || { excellent: "retail_xclean", very_good: "tradein_clean", good: "tradein_avg", fair: "wholesale_rough" },
         recon_cost: d.recon_cost ?? 0,
         offer_floor: d.offer_floor ?? 500,
         offer_ceiling: d.offer_ceiling ?? null,
@@ -281,7 +272,6 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
         ...d,
         deduction_amounts: d.deduction_amounts || DEFAULT_DEDUCTION_AMOUNTS,
         condition_multipliers: d.condition_multipliers || DEFAULT_CONDITION_MULTIPLIERS,
-        condition_basis_map: d.condition_basis_map || { excellent: "retail_xclean", very_good: "tradein_clean", good: "tradein_avg", fair: "wholesale_rough" },
         recon_cost: d.recon_cost ?? 0,
         offer_floor: d.offer_floor ?? 500,
         offer_ceiling: d.offer_ceiling ?? null,
@@ -308,7 +298,6 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
       deductions_config: settings.deductions_config as any,
       deduction_amounts: settings.deduction_amounts as any,
       condition_multipliers: settings.condition_multipliers as any,
-      condition_basis_map: settings.condition_basis_map as any,
       recon_cost: settings.recon_cost,
       offer_floor: settings.offer_floor,
       offer_ceiling: settings.offer_ceiling,

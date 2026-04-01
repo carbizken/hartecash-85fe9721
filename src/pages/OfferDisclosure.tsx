@@ -56,8 +56,8 @@ const sections: Section[] = [
     render: () => (
       <>
         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 mb-4">
-          <p className="text-sm font-semibold text-destructive mb-1">HarteCash cannot purchase vehicles with any of the following title brands or designations — regardless of condition, mileage, or offer amount.</p>
-          <p className="text-[13px] text-destructive/85 leading-relaxed">These restrictions are firm and non-negotiable. Verify your vehicle's title status before scheduling an appointment. If an ineligible brand is discovered at inspection that was not disclosed at submission, HarteCash reserves the right to immediately withdraw the Offer.</p>
+          <p className="text-sm font-semibold text-destructive mb-1">We cannot purchase vehicles with any of the following title brands or designations — regardless of condition, mileage, or offer amount.</p>
+          <p className="text-[13px] text-destructive/85 leading-relaxed">These restrictions are firm and non-negotiable. Verify your vehicle's title status before scheduling an appointment. If an ineligible brand is discovered at inspection that was not disclosed at submission, we reserve the right to immediately withdraw the Offer.</p>
         </div>
         <div className="flex flex-col gap-2 mb-4">
           {ineligibleTitles.map((t) => (

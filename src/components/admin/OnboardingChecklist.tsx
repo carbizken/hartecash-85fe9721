@@ -26,6 +26,9 @@ const OnboardingChecklist = ({ onNavigate }: OnboardingChecklistProps) => {
   const dealershipId = tenant.dealership_id;
   const [items, setItems] = useState<CheckItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sigDealer, setSigDealer] = useState<string | null>(null);
+  const [sigStaff, setSigStaff] = useState<string | null>(null);
+  const [signedAt, setSignedAt] = useState<string | null>(null);
 
   useEffect(() => {
     checkAll();

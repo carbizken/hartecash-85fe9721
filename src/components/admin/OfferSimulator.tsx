@@ -28,7 +28,13 @@ interface Props {
   onSettingsChange?: (settings: OfferSettings) => void;
 }
 
-const CONDITIONS = ["excellent", "good", "fair", "rough"] as const;
+const CONDITIONS = ["excellent", "very_good", "good", "fair"] as const;
+const CONDITION_LABELS: Record<string, string> = {
+  excellent: "Excellent",
+  very_good: "Very Good",
+  good: "Good",
+  fair: "Fair",
+};
 
 const BB_VALUE_OPTIONS = [
   { value: "wholesale_xclean", label: "Wholesale – Extra Clean" },

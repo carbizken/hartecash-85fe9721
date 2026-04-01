@@ -108,7 +108,7 @@ const sections: Section[] = [
       <>
         <div className="bg-primary/5 border border-primary/15 rounded-lg p-4 mb-4">
           <p className="text-sm font-semibold text-primary mb-2">We believe you deserve the most your vehicle is worth — and we built our process to prove it.</p>
-          <p className="text-[13px] text-muted-foreground leading-relaxed">Most programs use condition only as a reason to reduce your offer after you arrive. HarteCash takes a different approach. When your vehicle arrives in better condition than estimated — particularly tires and brake pads — our inspector measures those components directly and your Final Offer is recalculated to include a <strong className="text-foreground">Fair Value Credit</strong> for what's actually there.</p>
+          <p className="text-[13px] text-muted-foreground leading-relaxed">Most programs use condition only as a reason to reduce your offer after you arrive. We take a different approach. When your vehicle arrives in better condition than estimated — particularly tires and brake pads — our inspector measures those components directly and your Final Offer is recalculated to include a <strong className="text-foreground">Fair Value Credit</strong> for what's actually there.</p>
         </div>
         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">Tire & Brake Fair Value Credit — Specific Thresholds</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">

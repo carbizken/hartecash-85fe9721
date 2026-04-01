@@ -153,6 +153,7 @@ const DEFAULT_SETTINGS: OfferSettings = {
   deductions_config: DEFAULT_DEDUCTIONS,
   deduction_amounts: DEFAULT_DEDUCTION_AMOUNTS,
   condition_multipliers: DEFAULT_CONDITION_MULTIPLIERS,
+  condition_basis_map: DEFAULT_CONDITION_BASIS_MAP,
   recon_cost: 0,
   offer_floor: 500,
   offer_ceiling: null,

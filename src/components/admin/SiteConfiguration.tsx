@@ -88,6 +88,7 @@ const DEFAULT_CONFIG: SiteConfig = {
   assign_oem_brand_match: false,
   assign_buying_center: false,
   buying_center_location_id: null,
+  vehicle_image_angle: "three_quarter",
 };
 
 interface SectionProps {

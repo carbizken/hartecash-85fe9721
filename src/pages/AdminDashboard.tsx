@@ -34,7 +34,7 @@ import SubmissionDetailSheet from "@/components/admin/SubmissionDetailSheet";
 import AppointmentManager from "@/components/admin/AppointmentManager";
 
 import { useStaffPermissions } from "@/hooks/useStaffPermissions";
-import { useTenant } from "@/contexts/TenantContext";
+import { useTenant, TenantOverrideProvider } from "@/contexts/TenantContext";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserCheck, UserX } from "lucide-react";

@@ -55,7 +55,6 @@ const OnboardingChecklist = ({ onNavigate }: OnboardingChecklistProps) => {
     const locCount = locRes.data?.length || 0;
     const notif = notifRes.data;
     const staffCount = staffRes.data?.length || 0;
-    const acct = accountRes.data;
 
     const checks: CheckItem[] = [
       {

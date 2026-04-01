@@ -112,6 +112,13 @@ const OfferPage = () => {
     setCalculatingDone(true);
   }, []);
 
+  // Collapse sticky bar on scroll
+  useEffect(() => {
+    const onScroll = () => setStickyCompact(window.scrollY > 200);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!token) { setError("Invalid link."); setLoading(false); return; }

@@ -234,7 +234,7 @@ const sections: Section[] = [
             <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
             <span className="text-[11px] font-bold text-destructive uppercase tracking-wider">Ineligible Vehicles</span>
           </div>
-          <p className="text-[13px] text-destructive leading-relaxed">HarteCash <strong>cannot purchase</strong> vehicles with salvage, total loss, rebuilt/reconstructed, TMU, lemon law buyback, flood damage, or junk title designations. See Section 01 for the complete list. Do not schedule an appointment without first verifying your title status.</p>
+          <p className="text-[13px] text-destructive leading-relaxed">We <strong>cannot purchase</strong> vehicles with salvage, total loss, rebuilt/reconstructed, TMU, lemon law buyback, flood damage, or junk title designations. See Section 01 for the complete list. Do not schedule an appointment without first verifying your title status.</p>
         </div>
         <p>Customers with outstanding loan or lease balances are responsible for any negative equity at closing, payable by cash, cashier's check, or certified funds. In certain circumstances, negative equity may be applied toward a new vehicle purchase, subject to credit approval.</p>
         <div className="bg-muted border border-border border-l-4 border-l-primary rounded-lg p-4 mt-1">

@@ -182,7 +182,7 @@ const sections: Section[] = [
     title: "In-Person Verification",
     render: () => (
       <>
-        <p>Once you accept your HarteCash Offer, a Harte Auto Group representative will conduct a physical inspection of your vehicle. The following are verified at every inspection:</p>
+        <p>Once you accept your Offer, a representative will conduct a physical inspection of your vehicle. The following are verified at every inspection:</p>
         <ul className="list-none space-y-2 mb-4">
           {[
             "Odometer reading confirmed against submitted mileage",

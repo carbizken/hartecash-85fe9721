@@ -333,7 +333,7 @@ const OfferDisclosure = () => {
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <AlertTriangle className="w-4 h-4 text-red-200/90 flex-shrink-0" />
           <p className="text-xs text-red-200/90 leading-relaxed">
-            <strong className="text-white">HarteCash does not purchase vehicles with salvage, total loss, rebuilt/reconstructed, TMU, lemon law buyback, flood damage, or junk title designations.</strong>
+            <strong className="text-white">We do not purchase vehicles with salvage, total loss, rebuilt/reconstructed, TMU, lemon law buyback, flood damage, or junk title designations.</strong>
             <span className="opacity-75">&nbsp; See Section 01 for the complete list before submitting.</span>
           </p>
         </div>

@@ -124,6 +124,7 @@ interface OfferSettingsRow {
   deduction_amounts: DeductionAmounts;
   condition_multipliers: ConditionMultipliers;
   condition_basis_map: ConditionBasisMap;
+  condition_equipment_map: ConditionEquipmentMap;
   recon_cost: number;
   offer_floor: number;
   offer_ceiling: number | null;

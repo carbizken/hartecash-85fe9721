@@ -155,6 +155,13 @@ const DEFAULT_DEDUCTIONS: DeductionsConfig = {
   missing_keys: true,
 };
 
+const DEFAULT_CONDITION_EQUIPMENT_MAP: ConditionEquipmentMap = {
+  excellent: true,
+  very_good: true,
+  good: true,
+  fair: true,
+};
+
 const DEFAULT_SETTINGS: OfferSettings = {
   bb_value_basis: "tradein_avg",
   global_adjustment_pct: 0,
@@ -162,6 +169,7 @@ const DEFAULT_SETTINGS: OfferSettings = {
   deduction_amounts: DEFAULT_DEDUCTION_AMOUNTS,
   condition_multipliers: DEFAULT_CONDITION_MULTIPLIERS,
   condition_basis_map: DEFAULT_CONDITION_BASIS_MAP,
+  condition_equipment_map: DEFAULT_CONDITION_EQUIPMENT_MAP,
   recon_cost: 0,
   offer_floor: 500,
   offer_ceiling: null,

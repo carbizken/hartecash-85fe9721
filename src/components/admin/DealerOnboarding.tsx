@@ -95,6 +95,14 @@ const DealerOnboarding = ({ isAdmin = false, onNavigate, targetDealershipId, onD
     fetchAccount();
   }, [dealershipId]);
 
+  useEffect(() => {
+    const loadTenants = async () => {
+      const { data } = await supabase.from("tenants").select("dealership_id, display_name").eq("is_active", true).order("display_name");
+      if (data) setTenants(data);
+    };
+    if (isAdmin) loadTenants();
+  }, [isAdmin]);
+
   const fetchAccount = async () => {
     setLoading(true);
     const { data } = await supabase

@@ -33,7 +33,7 @@ const OnboardingChecklist = ({ onNavigate, dealershipId: propDealershipId }: Onb
 
   useEffect(() => {
     checkAll();
-  }, []);
+  }, [dealershipId]);
 
   const checkAll = async () => {
     // Fetch all data in parallel

@@ -240,10 +240,11 @@ export default function OnboardingScript({ targetDealershipId }: OnboardingScrip
   // Load existing data
   useEffect(() => {
     const load = async () => {
+      const activeDealershipId = targetDealershipId || "default";
       const { data } = await supabase
         .from("dealer_accounts")
         .select("onboarding_answers, onboarding_signature_dealer, onboarding_signature_staff, onboarding_signed_at")
-        .eq("dealership_id", "default")
+        .eq("dealership_id", activeDealershipId)
         .maybeSingle();
       if (data) {
         if (data.onboarding_answers && typeof data.onboarding_answers === "object") {

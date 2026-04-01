@@ -139,13 +139,16 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
     );
   };
 
-  // New Carvana-style step order
+  // Build step order — when offer_before_details is on, contact info moves to offer page
+  const offerFirst = formConfig.offer_before_details;
+
   const getDisplaySteps = () => {
     const steps: string[] = ["Vehicle Info"];
     if (showTrimStep) steps.push("Select Your Vehicle");
     if (formConfig.step_vehicle_build) steps.push("Vehicle Build");
     if (formConfig.step_condition_history) steps.push("Condition");
-    steps.push("History", "Finalize");
+    steps.push("History");
+    if (!offerFirst) steps.push("Finalize");
     return steps;
   };
 

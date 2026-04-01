@@ -103,9 +103,9 @@ interface MileageTier {
 
 interface ConditionMultipliers {
   excellent: number;
+  very_good: number;
   good: number;
   fair: number;
-  rough: number;
 }
 
 interface OfferSettingsRow {

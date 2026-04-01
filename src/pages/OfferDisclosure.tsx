@@ -83,8 +83,8 @@ const sections: Section[] = [
     title: "Offer Validity, Accuracy & Your Disclosure Obligations",
     render: () => (
       <>
-        <p>Your HarteCash Offer is a genuine estimated offer generated from the vehicle details you provide. It is valid for <strong>eight (8) calendar days</strong> from the date and time of issuance. This Offer is not a guaranteed purchase price and is contingent upon our in-person verification of your vehicle's actual condition, mileage, use, and history.</p>
-        <p>If the vehicle's actual condition, equipment, mileage, or history differs from the information you provided, HarteCash and Harte Auto Group reserve the right to revise the Offer upward or downward, or to decline to purchase the vehicle.</p>
+        <p>Your Offer is a genuine estimated offer generated from the vehicle details you provide. It is valid for <strong>eight (8) calendar days</strong> from the date and time of issuance. This Offer is not a guaranteed purchase price and is contingent upon our in-person verification of your vehicle's actual condition, mileage, use, and history.</p>
+        <p>If the vehicle's actual condition, equipment, mileage, or history differs from the information you provided, we reserve the right to revise the Offer upward or downward, or to decline to purchase the vehicle.</p>
         <div className="bg-muted border border-border border-l-4 border-l-primary rounded-lg p-4 my-4">
           <p className="text-xs font-bold text-foreground uppercase tracking-wider mb-1">Federal Odometer Disclosure — Your Certification</p>
           <p className="text-[13px] text-muted-foreground leading-relaxed">

@@ -56,6 +56,13 @@ export interface ConditionBasisMap {
   fair: string;
 }
 
+export interface ConditionEquipmentMap {
+  excellent: boolean;
+  very_good: boolean;
+  good: boolean;
+  fair: boolean;
+}
+
 export interface AgeTier {
   min_years: number;
   max_years: number;

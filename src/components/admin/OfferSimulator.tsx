@@ -476,7 +476,7 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
       {!liveBbVehicle && !liveLoading && (
         <div className="bg-muted/40 rounded-lg p-8 text-sm text-muted-foreground text-center">
           <Car className="w-8 h-8 mx-auto mb-2 opacity-40" />
-          Enter a VIN and mileage, then click <strong>Look Up</strong> to start building your pricing model.
+          Enter a VIN and mileage, then click <strong>Look Up</strong> to start building your offer logic.
         </div>
       )}
 

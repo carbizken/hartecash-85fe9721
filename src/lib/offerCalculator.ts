@@ -75,6 +75,39 @@ export interface MileageTier {
   adjustment_flat: number;
 }
 
+export interface LowMileageBonus {
+  enabled: boolean;
+  avg_miles_per_year: number;
+  bonus_pct_per_step: number;
+  step_size_pct: number;
+  max_bonus_pct: number;
+  min_miles_per_year: number;
+}
+
+export const DEFAULT_LOW_MILEAGE_BONUS: LowMileageBonus = {
+  enabled: false,
+  avg_miles_per_year: 12000,
+  bonus_pct_per_step: 2,
+  step_size_pct: 20,
+  max_bonus_pct: 8,
+  min_miles_per_year: 4000,
+};
+
+/** Calculate low-mileage bonus percentage */
+export function calcLowMileageBonusPct(
+  vehicleYear: string | undefined,
+  mileage: number,
+  bonus: LowMileageBonus
+): number {
+  if (!bonus.enabled || !vehicleYear) return 0;
+  const age = Math.max(new Date().getFullYear() - Number(vehicleYear), 1);
+  const milesPerYear = mileage / age;
+  if (milesPerYear >= bonus.avg_miles_per_year || milesPerYear < bonus.min_miles_per_year) return 0;
+  const pctBelow = ((bonus.avg_miles_per_year - milesPerYear) / bonus.avg_miles_per_year) * 100;
+  const steps = Math.floor(pctBelow / bonus.step_size_pct);
+  return Math.min(steps * bonus.bonus_pct_per_step, bonus.max_bonus_pct);
+}
+
 export interface OfferSettings {
   bb_value_basis: string;
   global_adjustment_pct: number;

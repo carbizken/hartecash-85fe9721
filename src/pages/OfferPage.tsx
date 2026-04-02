@@ -278,6 +278,7 @@ const OfferPage = () => {
         updateData.bb_tradein_avg = freshBBValues.bb_tradein_avg;
         updateData.bb_wholesale_avg = freshBBValues.bb_wholesale_avg;
         updateData.bb_retail_avg = freshBBValues.bb_retail_avg;
+        if (freshBBValues.bb_value_tiers) updateData.bb_value_tiers = freshBBValues.bb_value_tiers;
         if (newSubmission.bb_mileage_adj !== undefined) updateData.bb_mileage_adj = newSubmission.bb_mileage_adj;
         if (newSubmission.bb_base_whole_avg !== undefined) updateData.bb_base_whole_avg = newSubmission.bb_base_whole_avg;
       }

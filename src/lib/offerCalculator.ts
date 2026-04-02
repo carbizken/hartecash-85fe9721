@@ -371,15 +371,23 @@ export function calculateOffer(
     }
   }
 
-  // 4. Condition-based deductions (configurable amounts)
+  // 4. Condition-based deductions (configurable amounts + deduction modes)
   let deductions = 0;
+  const modes = cfg.deduction_modes || DEFAULT_DEDUCTION_MODES;
 
-  // Normalize form values for comparison (form uses labels like "1 accident", calculator needs to match)
+  // Normalize form values for comparison
   const accidentsLower = (formData.accidents || "").toLowerCase();
   if (ded.accidents) {
-    if (accidentsLower === "1" || accidentsLower === "1 accident") deductions += amt.accidents_1;
-    else if (accidentsLower === "2" || accidentsLower === "2 accidents" || accidentsLower === "2+ accidents") deductions += amt.accidents_2;
-    else if (accidentsLower === "3+" || accidentsLower === "3+ accidents") deductions += amt.accidents_3plus;
+    if (modes.accidents === "pct") {
+      // Percentage of base value
+      if (accidentsLower === "1" || accidentsLower === "1 accident") deductions += Math.round(baseValue * (amt.accidents_1 / 100));
+      else if (accidentsLower === "2" || accidentsLower === "2 accidents" || accidentsLower === "2+ accidents") deductions += Math.round(baseValue * (amt.accidents_2 / 100));
+      else if (accidentsLower === "3+" || accidentsLower === "3+ accidents") deductions += Math.round(baseValue * (amt.accidents_3plus / 100));
+    } else {
+      if (accidentsLower === "1" || accidentsLower === "1 accident") deductions += amt.accidents_1;
+      else if (accidentsLower === "2" || accidentsLower === "2 accidents" || accidentsLower === "2+ accidents") deductions += amt.accidents_2;
+      else if (accidentsLower === "3+" || accidentsLower === "3+ accidents") deductions += amt.accidents_3plus;
+    }
   }
   if (ded.exterior_damage) {
     deductions += formData.exteriorDamage.filter((d) => d !== "none").length * amt.exterior_damage_per_item;
@@ -402,7 +410,13 @@ export function calculateOffer(
     deductions += formData.techIssues.filter((d) => d !== "none").length * amt.tech_issue_per_item;
   }
   const drivableLower = (formData.drivable || "").toLowerCase();
-  if (ded.not_drivable && (drivableLower === "no" || drivableLower === "not drivable")) deductions += amt.not_drivable;
+  if (ded.not_drivable && (drivableLower === "no" || drivableLower === "not drivable")) {
+    if (modes.not_drivable === "pct") {
+      deductions += Math.round(baseValue * (amt.not_drivable / 100));
+    } else {
+      deductions += amt.not_drivable;
+    }
+  }
   const smokedLower = (formData.smokedIn || "").toLowerCase();
   if (ded.smoked_in && (smokedLower === "yes" || smokedLower === "smoked in")) deductions += amt.smoked_in;
   const tiresLower = (formData.tiresReplaced || "").toLowerCase();
@@ -427,6 +441,19 @@ export function calculateOffer(
     high = Math.round(high * (1 + regionalPct / 100));
   }
 
+  // 6c. Apply seasonal adjustment %
+  const seasonal = cfg.seasonal_adjustment || DEFAULT_SEASONAL_ADJUSTMENT;
+  if (seasonal.enabled && seasonal.adjustment_pct !== 0) {
+    high = Math.round(high * (1 + seasonal.adjustment_pct / 100));
+  }
+
+  // 6d. Apply color desirability adjustment %
+  const colorConfig = cfg.color_desirability || DEFAULT_COLOR_DESIRABILITY;
+  const colorPct = calcColorAdjustmentPct(formData.exteriorColor, colorConfig);
+  if (colorPct !== 0) {
+    high = Math.round(high * (1 + colorPct / 100));
+  }
+
   // 7. Apply age-based tier adjustments
   const ageTiers = cfg.age_tiers || [];
   if (ageTiers.length > 0 && bbVehicle.year) {
@@ -435,7 +462,7 @@ export function calculateOffer(
     for (const tier of ageTiers) {
       if (vehicleAge >= tier.min_years && vehicleAge <= tier.max_years) {
         high = Math.round(high * (1 + tier.adjustment_pct / 100));
-        break; // Only apply the first matching tier
+        break;
       }
     }
   }
@@ -459,6 +486,13 @@ export function calculateOffer(
     high = Math.round(high * (1 + lmBonusPct / 100));
   }
 
+  // 7d. Apply high-mileage penalty
+  const hmp = cfg.high_mileage_penalty || DEFAULT_HIGH_MILEAGE_PENALTY;
+  const hmPenaltyPct = calcHighMileagePenaltyPct(bbVehicle.year, mileage, hmp);
+  if (hmPenaltyPct > 0) {
+    high = Math.round(high * (1 - hmPenaltyPct / 100));
+  }
+
   // 8. Apply matching rules
   const vehicleYear = bbVehicle.year;
   const vehicleMake = bbVehicle.make;
@@ -473,10 +507,8 @@ export function calculateOffer(
     if (matchesRule(rule, vehicleYear, vehicleMake, vehicleModel, mileage, condition)) {
       matchedRuleIds.push(rule.id);
       if (rule.adjustment_type === "flat") {
-        // Flat dollar adjustment (positive = boost, negative = penalty)
         high = Math.round(high + (rule.adjustment_pct || 0));
       } else {
-        // Percentage adjustment (default)
         if (rule.adjustment_pct !== 0) {
           high = Math.round(high * (1 + rule.adjustment_pct / 100));
         }
@@ -487,7 +519,7 @@ export function calculateOffer(
     }
   }
 
-  // 8. Apply floor & ceiling
+  // 9. Apply floor & ceiling
   const floor = cfg.offer_floor || 500;
   high = Math.max(high, floor);
   if (cfg.offer_ceiling && cfg.offer_ceiling > 0) {

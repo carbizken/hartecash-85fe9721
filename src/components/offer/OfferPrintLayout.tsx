@@ -209,7 +209,7 @@ const OfferPrintLayout = ({
       )}
 
       {/* Condition Report */}
-      <div className="border border-border rounded-lg p-4 mb-4">
+      <div className="border border-border rounded-lg p-3 mb-3">
         <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2 pb-1.5 border-b border-border">Condition Report</p>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
           {conditionItems.map((item, i) => (

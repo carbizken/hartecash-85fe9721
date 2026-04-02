@@ -190,6 +190,13 @@ export function recalculateFromSubmission(
     }
   }
 
+  // 6b. Low-mileage bonus
+  const lmb = cfg.low_mileage_bonus || DEFAULT_LOW_MILEAGE_BONUS;
+  const lmBonusPct = calcLowMileageBonusPct(condition.vehicle_year || undefined, mileage, lmb);
+  if (lmBonusPct > 0) {
+    high = Math.round(high * (1 + lmBonusPct / 100));
+  }
+
   // 7. Rules
   const activeRules = (rules || []).filter(r => r.is_active);
   const matchedRuleIds: string[] = [];

@@ -245,8 +245,12 @@
 
 
   @page {
-    margin: 0.4in 0.5in;
+    margin: 0.3in 0.4in;
     size: letter;
+  }
+
+  .print-offer-layout {
+    font-size: 10px;
   }
 }
 

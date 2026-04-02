@@ -266,8 +266,8 @@ const OfferPrintLayout = ({
       )}
 
       {/* What to Bring + QR */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="border border-border rounded-lg p-3">
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="border border-border rounded-lg p-2">
           <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2 pb-1.5 border-b border-border">Bring to Your Visit</p>
           <div className="space-y-1.5 text-xs">
             <div className="flex items-center gap-1.5">

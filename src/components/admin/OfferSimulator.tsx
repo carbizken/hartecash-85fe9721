@@ -399,7 +399,43 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
       }
     }
 
-    // 10. Floor/Ceiling
+    // 9c. High-Mileage Penalty
+    const hmp = (activeSettings as any).high_mileage_penalty || DEFAULT_HIGH_MILEAGE_PENALTY;
+    if (hmp?.enabled && liveBbVehicle.year) {
+      const age = Math.max(currentYear - Number(liveBbVehicle.year), 1);
+      const milesPerYear = mileageNum / age;
+      if (milesPerYear > hmp.avg_miles_per_year && milesPerYear <= (hmp.max_miles_per_year || 25000)) {
+        const pctAbove = ((milesPerYear - hmp.avg_miles_per_year) / hmp.avg_miles_per_year) * 100;
+        const steps = Math.floor(pctAbove / (hmp.step_size_pct || 20));
+        const penaltyPct = Math.min(steps * (hmp.penalty_pct_per_step || 2), hmp.max_penalty_pct || 10);
+        if (penaltyPct > 0) {
+          const adj = -Math.round(running * (penaltyPct / 100));
+          running += adj;
+          blocks.push({ id: "high_mileage", label: `High Mileage Penalty (-${penaltyPct}%)`, value: adj, runningTotal: running, type: "subtract", editable: false });
+        }
+      }
+    }
+
+    // 9d. Seasonal Adjustment
+    const seasonal = (activeSettings as any).seasonal_adjustment || DEFAULT_SEASONAL_ADJUSTMENT;
+    if (seasonal?.enabled && seasonal.adjustment_pct !== 0) {
+      const adj = Math.round(running * (seasonal.adjustment_pct / 100));
+      running += adj;
+      blocks.push({ id: "seasonal", label: `Seasonal (${seasonal.adjustment_pct > 0 ? "+" : ""}${seasonal.adjustment_pct}%)`, value: adj, runningTotal: running, type: adj >= 0 ? "add" : "subtract", editable: false });
+    }
+
+    // 9e. Color Desirability
+    const colorConfig = (activeSettings as any).color_desirability || DEFAULT_COLOR_DESIRABILITY;
+    if (colorConfig?.enabled) {
+      // Use the vehicle's first exterior color as a proxy
+      const sampleColor = liveBbVehicle.exterior_colors?.[0]?.name || "";
+      const colorPct = calcColorAdjustmentPct(sampleColor, colorConfig);
+      if (colorPct !== 0) {
+        const adj = Math.round(running * (colorPct / 100));
+        running += adj;
+        blocks.push({ id: "color", label: `Color (${sampleColor || "—"}) ${colorPct > 0 ? "+" : ""}${colorPct}%`, value: adj, runningTotal: running, type: adj >= 0 ? "add" : "subtract", editable: false });
+      }
+    }
     const clamped = Math.max(running, activeSettings.offer_floor || 500);
     if (clamped !== running) {
       blocks.push({ id: "floor", label: `Floor ($${(activeSettings.offer_floor || 500).toLocaleString()})`, value: clamped - running, runningTotal: clamped, type: "add", editable: true, editKey: "offer_floor", editType: "flat", currentEditValue: activeSettings.offer_floor });

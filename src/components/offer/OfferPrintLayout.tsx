@@ -89,24 +89,24 @@ const OfferPrintLayout = ({
   return (
     <div className="hidden print:block print-offer-layout">
       {/* Premium Header */}
-      <div className="flex items-center justify-between pb-4 mb-5 border-b-[3px] border-primary">
-        <div className="flex items-center gap-4">
-          <img src={config.logo_url || config.logo_white_url || logoFallback} alt={config.dealership_name || "Dealership"} className="h-11 w-auto brightness-0" />
-          <div className="border-l-2 border-border pl-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Vehicle Purchase Program</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">
+      <div className="flex items-center justify-between pb-2 mb-3 border-b-[3px] border-primary">
+        <div className="flex items-center gap-3">
+          <img src={config.logo_url || config.logo_white_url || logoFallback} alt={config.dealership_name || "Dealership"} className="h-9 w-auto brightness-0" />
+          <div className="border-l-2 border-border pl-3">
+            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Vehicle Purchase Program</p>
+            <p className="text-[9px] text-muted-foreground">
               {createdDate?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
             </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Prepared for</p>
-          <p className="text-base font-bold text-foreground">{s.name || "Customer"}</p>
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Prepared for</p>
+          <p className="text-sm font-bold text-foreground">{s.name || "Customer"}</p>
         </div>
       </div>
 
       {/* Hero: Vehicle Image + Summary side by side */}
-      <div className="grid grid-cols-2 gap-6 mb-5">
+      <div className="grid grid-cols-2 gap-4 mb-3">
         <div>
           {s.vehicle_year && s.vehicle_make && s.vehicle_model && (
             <div className="overflow-hidden -mx-2">
@@ -120,9 +120,9 @@ const OfferPrintLayout = ({
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div>
-            <p className="text-lg font-bold text-foreground">{vehicleStr}</p>
+            <p className="text-base font-bold text-foreground">{vehicleStr}</p>
             {s.vin && (
               <p className="text-[10px] font-mono text-muted-foreground">VIN: {s.vin.toUpperCase()}</p>
             )}
@@ -155,7 +155,7 @@ const OfferPrintLayout = ({
           </div>
 
           {/* Offer Card inline */}
-          <div className="border-2 border-primary rounded-xl p-4 mt-2">
+          <div className="border-2 border-primary rounded-xl p-3 mt-1">
             <div className="flex justify-center mb-1">
               <span className="text-[9px] font-bold uppercase tracking-[0.2em] bg-primary/10 text-primary px-3 py-1 rounded-full">
                 {printIsTrade ? "Trade-In Offer" : "Cash Offer"}
@@ -189,7 +189,7 @@ const OfferPrintLayout = ({
 
       {/* Trade-in breakdown (if applicable) */}
       {printIsTrade && taxRate > 0 && (
-        <div className="border border-border rounded-lg p-4 mb-4">
+        <div className="border border-border rounded-lg p-3 mb-3">
           <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2 pb-1.5 border-b border-border">Trade-In Tax Credit Breakdown</p>
           <div className="space-y-1.5 text-xs">
             <div className="flex justify-between">
@@ -209,7 +209,7 @@ const OfferPrintLayout = ({
       )}
 
       {/* Condition Report */}
-      <div className="border border-border rounded-lg p-4 mb-4">
+      <div className="border border-border rounded-lg p-3 mb-3">
         <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2 pb-1.5 border-b border-border">Condition Report</p>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
           {conditionItems.map((item, i) => (
@@ -227,8 +227,8 @@ const OfferPrintLayout = ({
 
       {/* Appointment Details (if scheduled) */}
       {appointment && (
-        <div className="border-2 border-primary/30 bg-primary/5 rounded-lg p-4 mb-4">
-          <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-primary/20">
+        <div className="border-2 border-primary/30 bg-primary/5 rounded-lg p-3 mb-3">
+          <div className="flex items-center gap-2 mb-1.5 pb-1 border-b border-primary/20">
             <CalendarCheck className="w-4 h-4 text-primary" />
             <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-primary">Scheduled Inspection</p>
           </div>
@@ -266,8 +266,8 @@ const OfferPrintLayout = ({
       )}
 
       {/* What to Bring + QR */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="border border-border rounded-lg p-3">
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="border border-border rounded-lg p-2">
           <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2 pb-1.5 border-b border-border">Bring to Your Visit</p>
           <div className="space-y-1.5 text-xs">
             <div className="flex items-center gap-1.5">

@@ -836,7 +836,71 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
                     </CollapsibleContent>
                   </Collapsible>
 
+                  {/* Low-Mileage Bonus */}
                   <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full px-3 py-2 text-left hover:bg-muted/30 transition-colors rounded-lg border border-border">
+                        <div className="flex items-center gap-1.5">
+                          <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+                          <span className="font-semibold text-[11px] text-card-foreground">Low-Mileage Bonus</span>
+                          {(localSettings as any).low_mileage_bonus?.enabled && (
+                            <Badge variant="secondary" className="text-[8px] px-1 py-0">ON</Badge>
+                          )}
+                        </div>
+                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                      </button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="space-y-2 p-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-muted-foreground">Enable low-mileage bonus</span>
+                          <Switch
+                            checked={(localSettings as any).low_mileage_bonus?.enabled ?? false}
+                            onCheckedChange={(checked) => updateLocalSetting("low_mileage_bonus" as any, { ...(localSettings as any).low_mileage_bonus || {}, enabled: checked })}
+                            className="scale-75"
+                          />
+                        </div>
+                        {(localSettings as any).low_mileage_bonus?.enabled && (
+                          <div className="space-y-1.5 border-t border-border pt-2">
+                            <div className="flex items-center gap-1 text-[10px]">
+                              <span className="text-muted-foreground w-28">Avg mi/year:</span>
+                              <Input type="number" value={(localSettings as any).low_mileage_bonus?.avg_miles_per_year ?? 12000}
+                                onChange={e => updateLocalSetting("low_mileage_bonus" as any, { ...(localSettings as any).low_mileage_bonus, avg_miles_per_year: Number(e.target.value) })}
+                                className="w-20 h-5 text-[10px]" step="1000" />
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px]">
+                              <span className="text-muted-foreground w-28">Bonus % per step:</span>
+                              <Input type="number" value={(localSettings as any).low_mileage_bonus?.bonus_pct_per_step ?? 2}
+                                onChange={e => updateLocalSetting("low_mileage_bonus" as any, { ...(localSettings as any).low_mileage_bonus, bonus_pct_per_step: Number(e.target.value) })}
+                                className="w-14 h-5 text-[10px]" step="0.5" />
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px]">
+                              <span className="text-muted-foreground w-28">Step size (% below):</span>
+                              <Input type="number" value={(localSettings as any).low_mileage_bonus?.step_size_pct ?? 20}
+                                onChange={e => updateLocalSetting("low_mileage_bonus" as any, { ...(localSettings as any).low_mileage_bonus, step_size_pct: Number(e.target.value) })}
+                                className="w-14 h-5 text-[10px]" step="5" />
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px]">
+                              <span className="text-muted-foreground w-28">Max bonus %:</span>
+                              <Input type="number" value={(localSettings as any).low_mileage_bonus?.max_bonus_pct ?? 8}
+                                onChange={e => updateLocalSetting("low_mileage_bonus" as any, { ...(localSettings as any).low_mileage_bonus, max_bonus_pct: Number(e.target.value) })}
+                                className="w-14 h-5 text-[10px]" step="1" />
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px]">
+                              <span className="text-muted-foreground w-28">Min mi/year floor:</span>
+                              <Input type="number" value={(localSettings as any).low_mileage_bonus?.min_miles_per_year ?? 4000}
+                                onChange={e => updateLocalSetting("low_mileage_bonus" as any, { ...(localSettings as any).low_mileage_bonus, min_miles_per_year: Number(e.target.value) })}
+                                className="w-20 h-5 text-[10px]" step="500" />
+                            </div>
+                            <p className="text-[8px] text-muted-foreground leading-tight mt-1">
+                              Vehicles averaging below the benchmark get a bonus. E.g., 40% below avg → 2 steps × 2% = +4% bonus. Floor prevents rewarding garaged/unused vehicles.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+
                     <CollapsibleTrigger asChild>
                       <button className="flex items-center justify-between w-full px-3 py-2 text-left hover:bg-muted/30 transition-colors rounded-lg border border-border">
                         <div className="flex items-center gap-1.5">

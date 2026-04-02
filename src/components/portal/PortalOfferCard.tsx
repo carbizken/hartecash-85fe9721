@@ -51,8 +51,6 @@ const PortalOfferCard = ({
 
   const isAccepted = isAcceptedOverride || !!offeredPrice;
   const cashOffer = offeredPrice || estimatedOfferHigh || 0;
-  const estimateLow = estimatedOfferLow || 0;
-  const isEstimate = !isAccepted && !!estimatedOfferHigh;
 
   const { state, rate: taxRate } = getTaxRateFromZip(zip || "");
   const stateName = state ? STATE_NAMES[state] || state : null;

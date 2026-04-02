@@ -354,10 +354,16 @@ const SubmissionsTable = ({
                         </div>
                       </td>
                       <td className="px-2 py-3 text-center">
-                        {(() => {
-                          const days = getDaysSinceUpdate(sub);
-                          return <span className={`text-xs font-bold ${getAgingColor(days, sub.progress_status)}`} title={`${days}d since last update`}>{days}d</span>;
-                        })()}
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span className={`text-xs font-bold ${sla.color}`} title={`${Math.round(hours)}h since last update`}>
+                            {formatAge(hours)}
+                          </span>
+                          {sla.label && (
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${sla.color}`}>
+                              {sla.label}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-3 py-3 text-right">
                         <div className="flex justify-end gap-1">

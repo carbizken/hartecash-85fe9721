@@ -194,6 +194,7 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
           offer_ceiling: incoming.offer_ceiling,
           age_tiers: incoming.age_tiers as any,
           mileage_tiers: incoming.mileage_tiers as any,
+          low_mileage_bonus: (incoming as any).low_mileage_bonus,
         } : prev);
       });
     }

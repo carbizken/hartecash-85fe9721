@@ -32,6 +32,9 @@ import RequestAccessDialog from "@/components/admin/RequestAccessDialog";
 import SubmissionsTable from "@/components/admin/SubmissionsTable";
 import SubmissionDetailSheet from "@/components/admin/SubmissionDetailSheet";
 import AppointmentManager from "@/components/admin/AppointmentManager";
+import TodayActionSummary from "@/components/admin/TodayActionSummary";
+import AdminCommandPalette from "@/components/admin/AdminCommandPalette";
+import AdminBreadcrumbNav from "@/components/admin/AdminBreadcrumb";
 
 import { useStaffPermissions } from "@/hooks/useStaffPermissions";
 import { useTenant, TenantOverrideProvider } from "@/contexts/TenantContext";
@@ -271,7 +274,17 @@ const AdminDashboard = () => {
         </header>
 
         <div className="flex-1 px-3 md:px-4 py-4 md:py-6 overflow-auto">
-          <div className="max-w-[1400px] mx-auto">
+          <div className="max-w-[1400px] mx-auto space-y-4">
+            <div className="flex items-center justify-between">
+              <AdminBreadcrumbNav activeSection={activeSection} onNavigate={setActiveSection} />
+              <kbd className="hidden md:inline-flex items-center gap-1 rounded border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground cursor-pointer" onClick={() => { const e = new KeyboardEvent("keydown", { key: "k", metaKey: true }); document.dispatchEvent(e); }}>
+                ⌘K
+              </kbd>
+            </div>
+
+            {activeSection === "submissions" && (
+              <TodayActionSummary submissions={submissions} appointments={appointments} onNavigate={setActiveSection} />
+            )}
             {activeSection === "submissions" && (
               <SubmissionsTable
                 submissions={submissions} loading={loading} search={search} onSearchChange={setSearch}
@@ -471,6 +484,13 @@ const AdminDashboard = () => {
       </div>
 
       {userId && <RequestAccessDialog open={showRequestAccessDialog} onOpenChange={setShowRequestAccessDialog} userId={userId} />}
+
+      <AdminCommandPalette
+        onNavigate={(s) => setActiveSection(s)}
+        onViewSubmission={handleView}
+        submissions={submissions}
+        allowedSections={allowedSections}
+      />
 
       <SubmissionDetailSheet
         selected={selected}

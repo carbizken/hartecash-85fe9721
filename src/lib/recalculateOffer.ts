@@ -228,5 +228,5 @@ export function recalculateFromSubmission(
 
   const low = Math.max(Math.round(high * 0.90), floor);
 
-  return { low, high, baseValue: Math.round(bbTradeinAvg), totalDeductions: Math.round(deductions), reconCost: Math.round(reconCost), matchedRuleIds, isHotLead };
+  return { low, high, baseValue: Math.round(baseValue), totalDeductions: Math.round(deductions), reconCost: Math.round(reconCost), matchedRuleIds, isHotLead };
 }

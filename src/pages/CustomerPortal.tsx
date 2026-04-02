@@ -172,7 +172,7 @@ const CustomerPortal = () => {
         subCond,
         offerSettings,
         offerRules,
-        { bb_tradein_avg: submission.bb_tradein_avg, bb_wholesale_avg: condition?.bb_wholesale_avg, bb_retail_avg: condition?.bb_retail_avg }
+        { bb_tradein_avg: submission.bb_tradein_avg, bb_wholesale_avg: condition?.bb_wholesale_avg, bb_retail_avg: condition?.bb_retail_avg, bb_value_tiers: condition?.bb_value_tiers }
       );
 
       if (newEstimate) {

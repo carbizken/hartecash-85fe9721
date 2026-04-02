@@ -444,9 +444,9 @@ const OfferPage = () => {
           <p className="text-xs text-muted-foreground mb-1">
             {isEstimate ? "Estimated Cash Offer" : "Cash Offer"} for Your {vehicleStr}
           </p>
-          {isEstimate ? (
+           {isEstimate ? (
             <p className="text-4xl lg:text-5xl font-extrabold text-accent tracking-tight">
-              ${estimateLow.toLocaleString("en-US", { maximumFractionDigits: 0 })} – ${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              ${cashOffer.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             </p>
           ) : (
             <p className="text-4xl lg:text-5xl font-extrabold text-accent tracking-tight">

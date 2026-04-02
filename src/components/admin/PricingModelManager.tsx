@@ -157,6 +157,7 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
       age_tiers: editModel.age_tiers || [],
       mileage_tiers: editModel.mileage_tiers || [],
       regional_adjustment_pct: editModel.regional_adjustment_pct || 0,
+      low_mileage_bonus: (editModel as any).low_mileage_bonus || { enabled: false, avg_miles_per_year: 12000, bonus_pct_per_step: 2, step_size_pct: 20, max_bonus_pct: 8, min_miles_per_year: 4000 },
     };
   }, [editModel]);
 

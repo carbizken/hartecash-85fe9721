@@ -210,6 +210,7 @@ const DEFAULT_SETTINGS: OfferSettings = {
   age_tiers: [],
   mileage_tiers: [],
   regional_adjustment_pct: 0,
+  low_mileage_bonus: DEFAULT_LOW_MILEAGE_BONUS,
 };
 
 /** Extract the correct BB value based on the configured basis */

@@ -40,6 +40,8 @@ interface ConditionData {
   tires_replaced: string | null;
   num_keys: string | null;
   drivable: string | null;
+  bb_wholesale_avg: number | null;
+  bb_retail_avg: number | null;
 }
 
 interface PortalSubmission {

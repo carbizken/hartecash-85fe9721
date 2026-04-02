@@ -43,7 +43,7 @@ const DealAccepted = () => {
   // Confetti celebration — only on first visit
   useEffect(() => {
     if (!isFirstVisit) return;
-    sessionStorage.setItem(confettiKey, "1");
+    localStorage.setItem(confettiKey, "1");
 
     const duration = 2500;
     const end = Date.now() + duration;

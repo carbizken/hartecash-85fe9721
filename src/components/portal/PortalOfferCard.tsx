@@ -52,8 +52,11 @@ const PortalOfferCard = ({
   const isAccepted = isAcceptedOverride || !!offeredPrice;
   const cashOffer = offeredPrice || estimatedOfferHigh || 0;
 
-  const { state, rate: taxRate } = getTaxRateFromZip(zip || "");
-  const stateName = state ? STATE_NAMES[state] || state : null;
+  const zipResult = getTaxRateFromZip(zip || "");
+  // Default to Connecticut 6.35% if no state can be determined
+  const state = zipResult.state || "CT";
+  const taxRate = zipResult.state ? zipResult.rate : 0.0635;
+  const stateName = STATE_NAMES[state] || state;
   const taxPercent = (taxRate * 100).toFixed(2);
   const taxSavings = cashOffer * taxRate;
   const tradeInValue = calcTradeInValue(cashOffer, taxRate);

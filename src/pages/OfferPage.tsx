@@ -683,20 +683,7 @@ const OfferPage = () => {
     </div>
   );
 
-  const NoTaxBlock = (!s.zip || taxRate === 0) && (
-    <div className="bg-card rounded-xl p-5 shadow-lg">
-      <div className="flex items-center gap-2 mb-3">
-        <Info className="w-5 h-5 text-muted-foreground" />
-        <h3 className="font-bold text-card-foreground text-sm">Trade-In Savings</h3>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        {!s.zip 
-          ? "We don't have your zip code on file. Contact us to learn about sales tax savings when you trade in your vehicle."
-          : `Your state (${stateName || state}) does not have a vehicle sales tax, so the trade-in value equals your cash offer.`
-        }
-      </p>
-    </div>
-  );
+  const NoTaxBlock = null;
 
 
 

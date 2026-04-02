@@ -1,8 +1,8 @@
 /**
  * Recalculate offer from submission data without needing full BBVehicle.
- * Uses bb_tradein_avg as the base value and applies condition/deduction logic.
+ * Uses condition_basis_map to resolve the correct BB base value per condition tier.
  */
-import type { OfferSettings, OfferRule, ConditionMultipliers, OfferEstimate } from "./offerCalculator";
+import type { OfferSettings, OfferRule, ConditionMultipliers, ConditionBasisMap, OfferEstimate } from "./offerCalculator";
 
 export interface SubmissionCondition {
   overall_condition: string | null;

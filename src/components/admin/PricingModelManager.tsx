@@ -293,6 +293,7 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
       offer_ceiling: editModel.offer_ceiling ?? null,
       age_tiers: editModel.age_tiers as any || [],
       mileage_tiers: editModel.mileage_tiers as any || [],
+      low_mileage_bonus: (editModel as any).low_mileage_bonus || { enabled: false, avg_miles_per_year: 12000, bonus_pct_per_step: 2, step_size_pct: 20, max_bonus_pct: 8, min_miles_per_year: 4000 },
     };
     const { data, error } = await supabase.from("pricing_models" as any).insert(payload as any).select().single();
     if (error) {

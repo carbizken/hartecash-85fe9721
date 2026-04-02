@@ -84,6 +84,7 @@ interface ConditionDetails {
   bb_retail_avg: number | null;
   bb_wholesale_avg: number | null;
   bb_tradein_avg: number | null;
+  bb_value_tiers: Record<string, Record<string, number>> | null;
 }
 
 const CONDITION_OPTIONS = [
@@ -137,7 +138,7 @@ const OfferPage = () => {
       const [condRes, pricingRes, apptRes, locRes] = await Promise.all([
         supabase
           .from("submissions")
-          .select("accidents, drivable, exterior_damage, interior_damage, mechanical_issues, engine_issues, tech_issues, smoked_in, tires_replaced, num_keys, windshield_damage, modifications, drivetrain, bb_msrp, bb_class_name, bb_drivetrain, bb_transmission, bb_fuel_type, bb_engine, bb_mileage_adj, bb_regional_adj, bb_base_whole_avg, bb_retail_avg, bb_wholesale_avg, bb_tradein_avg")
+          .select("accidents, drivable, exterior_damage, interior_damage, mechanical_issues, engine_issues, tech_issues, smoked_in, tires_replaced, num_keys, windshield_damage, modifications, drivetrain, bb_msrp, bb_class_name, bb_drivetrain, bb_transmission, bb_fuel_type, bb_engine, bb_mileage_adj, bb_regional_adj, bb_base_whole_avg, bb_retail_avg, bb_wholesale_avg, bb_tradein_avg, bb_value_tiers")
           .eq("token", token)
           .maybeSingle(),
         resolveEffectiveSettings("default"),
@@ -193,6 +194,11 @@ const OfferPage = () => {
             bb_tradein_avg: v.tradein?.avg ?? null,
             bb_wholesale_avg: v.wholesale?.avg ?? null,
             bb_retail_avg: v.retail?.avg ?? null,
+            bb_value_tiers: {
+              wholesale: v.wholesale,
+              tradein: v.tradein,
+              retail: v.retail,
+            },
           };
           // Update condition + submission with fresh BB data
           newCondition.bb_tradein_avg = v.tradein?.avg ?? null;
@@ -200,6 +206,7 @@ const OfferPage = () => {
           newCondition.bb_retail_avg = v.retail?.avg ?? null;
           newCondition.bb_mileage_adj = v.mileage_adj ?? null;
           newCondition.bb_base_whole_avg = v.base_whole_avg ?? null;
+          (newCondition as any).bb_value_tiers = freshBBValues.bb_value_tiers;
           setCondition({ ...newCondition });
 
           newSubmission.bb_tradein_avg = v.tradein?.avg ?? null;
@@ -238,6 +245,7 @@ const OfferPage = () => {
         bb_tradein_avg: newCondition.bb_tradein_avg ?? submission.bb_tradein_avg,
         bb_wholesale_avg: newCondition.bb_wholesale_avg ?? submission.bb_wholesale_avg,
         bb_retail_avg: newCondition.bb_retail_avg ?? submission.bb_retail_avg,
+        bb_value_tiers: newCondition.bb_value_tiers ?? (condition as any)?.bb_value_tiers ?? null,
       };
       const newEstimate = recalculateFromSubmission(
         bbVals.bb_tradein_avg || 0,
@@ -270,6 +278,7 @@ const OfferPage = () => {
         updateData.bb_tradein_avg = freshBBValues.bb_tradein_avg;
         updateData.bb_wholesale_avg = freshBBValues.bb_wholesale_avg;
         updateData.bb_retail_avg = freshBBValues.bb_retail_avg;
+        if (freshBBValues.bb_value_tiers) updateData.bb_value_tiers = freshBBValues.bb_value_tiers;
         if (newSubmission.bb_mileage_adj !== undefined) updateData.bb_mileage_adj = newSubmission.bb_mileage_adj;
         if (newSubmission.bb_base_whole_avg !== undefined) updateData.bb_base_whole_avg = newSubmission.bb_base_whole_avg;
       }

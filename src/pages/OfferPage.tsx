@@ -727,13 +727,13 @@ const OfferPage = () => {
         condition={condition}
         vehicleStr={vehicleStr}
         createdDate={createdDate}
-        isEstimate={isEstimate}
+        isEstimate={false}
         isExpired={isExpired}
         daysRemaining={daysRemaining}
         expiresDate={expiresDate}
         activeTab={activeTab}
         cashOffer={cashOffer}
-        estimateLow={estimateLow}
+        estimateLow={cashOffer}
         tradeInValue={tradeInValue}
         tradeInValueLow={tradeInValueLow}
         taxRate={taxRate}

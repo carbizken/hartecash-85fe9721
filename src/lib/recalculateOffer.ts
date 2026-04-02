@@ -49,20 +49,40 @@ const DEFAULT_DEDUCTION_AMOUNTS = {
   missing_keys_0: 400,
 };
 
+/** All BB tier values stored on submission */
+export interface BBValueTiers {
+  wholesale?: { xclean?: number; clean?: number; avg?: number; rough?: number };
+  tradein?: { clean?: number; avg?: number; rough?: number };
+  retail?: { xclean?: number; clean?: number; avg?: number; rough?: number };
+}
+
 /** Optional BB values stored on submission for condition_basis_map resolution */
 export interface SubmissionBBValues {
   bb_tradein_avg?: number | null;
   bb_wholesale_avg?: number | null;
   bb_retail_avg?: number | null;
+  bb_value_tiers?: BBValueTiers | null;
 }
 
 /** Resolve base value from stored BB data using condition_basis_map */
 function resolveBaseValue(bbValues: SubmissionBBValues, basis: string): number {
-  // Map basis keys to the available stored values
-  // We only have avg-tier values stored; use the closest match
+  const tiers = bbValues.bb_value_tiers;
+  if (tiers) {
+    // Use full tier data for exact resolution
+    const [category, tier] = basis.split("_");
+    if (category === "wholesale" && tiers.wholesale) {
+      return (tiers.wholesale as Record<string, number>)[tier] || tiers.wholesale.avg || 0;
+    }
+    if (category === "tradein" && tiers.tradein) {
+      return (tiers.tradein as Record<string, number>)[tier] || tiers.tradein.avg || 0;
+    }
+    if (category === "retail" && tiers.retail) {
+      return (tiers.retail as Record<string, number>)[tier] || tiers.retail.avg || 0;
+    }
+  }
+  // Fallback to avg-only values
   if (basis.startsWith("wholesale")) return bbValues.bb_wholesale_avg || 0;
   if (basis.startsWith("retail")) return bbValues.bb_retail_avg || 0;
-  // Default to trade-in for any tradein_* basis
   return bbValues.bb_tradein_avg || 0;
 }
 

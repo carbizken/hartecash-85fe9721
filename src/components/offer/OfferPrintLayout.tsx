@@ -155,7 +155,7 @@ const OfferPrintLayout = ({
           </div>
 
           {/* Offer Card inline */}
-          <div className="border-2 border-primary rounded-xl p-4 mt-2">
+          <div className="border-2 border-primary rounded-xl p-3 mt-1">
             <div className="flex justify-center mb-1">
               <span className="text-[9px] font-bold uppercase tracking-[0.2em] bg-primary/10 text-primary px-3 py-1 rounded-full">
                 {printIsTrade ? "Trade-In Offer" : "Cash Offer"}

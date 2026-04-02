@@ -125,7 +125,7 @@ const PricingAccessGate = ({ userId, userRole, children }: PricingAccessGateProp
           <Lock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="font-bold text-lg text-card-foreground mb-2">Restricted Access</h3>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Pricing model configuration is restricted to Admin and GM roles. Contact your administrator for access.
+            Offer logic configuration is restricted to Admin and GM roles. Contact your administrator for access.
           </p>
         </CardContent>
       </Card>

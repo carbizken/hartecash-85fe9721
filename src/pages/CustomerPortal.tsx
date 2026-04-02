@@ -166,7 +166,8 @@ const CustomerPortal = () => {
         submission.bb_tradein_avg,
         subCond,
         offerSettings,
-        offerRules
+        offerRules,
+        { bb_tradein_avg: submission.bb_tradein_avg, bb_wholesale_avg: submission.bb_wholesale_avg, bb_retail_avg: submission.bb_retail_avg }
       );
 
       if (newEstimate) {

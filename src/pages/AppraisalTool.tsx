@@ -146,7 +146,7 @@ const WaterfallBlockRow = ({
         <div className="w-4 shrink-0 flex items-center justify-center">
           {block.editable && <Pencil className={`w-2.5 h-2.5 transition-opacity ${isExpanded ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100"}`} />}
         </div>
-        <div className="w-28 shrink-0 text-right pr-1">
+        <div className="w-20 sm:w-28 shrink-0 text-right pr-1">
           <span className={`text-[11px] leading-tight ${isTotal ? "font-bold text-card-foreground" : "text-muted-foreground"}`}>{block.label}</span>
         </div>
         <div className="flex-1 h-7 relative rounded-sm overflow-hidden bg-muted/20">
@@ -731,7 +731,7 @@ export default function AppraisalTool() {
       <div className="sticky top-0 z-20 bg-gradient-to-br from-primary via-[hsl(210,100%,28%)] to-[hsl(215,90%,22%)] text-primary-foreground px-6 py-4 shadow-xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")} className="text-primary-foreground hover:bg-primary-foreground/10 rounded-xl">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-primary-foreground hover:bg-primary-foreground/10 rounded-xl">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="border-l border-primary-foreground/15 pl-4">
@@ -831,7 +831,7 @@ export default function AppraisalTool() {
               <DollarSign className="w-3.5 h-3.5 text-primary" />
               <span className="text-[11px] font-bold text-card-foreground uppercase tracking-wider">① Select Condition Tier</span>
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {CONDITIONS.map(cond => {
                 const basisMap = activeSettings.condition_basis_map || {};
                 const selectedBasis = (basisMap as Record<string, string>)[cond] || "tradein_avg";
@@ -971,7 +971,7 @@ export default function AppraisalTool() {
               <div className="space-y-2">
                 {/* Condition */}
                 <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                  <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Condition</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Condition</span>
                   <span className="text-xs font-bold text-primary">{CONDITION_LABELS[condition]}</span>
                   {sub.inspector_grade && sub.inspector_grade !== sub.overall_condition && (
                     <span className="text-[8px] text-muted-foreground">Customer: {formatGrade(sub.overall_condition)}</span>
@@ -982,7 +982,7 @@ export default function AppraisalTool() {
 
                 {/* Modifications */}
                 <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                  <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Modifications</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Modifications</span>
                   <Select value={modifications} onValueChange={setModifications}>
                     <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -997,7 +997,7 @@ export default function AppraisalTool() {
                 {/* Drivable */}
                 {isOn("not_drivable") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Drivable?</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Drivable?</span>
                     <Select value={drivable} onValueChange={setDrivable}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1013,7 +1013,7 @@ export default function AppraisalTool() {
                 {/* Exterior Damage */}
                 {isOn("exterior_damage") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Exterior Damage</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Exterior Damage</span>
                     <Select value={String(exteriorItems)} onValueChange={v => setExteriorItems(Number(v))}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1034,7 +1034,7 @@ export default function AppraisalTool() {
                 {/* Windshield */}
                 {isOn("windshield_damage") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Windshield</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Windshield</span>
                     <Select value={windshield} onValueChange={setWindshield}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1050,7 +1050,7 @@ export default function AppraisalTool() {
 
                 {/* Moonroof */}
                 <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                  <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Moonroof</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Moonroof</span>
                   <Select value={moonroof} onValueChange={setMoonroof}>
                     <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -1066,7 +1066,7 @@ export default function AppraisalTool() {
                 {/* Interior Damage */}
                 {isOn("interior_damage") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Interior Damage</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Interior Damage</span>
                     <Select value={String(interiorItems)} onValueChange={v => setInteriorItems(Number(v))}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1086,7 +1086,7 @@ export default function AppraisalTool() {
                 {/* Tech Issues */}
                 {isOn("tech_issues") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Tech Issues</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Tech Issues</span>
                     <Select value={String(techItems)} onValueChange={v => setTechItems(Number(v))}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1106,7 +1106,7 @@ export default function AppraisalTool() {
                 {/* Engine Issues */}
                 {isOn("engine_issues") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Engine Issues</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Engine Issues</span>
                     <Select value={String(engineItems)} onValueChange={v => setEngineItems(Number(v))}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1127,7 +1127,7 @@ export default function AppraisalTool() {
                 {/* Mechanical Issues */}
                 {isOn("mechanical_issues") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Mechanical Issues</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Mechanical Issues</span>
                     <Select value={String(mechItems)} onValueChange={v => setMechItems(Number(v))}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1147,7 +1147,7 @@ export default function AppraisalTool() {
                 {/* Accidents */}
                 {isOn("accidents") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Accidents</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Accidents</span>
                     <Select value={accidents} onValueChange={setAccidents}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1164,7 +1164,7 @@ export default function AppraisalTool() {
                 {/* Smoked In */}
                 {isOn("smoked_in") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Smoked In?</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Smoked In?</span>
                     <Select value={smokedIn} onValueChange={setSmokedIn}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1180,7 +1180,7 @@ export default function AppraisalTool() {
                 {/* Tires */}
                 {isOn("tires_not_replaced") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Tires Replaced</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Tires Replaced</span>
                     <Select value={tiresReplaced} onValueChange={setTiresReplaced}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1199,7 +1199,7 @@ export default function AppraisalTool() {
                 {/* Keys */}
                 {isOn("missing_keys") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Keys</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Keys</span>
                     <Select value={numKeys} onValueChange={setNumKeys}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>

@@ -561,9 +561,13 @@ export default function AppraisalTool() {
     setLiveSelectedAddDeducts(prev => prev.includes(uoc) ? prev.filter(u => u !== uoc) : [...prev, uoc]);
   };
 
-  // Save Final Appraised Value
+   // Save Final Appraised Value
   const handleSave = async () => {
     if (!sub) return;
+    if (sub.appraisal_finalized) {
+      toast({ title: "Locked", description: "Appraisal is finalized. Unlock to make changes.", variant: "destructive" });
+      return;
+    }
     const saveVal = acvOverride != null && acvOverride > 0 ? acvOverride : finalValue;
     setSaving(true);
     const { error } = await supabase.from("submissions").update({ acv_value: saveVal }).eq("id", sub.id);
@@ -572,12 +576,49 @@ export default function AppraisalTool() {
     } else {
       setSub(prev => prev ? { ...prev, acv_value: saveVal } : prev);
       setAcvOverride(saveVal);
-      toast({ title: "Saved", description: `Final appraised value set to $${saveVal.toLocaleString()}` });
+      toast({ title: "Saved", description: `Appraisal value set to $${saveVal.toLocaleString()}` });
     }
     setSaving(false);
   };
 
-  // Parse inspection data
+  // Finalize / lock the appraisal
+  const handleFinalize = async () => {
+    if (!sub) return;
+    const saveVal = acvOverride != null && acvOverride > 0 ? acvOverride : finalValue;
+    setSaving(true);
+    const { error } = await supabase.from("submissions").update({
+      acv_value: saveVal,
+      appraisal_finalized: true,
+      appraisal_finalized_at: new Date().toISOString(),
+      appraisal_finalized_by: sub.appraised_by || "Staff",
+    } as any).eq("id", sub.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setSub(prev => prev ? { ...prev, acv_value: saveVal, appraisal_finalized: true, appraisal_finalized_at: new Date().toISOString(), appraisal_finalized_by: sub.appraised_by || "Staff" } : prev);
+      setAcvOverride(saveVal);
+      toast({ title: "Appraisal Finalized", description: `Locked at $${saveVal.toLocaleString()}. Check request can now be generated.` });
+    }
+    setSaving(false);
+  };
+
+  // Unlock appraisal
+  const handleUnlockAppraisal = async () => {
+    if (!sub) return;
+    setSaving(true);
+    const { error } = await supabase.from("submissions").update({
+      appraisal_finalized: false,
+      appraisal_finalized_at: null,
+      appraisal_finalized_by: null,
+    } as any).eq("id", sub.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setSub(prev => prev ? { ...prev, appraisal_finalized: false, appraisal_finalized_at: null, appraisal_finalized_by: null } : prev);
+      toast({ title: "Unlocked", description: "Appraisal unlocked for editing." });
+    }
+    setSaving(false);
+  };
   const inspectionData = useMemo(() => {
     if (!sub?.internal_notes) return null;
     if (!sub.internal_notes.includes("[INSPECTION")) return null;

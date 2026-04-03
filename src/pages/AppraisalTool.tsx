@@ -686,7 +686,7 @@ export default function AppraisalTool() {
 
       <div className="max-w-7xl mx-auto p-6">
         {/* ═══ HUD — Key Metrics Strip ═══ */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-5">
           {[
             { label: "Customer Offer", value: `$${Math.floor(currentOffer).toLocaleString()}`, color: "text-card-foreground", bg: "bg-card border-border/60 shadow-sm" },
             { label: "Final Appraised Value", value: `$${Math.floor(finalValue).toLocaleString()}`, color: "text-primary", bg: "bg-primary/5 border-primary/25 shadow-sm shadow-primary/5" },

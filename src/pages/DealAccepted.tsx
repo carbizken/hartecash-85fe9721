@@ -44,6 +44,14 @@ const DealAccepted = () => {
   const [isFirstVisit] = useState(() => !localStorage.getItem(confettiKey));
   const { config } = useSiteConfig();
 
+  // Contact gate state
+  const [contactGateOpen, setContactGateOpen] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactZip, setContactZip] = useState("");
+  const [contactSaving, setContactSaving] = useState(false);
+
   // Confetti celebration — only on first visit
   useEffect(() => {
     if (!isFirstVisit) return;

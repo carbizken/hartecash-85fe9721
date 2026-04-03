@@ -581,7 +581,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
                   Looking up vehicle…
                 </span>
               ) : (
-                "Continue"
+                stepCtaLabels[currentStepName] || "Continue"
               )}
             </Button>
           ) : (

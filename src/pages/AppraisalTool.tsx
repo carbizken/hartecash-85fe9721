@@ -1180,7 +1180,7 @@ export default function AppraisalTool() {
                 {/* Tires */}
                 {isOn("tires_not_replaced") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Tires Replaced</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Tires Replaced</span>
                     <Select value={tiresReplaced} onValueChange={setTiresReplaced}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>

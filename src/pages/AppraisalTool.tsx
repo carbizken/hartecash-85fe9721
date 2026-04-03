@@ -1439,7 +1439,7 @@ export default function AppraisalTool() {
             {/* Final Offer Card */}
             {offerResult && (
               <div className="rounded-xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-primary/10 p-5">
-                <div className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Appraisal Value</div>
+                <div className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1">Final Appraised Value</div>
                 <div className="text-3xl font-bold text-primary">
                   ${finalValue.toLocaleString()}
                 </div>

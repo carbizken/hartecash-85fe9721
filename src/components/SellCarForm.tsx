@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { logConsent } from "@/lib/consent";
 import { calculateOffer, type OfferEstimate, type OfferSettings, type OfferRule } from "@/lib/offerCalculator";
+import { resolveEffectiveSettings } from "@/lib/resolvePricingModel";
 import { resolveStoreAssignment } from "@/lib/storeAssignment";
 import { initialFormData } from "./sell-form/types";
 import { useFormConfig } from "@/hooks/useFormConfig";
@@ -74,7 +75,16 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
   const [bbLoading, setBbLoading] = useState(false);
   const [selectedAddDeducts, setSelectedAddDeducts] = useState<string[]>([]);
   const [showTrimStep, setShowTrimStep] = useState(false);
+  const [offerSettingsEarly, setOfferSettingsEarly] = useState<OfferSettings | null>(null);
+  const [offerRulesEarly, setOfferRulesEarly] = useState<OfferRule[]>([]);
 
+  // Fetch offer settings early so LiveOfferPreview uses the real waterfall
+  useEffect(() => {
+    resolveEffectiveSettings(tenant.dealership_id).then(({ settings, rules }) => {
+      if (settings) setOfferSettingsEarly(settings);
+      if (rules) setOfferRulesEarly(rules);
+    }).catch(() => {});
+  }, [tenant.dealership_id]);
   // ── Abandoned form auto-save ──
   // Save a partial submission when the user has contact info but leaves
   const savePartialRef = useRef<() => void>();
@@ -339,15 +349,16 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
       crypto.getRandomValues(tokenBytes);
       const generatedToken = Array.from(tokenBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
-      // Fetch active pricing model (checks pricing_models first, falls back to offer_settings)
-      let offerSettingsData: OfferSettings | null = null;
-      let offerRulesData: OfferRule[] = [];
-      try {
-        const { resolveEffectiveSettings } = await import("@/lib/resolvePricingModel");
-        const resolved = await resolveEffectiveSettings(tenant.dealership_id);
-        offerSettingsData = resolved.settings;
-        offerRulesData = resolved.rules;
-      } catch { /* use defaults */ }
+      // Use pre-fetched offer settings, or re-fetch if not available
+      let offerSettingsData: OfferSettings | null = offerSettingsEarly;
+      let offerRulesData: OfferRule[] = offerRulesEarly;
+      if (!offerSettingsData) {
+        try {
+          const resolved = await resolveEffectiveSettings(tenant.dealership_id);
+          offerSettingsData = resolved.settings;
+          offerRulesData = resolved.rules;
+        } catch { /* use defaults */ }
+      }
 
       // Calculate offer estimate
       const estimate = calculateOffer(bbSelectedVehicle, formData, selectedAddDeducts, offerSettingsData, offerRulesData);
@@ -508,7 +519,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
       case "Condition":
         return (
           <>
-            <LiveOfferPreview formData={formData} bbVehicle={bbSelectedVehicle} />
+            <LiveOfferPreview formData={formData} bbVehicle={bbSelectedVehicle} selectedAddDeducts={selectedAddDeducts} offerSettings={offerSettingsEarly} offerRules={offerRulesEarly} />
             <StepCondition formData={formData} updateArray={updateArray} update={update} formConfig={formConfig} bbVehicle={bbSelectedVehicle} vehicleInfo={vehicleInfo} />
           </>
         );

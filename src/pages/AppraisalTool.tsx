@@ -577,6 +577,7 @@ export default function AppraisalTool() {
     } else {
       setSub(prev => prev ? { ...prev, acv_value: saveVal } : prev);
       setAcvOverride(saveVal);
+      setLastSavedAt(new Date());
       toast({ title: "Saved", description: `Appraisal value set to $${saveVal.toLocaleString()}` });
     }
     setSaving(false);

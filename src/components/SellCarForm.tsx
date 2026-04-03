@@ -19,6 +19,7 @@ import StepSelectTrim from "./sell-form/StepSelectTrim";
 import StepCondition from "./sell-form/StepCondition";
 import StepHistory from "./sell-form/StepHistory";
 import StepFinalize from "./sell-form/StepFinalize";
+import { motion, AnimatePresence } from "framer-motion";
 import LiveOfferPreview from "./sell-form/LiveOfferPreview";
 
 const stepTimeEstimates: Record<string, string> = {

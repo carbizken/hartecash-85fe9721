@@ -79,14 +79,24 @@ const DealAccepted = () => {
         const sub = data[0] as unknown as DealSubmission;
         setSubmission(sub);
 
-        // Fire Customer Accepted notification (staff) + Offer Accepted confirmation (customer)
-        if ((sub as any).id) {
-          supabase.functions.invoke("send-notification", {
-            body: { trigger_key: "staff_customer_accepted", submission_id: (sub as any).id },
-          }).catch(console.error);
-          supabase.functions.invoke("send-notification", {
-            body: { trigger_key: "customer_offer_accepted", submission_id: (sub as any).id },
-          }).catch(console.error);
+        // Check if contact info is missing (offer-first flow)
+        const needsContact = !sub.name || !sub.email || !sub.phone;
+        if (needsContact) {
+          setContactName(sub.name || "");
+          setContactEmail(sub.email || "");
+          setContactPhone(sub.phone || "");
+          setContactZip(sub.zip || "");
+          setContactGateOpen(true);
+        } else {
+          // Fire notifications only when contact info is present
+          if ((sub as any).id) {
+            supabase.functions.invoke("send-notification", {
+              body: { trigger_key: "staff_customer_accepted", submission_id: (sub as any).id },
+            }).catch(console.error);
+            supabase.functions.invoke("send-notification", {
+              body: { trigger_key: "customer_offer_accepted", submission_id: (sub as any).id },
+            }).catch(console.error);
+          }
         }
       }
       setLoading(false);

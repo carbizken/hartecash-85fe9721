@@ -1066,7 +1066,7 @@ export default function AppraisalTool() {
                 {/* Interior Damage */}
                 {isOn("interior_damage") && (
                   <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
-                    <span className="text-[10px] font-semibold text-muted-foreground w-32 shrink-0">Interior Damage</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground w-24 sm:w-32 shrink-0">Interior Damage</span>
                     <Select value={String(interiorItems)} onValueChange={v => setInteriorItems(Number(v))}>
                       <SelectTrigger className="h-6 text-[10px] w-36"><SelectValue /></SelectTrigger>
                       <SelectContent>

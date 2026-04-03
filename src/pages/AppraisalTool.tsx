@@ -570,17 +570,18 @@ export default function AppraisalTool() {
     setLiveSelectedAddDeducts(prev => prev.includes(uoc) ? prev.filter(u => u !== uoc) : [...prev, uoc]);
   };
 
-  // Save ACV
+  // Save Final Appraised Value
   const handleSave = async () => {
     if (!sub) return;
+    const saveVal = acvOverride != null && acvOverride > 0 ? acvOverride : finalValue;
     setSaving(true);
-    const { error } = await supabase.from("submissions").update({ acv_value: finalValue }).eq("id", sub.id);
+    const { error } = await supabase.from("submissions").update({ acv_value: saveVal }).eq("id", sub.id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      setSub(prev => prev ? { ...prev, acv_value: finalValue } : prev);
-      setAcvOverride(finalValue);
-      toast({ title: "ACV Saved", description: `Appraised value set to $${finalValue.toLocaleString()}` });
+      setSub(prev => prev ? { ...prev, acv_value: saveVal } : prev);
+      setAcvOverride(saveVal);
+      toast({ title: "Saved", description: `Final appraised value set to $${saveVal.toLocaleString()}` });
     }
     setSaving(false);
   };

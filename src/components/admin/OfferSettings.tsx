@@ -217,7 +217,7 @@ const AMOUNT_LABELS: Record<string, string> = {
 const DEFAULT_DEDUCTION_AMOUNTS: DeductionAmounts = {
   accidents_1: 800, accidents_2: 1800, accidents_3plus: 3000,
   exterior_damage_per_item: 300, interior_damage_per_item: 200,
-  windshield_cracked: 400, windshield_chipped: 150,
+  windshield_cracked: 400, windshield_chipped: 150, moonroof_broken: 300,
   engine_issue_per_item: 500, mechanical_issue_per_item: 350, tech_issue_per_item: 150,
   not_drivable: 1500, smoked_in: 500, tires_not_replaced: 400,
   missing_keys_1: 200, missing_keys_0: 400,

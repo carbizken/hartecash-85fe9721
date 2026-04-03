@@ -518,7 +518,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
       case "Condition":
         return (
           <>
-            <LiveOfferPreview formData={formData} bbVehicle={bbSelectedVehicle} />
+            <LiveOfferPreview formData={formData} bbVehicle={bbSelectedVehicle} selectedAddDeducts={selectedAddDeducts} offerSettings={offerSettingsEarly} offerRules={offerRulesEarly} />
             <StepCondition formData={formData} updateArray={updateArray} update={update} formConfig={formConfig} bbVehicle={bbSelectedVehicle} vehicleInfo={vehicleInfo} />
           </>
         );

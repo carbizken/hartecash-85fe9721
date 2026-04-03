@@ -91,7 +91,6 @@ export default function ProfitSpreadGauge({
   const wholesalePos = pctPos(wholesaleAvg);
   const tradeinPos = pctPos(tradeinAvg);
   const retailPos = pctPos(retailAvg);
-  const retailPos = pctPos(retailAvg);
   const liveMarketPos = retailListings?.avgPrice ? pctPos(retailListings.avgPrice) : null;
   const msrpPos = msrp > 0 ? pctPos(msrp) : null;
 

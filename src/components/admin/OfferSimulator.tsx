@@ -332,7 +332,7 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
     const vehicleAge = currentYear - Number(liveBbVehicle.year);
     const mileageNum = parseInt(liveMileage.replace(/[^0-9]/g, "")) || 0;
     const matchedAge = (activeSettings.age_tiers || []).find(t => vehicleAge >= t.min_years && vehicleAge <= t.max_years);
-    const matchedMileage = (activeSettings.mileage_tiers || []).find(t => mileageNum >= t.min_miles && mileageNum <= t.max_miles);
+    
 
     // 1. Base
     blocks.push({ id: "base", label: "Base Value", value: running, runningTotal: running, type: "base", editable: true, editKey: "bb_value_basis", editType: "flat" });

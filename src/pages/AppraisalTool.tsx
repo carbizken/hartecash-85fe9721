@@ -146,7 +146,7 @@ const WaterfallBlockRow = ({
         <div className="w-4 shrink-0 flex items-center justify-center">
           {block.editable && <Pencil className={`w-2.5 h-2.5 transition-opacity ${isExpanded ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100"}`} />}
         </div>
-        <div className="w-28 shrink-0 text-right pr-1">
+        <div className="w-20 sm:w-28 shrink-0 text-right pr-1">
           <span className={`text-[11px] leading-tight ${isTotal ? "font-bold text-card-foreground" : "text-muted-foreground"}`}>{block.label}</span>
         </div>
         <div className="flex-1 h-7 relative rounded-sm overflow-hidden bg-muted/20">

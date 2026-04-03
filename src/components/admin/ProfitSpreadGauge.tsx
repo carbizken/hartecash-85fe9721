@@ -15,7 +15,6 @@ export default function ProfitSpreadGauge({
   wholesaleAvg,
   tradeinAvg,
   retailAvg,
-  retailClean,
   msrp,
   retailListings,
 }: Props) {

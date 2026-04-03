@@ -265,7 +265,15 @@ const OfferSimulator = ({ settings, savedSettings, rules, inlineControls = true,
   const [liveDrivable, setLiveDrivable] = useState("yes");
   const [liveSmokedIn, setLiveSmokedIn] = useState("no");
   const [liveExteriorItems, setLiveExteriorItems] = useState(0);
+  const [liveInteriorItems, setLiveInteriorItems] = useState(0);
   const [liveMechanicalItems, setLiveMechanicalItems] = useState(0);
+  const [liveEngineItems, setLiveEngineItems] = useState(0);
+  const [liveTechItems, setLiveTechItems] = useState(0);
+  const [liveWindshield, setLiveWindshield] = useState("none");
+  const [liveMoonroof, setLiveMoonroof] = useState("no");
+  const [liveTiresReplaced, setLiveTiresReplaced] = useState("4");
+  const [liveNumKeys, setLiveNumKeys] = useState("2+");
+  const [liveModifications, setLiveModifications] = useState("none");
   const [liveLoading, setLiveLoading] = useState(false);
   const [liveBbVehicle, setLiveBbVehicle] = useState<BBVehicle | null>(null);
   const [liveSelectedAddDeducts, setLiveSelectedAddDeducts] = useState<string[]>([]);

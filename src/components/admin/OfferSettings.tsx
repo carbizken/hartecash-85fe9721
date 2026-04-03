@@ -336,6 +336,7 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
       retail_search_radius: settings.retail_search_radius ?? 100,
       dealer_pack: settings.dealer_pack ?? 0,
       hide_pack_from_appraisal: settings.hide_pack_from_appraisal ?? false,
+      retail_profit_basis: settings.retail_profit_basis || "retail_avg",
       updated_at: new Date().toISOString(),
     } as any).eq("id", settings.id);
 

@@ -438,20 +438,7 @@ export default function AppraisalTool() {
       blocks.push({ id: "deductions", label: "Deductions", value: -offerResult.totalDeductions, runningTotal: running, type: "subtract", editable: false });
     }
 
-    // 5. Recon (+ hidden pack if configured)
-    const reconVal = activeSettings.recon_cost || 0;
-    if (hidePackFromAppraisal) {
-      const combinedRecon = reconVal + effectivePack;
-      running -= combinedRecon;
-      blocks.push({ id: "recon", label: "Reconditioning", value: -combinedRecon, runningTotal: running, type: combinedRecon > 0 ? "subtract" : "base", editable: true, editKey: "recon_cost", editType: "flat", currentEditValue: reconVal });
-    } else {
-      running -= reconVal;
-      blocks.push({ id: "recon", label: "Recon Cost", value: -reconVal, runningTotal: running, type: reconVal > 0 ? "subtract" : "base", editable: true, editKey: "recon_cost", editType: "flat", currentEditValue: reconVal });
-      if (effectivePack > 0) {
-        running -= effectivePack;
-        blocks.push({ id: "dealer_pack", label: "Dealer Pack", value: -effectivePack, runningTotal: running, type: "subtract", editable: false });
-      }
-    }
+    // 5. Recon & Pack are NOT subtracted from customer offer — they are internal costs for profit analysis only
 
     // 6. Global %
     if (activeSettings.global_adjustment_pct !== 0) {
@@ -549,7 +536,8 @@ export default function AppraisalTool() {
 
   const waterfallFinal = waterfallBlocks.find(b => b.id === "final")?.runningTotal ?? 0;
   const finalValue = acvOverride != null && acvOverride > 0 ? acvOverride : waterfallFinal;
-  const projectedProfit = retailAvg > 0 ? retailAvg - finalValue - effectivePack : 0;
+  const reconCost = activeSettings?.recon_cost || 0;
+  const projectedProfit = retailAvg > 0 ? retailAvg - finalValue - effectivePack - reconCost : 0;
   const profitMargin = retailAvg > 0 ? (projectedProfit / retailAvg) * 100 : 0;
 
   const handleBlockValueChange = useCallback((editKey: string, value: number, editType: string) => {
@@ -698,13 +686,12 @@ export default function AppraisalTool() {
 
       <div className="max-w-7xl mx-auto p-6">
         {/* ═══ HUD — Key Metrics Strip ═══ */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-5">
           {[
             { label: "Customer Offer", value: `$${Math.floor(currentOffer).toLocaleString()}`, color: "text-card-foreground", bg: "bg-card border-border/60 shadow-sm" },
             { label: "Final Appraised Value", value: `$${Math.floor(finalValue).toLocaleString()}`, color: "text-primary", bg: "bg-primary/5 border-primary/25 shadow-sm shadow-primary/5" },
             { label: "Retail Avg", value: retailAvg > 0 ? `$${Math.floor(retailAvg).toLocaleString()}` : "—", color: "text-card-foreground", bg: "bg-card border-border/60 shadow-sm" },
-            { label: "Recon Cost", value: `$${Math.floor(activeSettings?.recon_cost || 0).toLocaleString()}`, color: "text-destructive", bg: "bg-card border-destructive/20 shadow-sm" },
-            { label: "Dealer Pack", value: `$${Math.floor(effectivePack).toLocaleString()}`, color: "text-destructive", bg: "bg-card border-destructive/20 shadow-sm" },
+            { label: "TAC (Own For)", value: `$${Math.floor(finalValue + reconCost + effectivePack).toLocaleString()}`, color: "text-amber-600", bg: "bg-amber-500/5 border-amber-500/25 shadow-sm" },
             { label: "Projected Profit", value: `${projectedProfit >= 0 ? "+" : ""}$${Math.floor(Math.abs(projectedProfit)).toLocaleString()}`, color: projectedProfit >= 0 ? "text-emerald-600" : "text-destructive", bg: projectedProfit >= 0 ? "bg-emerald-500/5 border-emerald-500/25 shadow-sm" : "bg-destructive/5 border-destructive/25 shadow-sm" },
             { label: "Margin %", value: `${profitMargin.toFixed(1)}%`, color: profitMargin >= 0 ? "text-emerald-600" : "text-destructive", bg: profitMargin >= 0 ? "bg-emerald-500/5 border-emerald-500/25 shadow-sm" : "bg-destructive/5 border-destructive/25 shadow-sm" },
           ].map(metric => (

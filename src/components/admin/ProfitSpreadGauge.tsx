@@ -6,7 +6,6 @@ interface Props {
   wholesaleAvg: number;
   tradeinAvg: number;
   retailAvg: number;
-  retailClean: number;
   msrp: number;
   retailListings?: { avgPrice?: number; medianPrice?: number; count?: number } | null;
 }

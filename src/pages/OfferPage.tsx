@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, DollarSign, ArrowDown, TrendingUp, ShieldCheck, Info, Printer, CheckCircle, ArrowRight, Car, Gauge, Palette, Settings2, Pencil } from "lucide-react";
+import { ArrowLeft, DollarSign, ArrowDown, TrendingUp, ShieldCheck, Info, Printer, CheckCircle, ArrowRight, Car, Gauge, Palette, Settings2, Pencil, User } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import InspectionDisclosure from "@/components/portal/InspectionDisclosure";
@@ -115,6 +118,7 @@ const LOCKED_OFFER_STATUSES = new Set([
 
 const OfferPage = () => {
   const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
   const [submission, setSubmission] = useState<OfferSubmission | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -128,6 +132,12 @@ const OfferPage = () => {
   const [appointment, setAppointment] = useState<{ preferred_date: string; preferred_time: string; store_location: string | null } | null>(null);
   const [dealerLocations, setDealerLocations] = useState<{ id: string; name: string; city: string; state: string; address: string | null }[]>([]);
   
+  // Contact info gate for offer-first flow
+  const [showContactGate, setShowContactGate] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", zip: "" });
+  const [contactSaving, setContactSaving] = useState(false);
+  const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
+
   const { config } = useSiteConfig();
   const { toast } = useToast();
 
@@ -468,6 +478,57 @@ const OfferPage = () => {
 
   const acceptUrl = `/deal/${token}${activeTab === "trade" ? "?mode=trade" : ""}`;
 
+  // Check if contact info is missing (offer-first flow)
+  const isMissingContactInfo = !s.name || !s.email || !s.phone;
+
+  const handleAcceptAttempt = () => {
+    if (isMissingContactInfo) {
+      setContactForm({
+        name: s.name || "",
+        email: s.email || "",
+        phone: s.phone || "",
+        zip: s.zip || "",
+      });
+      setContactErrors({});
+      setShowContactGate(true);
+    } else {
+      window.location.href = acceptUrl;
+    }
+  };
+
+  const handleContactSubmit = async () => {
+    const errors: Record<string, string> = {};
+    if (!contactForm.name.trim()) errors.name = "Name is required";
+    if (!contactForm.email.trim() || !/\S+@\S+\.\S+/.test(contactForm.email)) errors.email = "Valid email is required";
+    const phoneDigits = contactForm.phone.replace(/\D/g, "");
+    if (phoneDigits.length < 10) errors.phone = "Valid phone number is required (10+ digits)";
+    if (!contactForm.zip.trim() || contactForm.zip.replace(/\D/g, "").length < 5) errors.zip = "Valid zip code is required";
+    
+    if (Object.keys(errors).length > 0) {
+      setContactErrors(errors);
+      return;
+    }
+
+    setContactSaving(true);
+    try {
+      await supabase
+        .from("submissions")
+        .update({
+          name: contactForm.name.trim(),
+          email: contactForm.email.trim(),
+          phone: contactForm.phone.trim(),
+          zip: contactForm.zip.trim(),
+        } as any)
+        .eq("token", token!);
+      
+      setShowContactGate(false);
+      window.location.href = acceptUrl;
+    } catch {
+      toast({ title: "Error", description: "Failed to save your info. Please try again.", variant: "destructive" });
+    }
+    setContactSaving(false);
+  };
+
   const AcceptButton = (
     <div className="print:hidden space-y-2">
       {isAccepted ? (
@@ -480,19 +541,21 @@ const OfferPage = () => {
           {/* Mobile: slide gesture */}
           <div className="lg:hidden">
             <SlideToAccept
-              onAccept={() => { window.location.href = acceptUrl; }}
+              onAccept={handleAcceptAttempt}
               label="Slide to Accept Your Price"
             />
           </div>
           {/* Desktop: click button */}
           <div className="hidden lg:block">
-            <Link to={acceptUrl}>
-              <Button className="w-full py-5 text-base font-bold text-white shadow-lg gap-2 rounded-xl" style={{ backgroundColor: "hsl(var(--cta-accept))", boxShadow: "0 10px 15px -3px hsl(var(--cta-accept) / 0.2)" }}>
-                <CheckCircle className="w-5 h-5" />
-                Accept & Lock In Your Price
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-            </Link>
+            <Button
+              onClick={handleAcceptAttempt}
+              className="w-full py-5 text-base font-bold text-white shadow-lg gap-2 rounded-xl"
+              style={{ backgroundColor: "hsl(var(--cta-accept))", boxShadow: "0 10px 15px -3px hsl(var(--cta-accept) / 0.2)" }}
+            >
+              <CheckCircle className="w-5 h-5" />
+              Accept & Lock In Your Price
+              <ArrowRight className="w-5 h-5" />
+            </Button>
           </div>
           <p className="text-[11px] text-muted-foreground text-center">
             No obligation until inspection
@@ -934,6 +997,80 @@ const OfferPage = () => {
           </p>
         </div>
       </div>
+      {/* Contact Info Gate Dialog */}
+      <Dialog open={showContactGate} onOpenChange={setShowContactGate}>
+        <DialogContent className="max-w-md">
+          <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+            <User className="w-5 h-5 text-primary" />
+            Almost There!
+          </DialogTitle>
+          <p className="text-sm text-muted-foreground -mt-1">
+            Enter your contact details so we can finalize your offer and reach out to schedule your visit.
+          </p>
+          <div className="space-y-3 mt-2">
+            <div>
+              <Label className="text-sm font-semibold">Full Name *</Label>
+              <Input
+                placeholder="John Smith"
+                value={contactForm.name}
+                onChange={e => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                className={contactErrors.name ? "border-destructive" : ""}
+              />
+              {contactErrors.name && <p className="text-xs text-destructive mt-0.5">{contactErrors.name}</p>}
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Email Address *</Label>
+              <Input
+                type="email"
+                placeholder="john@example.com"
+                value={contactForm.email}
+                onChange={e => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                className={contactErrors.email ? "border-destructive" : ""}
+              />
+              {contactErrors.email && <p className="text-xs text-destructive mt-0.5">{contactErrors.email}</p>}
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Cell Phone *</Label>
+              <Input
+                type="tel"
+                placeholder="(203) 555-1234"
+                value={contactForm.phone}
+                onChange={e => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
+                className={contactErrors.phone ? "border-destructive" : ""}
+              />
+              {contactErrors.phone && <p className="text-xs text-destructive mt-0.5">{contactErrors.phone}</p>}
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Zip Code *</Label>
+              <Input
+                placeholder="06516"
+                value={contactForm.zip}
+                onChange={e => setContactForm(prev => ({ ...prev, zip: e.target.value }))}
+                className={contactErrors.zip ? "border-destructive" : ""}
+                maxLength={10}
+              />
+              {contactErrors.zip && <p className="text-xs text-destructive mt-0.5">{contactErrors.zip}</p>}
+            </div>
+            <p className="text-[10px] text-muted-foreground leading-snug">
+              By submitting, you consent to receive calls, texts, and emails regarding your vehicle offer. Msg & data rates may apply.
+            </p>
+            <Button
+              onClick={handleContactSubmit}
+              disabled={contactSaving}
+              className="w-full py-5 text-base font-bold gap-2"
+              style={{ backgroundColor: "hsl(var(--cta-accept))" }}
+            >
+              {contactSaving ? "Saving..." : (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  Accept & Lock In My Price
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

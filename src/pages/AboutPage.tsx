@@ -100,7 +100,7 @@ const AboutPage = () => {
               <p className="text-xs md:text-sm text-muted-foreground mt-1">Years in Business</p>
             </div>
             <div>
-              <p className="text-2xl md:text-3xl font-extrabold text-primary">
+              <p className="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary">
                 <AnimatedCounter target={parseInt((config.stats_cars_purchased || "14721").replace(/\D/g, "")) || 14721} suffix="+" />
               </p>
               <p className="text-xs md:text-sm text-muted-foreground mt-1">Vehicles Purchased</p>

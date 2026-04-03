@@ -178,7 +178,7 @@ const AdminSectionRenderer = (props: AdminSectionRendererProps) => {
             <div className="border-t border-border pt-6">
               <h2 className="text-lg font-semibold text-card-foreground mb-4">Access Requests</h2>
               {pendingRequests.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No pending access requests.</div>
+                <AdminEmptyState icon={UserCheck} title="No pending requests" description="Access requests from new staff will appear here." />
               ) : (
                 <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden overflow-x-auto">
                   <table className="w-full text-sm min-w-[600px]">

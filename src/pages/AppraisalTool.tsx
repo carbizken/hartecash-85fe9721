@@ -438,20 +438,7 @@ export default function AppraisalTool() {
       blocks.push({ id: "deductions", label: "Deductions", value: -offerResult.totalDeductions, runningTotal: running, type: "subtract", editable: false });
     }
 
-    // 5. Recon (+ hidden pack if configured)
-    const reconVal = activeSettings.recon_cost || 0;
-    if (hidePackFromAppraisal) {
-      const combinedRecon = reconVal + effectivePack;
-      running -= combinedRecon;
-      blocks.push({ id: "recon", label: "Reconditioning", value: -combinedRecon, runningTotal: running, type: combinedRecon > 0 ? "subtract" : "base", editable: true, editKey: "recon_cost", editType: "flat", currentEditValue: reconVal });
-    } else {
-      running -= reconVal;
-      blocks.push({ id: "recon", label: "Recon Cost", value: -reconVal, runningTotal: running, type: reconVal > 0 ? "subtract" : "base", editable: true, editKey: "recon_cost", editType: "flat", currentEditValue: reconVal });
-      if (effectivePack > 0) {
-        running -= effectivePack;
-        blocks.push({ id: "dealer_pack", label: "Dealer Pack", value: -effectivePack, runningTotal: running, type: "subtract", editable: false });
-      }
-    }
+    // 5. Recon & Pack are NOT subtracted from customer offer — they are internal costs for profit analysis only
 
     // 6. Global %
     if (activeSettings.global_adjustment_pct !== 0) {

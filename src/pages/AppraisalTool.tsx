@@ -1422,7 +1422,7 @@ export default function AppraisalTool() {
                     type="text" inputMode="numeric"
                     value={acvOverride != null ? acvOverride.toLocaleString("en-US") : ""}
                     onChange={e => { const raw = e.target.value.replace(/[^0-9]/g, ""); setAcvOverride(raw ? Number(raw) : null); }}
-                    placeholder="Enter final ACV" className="h-10 text-lg font-bold pl-8"
+                    placeholder="Enter final appraised value" className="h-10 text-lg font-bold pl-8"
                   />
                 </div>
                 <Button onClick={handleSave} disabled={saving} size="lg">

@@ -95,7 +95,7 @@ const PrivacyPolicy = () => {
             <p>
               Your consent to receive text messages is documented at the time of form submission and
               retained in our records. We do not sell, rent, or share your phone number with third
-              parties for their marketing purposes. Your phone number will only be used by Harte Auto
+              parties for their marketing purposes. Your phone number will only be used by our dealership
               Group and its authorized service providers for the purposes described above.
             </p>
           </section>

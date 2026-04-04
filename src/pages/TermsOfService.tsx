@@ -87,7 +87,7 @@ const TermsOfService = () => {
           <section>
             <h2 className="text-xl font-bold text-foreground">6. Limitation of Liability</h2>
             <p>
-              Our website and services are provided "as is" without warranties of any kind. Harte Auto
+              Our website and services are provided "as is" without warranties of any kind. Our dealership
               Group shall not be liable for any indirect, incidental, or consequential damages arising
               from your use of our services.
             </p>

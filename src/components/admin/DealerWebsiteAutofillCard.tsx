@@ -348,7 +348,12 @@ export default function DealerWebsiteAutofillCard({
       maybeSetConfigText("tiktok_url", currentConfig?.tiktok_url, scraped.tiktok);
       maybeSetConfigText("youtube_url", currentConfig?.youtube_url, scraped.youtube);
       maybeSetConfigText("logo_url", currentConfig?.logo_url, scraped.logo_url);
-
+      maybeSetConfigText("hero_headline", currentConfig?.hero_headline, scraped.hero_headline);
+      maybeSetConfigText("hero_subtext", currentConfig?.hero_subtext, scraped.hero_subtext);
+      maybeSetConfigText("stats_years_in_business", currentConfig?.stats_years_in_business, scraped.stats_years_in_business);
+      maybeSetConfigText("stats_rating", currentConfig?.stats_rating, scraped.stats_rating);
+      maybeSetConfigText("stats_reviews_count", currentConfig?.stats_reviews_count, scraped.stats_reviews_count);
+      maybeSetConfigText("stats_cars_purchased", currentConfig?.stats_cars_purchased, scraped.stats_cars_purchased);
       const primaryColor = normalizeBrandColor(scraped.primary_color);
       if (primaryColor && (!isFilledText(currentConfig?.primary_color) || currentConfig?.primary_color === DEFAULT_PRIMARY_COLOR)) {
         configUpdates.primary_color = primaryColor;

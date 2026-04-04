@@ -129,33 +129,24 @@ const AboutPage = () => {
             ) : (
               <div className="prose prose-sm max-w-none text-foreground/85 space-y-4">
                 <p>
-                  It started with a handshake. In <strong>1951</strong>, George Harte Sr.
-                  opened a Chevrolet dealership in Connecticut with one simple belief:
-                  <em> treat every person who walks through your door like family</em>. He
-                  didn't have a marketing team or a mission statement — just a genuine desire
-                  to help his neighbors find the right car at a fair price.
+                  We started with a simple belief:
+                  <em> treat every person who walks through your door like family</em>. No
+                  marketing gimmicks or corporate scripts — just a genuine desire
+                  to help our neighbors get a fair deal.
                 </p>
                 <p>
-                  That belief became the foundation for everything that followed. The
-                  dealership grew from a single lot into{" "}
-                  <strong>{locations.length || 5} locations</strong> across Connecticut,
-                  representing Nissan, Infiniti, and Hyundai. George's children carried the
-                  business forward, and today, brothers <strong>Tom and Greg Harte</strong>{" "}
-                  lead the group as third-generation owners — with the fourth generation
-                  already part of the family business.
-                </p>
-                <p>
-                  A lot has changed since 1951. But the way we treat people hasn't. Many of
-                  our team members have been with us for <strong>10, 15, even 20+ years</strong>.
+                  That belief became the foundation for everything that followed. We grew from a single location into{" "}
+                  <strong>{locations.length || "multiple"} locations</strong>, and our team members
+                  have been with us for <strong>10, 15, even 20+ years</strong>.
                   Customers come back generation after generation — not because we run the
                   flashiest ads, but because when they work with us, they know they'll be
                   treated honestly.
                 </p>
                 <p>
                   That's why we built <strong>{name}</strong>. We wanted to bring
-                  that same family-first philosophy to people who just want to sell their car
+                  that same philosophy to people who just want to sell their car
                   — quickly, fairly, and without the runaround. You get a real offer in
-                  under 2 minutes, backed by an{" "}
+                  under 2 minutes, backed by a{" "}
                   <strong>{config.price_guarantee_days || 8}-day price guarantee</strong>.
                   We handle the loan payoffs, the paperwork, and we'll even pick up your
                   vehicle for free. It's the kind of experience we'd want for our own family.

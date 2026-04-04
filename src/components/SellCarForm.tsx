@@ -29,7 +29,7 @@ const stepTimeEstimates: Record<string, string> = {
   "Select Your Vehicle": "15 sec",
   "Vehicle Build": "30 sec",
   "Condition": "1 min",
-  "History": "30 sec",
+  "History": "1 min",
   "Finalize": "15 sec",
 };
 

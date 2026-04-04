@@ -13,7 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Car, DollarSign, TrendingUp, TrendingDown, Minus,
-  Gauge, ChevronDown, Save, AlertTriangle, CheckCircle, XCircle,
+  Gauge, ChevronDown, Save, AlertTriangle, CheckCircle, XCircle, Shield,
   Pencil, ArrowDown, Loader2, SlidersHorizontal, CheckSquare, Lock, Unlock,
 } from "lucide-react";
 import AppraisalConditionInputs from "@/components/appraisal/AppraisalConditionInputs";

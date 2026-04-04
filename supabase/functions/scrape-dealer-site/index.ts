@@ -36,7 +36,6 @@ serve(async (req) => {
       });
     }
 
-    // Format URL
     let formattedUrl = url.trim();
     if (!formattedUrl.startsWith("http://") && !formattedUrl.startsWith("https://")) {
       formattedUrl = `https://${formattedUrl}`;
@@ -44,7 +43,6 @@ serve(async (req) => {
 
     console.log("Scraping dealer site:", formattedUrl);
 
-    // Step 1: Scrape with Firecrawl (markdown + branding)
     const scrapeRes = await fetch("https://api.firecrawl.dev/v1/scrape", {
       method: "POST",
       headers: {
@@ -72,7 +70,6 @@ serve(async (req) => {
     const links = scrapeData.data?.links || scrapeData.links || [];
     const metadata = scrapeData.data?.metadata || scrapeData.metadata || {};
 
-    // Step 2: Use AI to extract structured dealer info
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -84,11 +81,11 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are an expert at extracting dealership information from website content. Extract all available information and return it using the provided tool.`,
+            content: `You are an expert at extracting dealership information from website content. Extract ALL available information and return it using the provided tool. Be thorough — look for every piece of data: contact info, social links, branding colors, OEM brands sold, business hours, staff/team members with emails, notification-relevant emails, number of locations, taglines, slogans, and any other dealership operational details. If the site mentions departments (service, sales, parts, BDC), extract those contact details too.`,
           },
           {
             role: "user",
-            content: `Extract dealership information from this website content.
+            content: `Extract ALL dealership information from this website content. Be as thorough as possible.
 
 WEBSITE URL: ${formattedUrl}
 PAGE TITLE: ${metadata.title || ""}
@@ -97,10 +94,10 @@ BRANDING DATA:
 ${JSON.stringify(branding, null, 2)}
 
 LINKS FOUND:
-${links.slice(0, 50).join("\n")}
+${links.slice(0, 80).join("\n")}
 
-PAGE CONTENT (first 8000 chars):
-${markdown.slice(0, 8000)}`,
+PAGE CONTENT (first 12000 chars):
+${markdown.slice(0, 12000)}`,
           },
         ],
         tools: [
@@ -112,6 +109,7 @@ ${markdown.slice(0, 8000)}`,
               parameters: {
                 type: "object",
                 properties: {
+                  // Section 1: Identity
                   dealership_name: { type: "string", description: "Full dealership name" },
                   tagline: { type: "string", description: "Tagline or slogan if found" },
                   phone: { type: "string", description: "Main phone number" },
@@ -123,14 +121,39 @@ ${markdown.slice(0, 8000)}`,
                   instagram: { type: "string", description: "Instagram URL" },
                   tiktok: { type: "string", description: "TikTok URL" },
                   youtube: { type: "string", description: "YouTube channel URL" },
+                  // Section 2: Architecture
+                  architecture: {
+                    type: "string",
+                    enum: ["Single Store", "Multi-Location", "Dealer Group"],
+                    description: "Inferred store architecture based on number of locations/brands",
+                  },
+                  num_locations: { type: "string", description: "Number of locations found (e.g. '3')" },
+                  // Section 3: Branding
                   primary_color: { type: "string", description: "Primary brand color as hex (e.g. #1e3a5f)" },
                   accent_color: { type: "string", description: "Accent/secondary color as hex" },
+                  success_color: { type: "string", description: "Success/CTA color as hex (green-ish button color)" },
                   logo_url: { type: "string", description: "URL to the dealership logo image" },
+                  // Section 4: Hero content
+                  hero_headline: { type: "string", description: "Main hero headline text from the homepage" },
+                  hero_subtext: { type: "string", description: "Hero subtext/description from the homepage" },
+                  // Brands
                   oem_brands: {
                     type: "array",
                     items: { type: "string" },
                     description: "Car brands/makes sold (e.g. Toyota, Honda, Ford)",
                   },
+                  // Section 11: Notifications — staff emails
+                  staff_emails: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Any staff/department email addresses found (sales, service, general, internet, etc.)",
+                  },
+                  staff_phones: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Any staff/department phone numbers found",
+                  },
+                  // Section 13: Locations
                   locations: {
                     type: "array",
                     items: {
@@ -140,26 +163,46 @@ ${markdown.slice(0, 8000)}`,
                         address: { type: "string" },
                         city_state_zip: { type: "string" },
                         brands: { type: "string" },
+                        phone: { type: "string" },
+                        email: { type: "string" },
                       },
                     },
                     description: "Individual store locations if multi-location",
                   },
+                  // Business hours
                   business_hours: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
+                        department: { type: "string", description: "e.g. Sales, Service, Parts — omit if only one set of hours" },
                         days: { type: "string", description: "e.g. Mon-Fri" },
                         hours: { type: "string", description: "e.g. 9:00 AM - 7:00 PM" },
                       },
                     },
-                    description: "Business hours",
+                    description: "Business hours by department",
                   },
-                  architecture: {
-                    type: "string",
-                    enum: ["Single Store", "Multi-Location", "Dealer Group"],
-                    description: "Inferred store architecture based on number of locations/brands",
+                  // Section 15: Staff
+                  staff_members: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        title: { type: "string" },
+                        email: { type: "string" },
+                        phone: { type: "string" },
+                      },
+                    },
+                    description: "Staff/team members found on the site with their roles",
                   },
+                  // Additional useful info
+                  dealer_group_name: { type: "string", description: "Parent dealer group name if part of a group" },
+                  dms_provider: { type: "string", description: "DMS/CRM provider if mentioned (e.g. DealerSocket, CDK, Reynolds)" },
+                  stats_years_in_business: { type: "string", description: "Years in business if mentioned" },
+                  stats_rating: { type: "string", description: "Google/review rating if mentioned (e.g. 4.8)" },
+                  stats_reviews_count: { type: "string", description: "Number of reviews if mentioned" },
+                  stats_cars_purchased: { type: "string", description: "Number of cars purchased/sold if mentioned" },
                 },
                 required: ["dealership_name"],
                 additionalProperties: false,

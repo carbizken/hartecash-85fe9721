@@ -17,7 +17,11 @@ const PrivacyPolicy = () => {
           <Link to="/" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <img src={harteLogo} alt="Harte Auto Group" className="h-20 w-auto" />
+          {config.logo_white_url ? (
+            <img src={config.logo_white_url} alt={config.dealership_name} className="h-20 w-auto" />
+          ) : (
+            <span className="text-lg font-bold">{config.dealership_name}</span>
+          )}
           <h1 className="font-bold text-lg">Privacy Policy</h1>
         </div>
       </div>

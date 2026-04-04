@@ -19,7 +19,11 @@ const AdminHeader = ({ darkMode, setDarkMode, userRole, onLogout }: AdminHeaderP
       <div className="px-3 md:px-4 py-1 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <SidebarTrigger className="text-white/80 hover:text-white hover:bg-white/10 -ml-1 shrink-0" />
-          <img src={harteLogoWhiteFallback} alt="Dashboard" className="h-12 md:h-20 w-auto shrink-0" />
+          {config.logo_white_url ? (
+            <img src={config.logo_white_url} alt="Dashboard" className="h-12 md:h-20 w-auto shrink-0" />
+          ) : (
+            <span className="text-sm md:text-base font-bold shrink-0">{config.dealership_name}</span>
+          )}
           <div className="min-w-0">
             <span className="text-sm md:text-lg font-bold">Dashboard</span>
             <span className="hidden sm:inline ml-2 text-xs px-2 py-0.5 rounded-full bg-white/20 text-white/90 font-medium">

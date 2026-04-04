@@ -8,8 +8,8 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="Privacy Policy | Harte Auto Group"
-        description="Learn how Harte Auto Group collects, uses, and protects your personal information. Includes SMS consent details and your data rights."
+        title={`Privacy Policy | ${config.dealership_name}`}
+        description={`Learn how ${config.dealership_name} collects, uses, and protects your personal information.`}
         path="/privacy"
       />
       <div className="bg-primary text-primary-foreground px-6 py-4">

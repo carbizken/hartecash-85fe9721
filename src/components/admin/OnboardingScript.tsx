@@ -276,6 +276,82 @@ export default function OnboardingScript({ targetDealershipId }: OnboardingScrip
     setDirty(true);
   }, []);
 
+  const handleScrape = async () => {
+    if (!scrapeUrl.trim()) {
+      toast.error("Enter a dealer website URL first");
+      return;
+    }
+    setScraping(true);
+    toast.info("Scanning dealer website… this may take 15-30 seconds");
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-dealer-site", {
+        body: { url: scrapeUrl.trim() },
+      });
+      if (error) throw error;
+      if (!data?.success || !data?.data) {
+        toast.error(data?.error || "Failed to extract dealer info");
+        setScraping(false);
+        return;
+      }
+
+      const d = data.data;
+      const fieldMap: Record<string, string | undefined> = {
+        dealership_name: d.dealership_name,
+        tagline: d.tagline,
+        phone: d.phone,
+        email: d.email,
+        address: d.address,
+        website: d.website || scrapeUrl.trim(),
+        google_review: d.google_review,
+        facebook: d.facebook,
+        instagram: d.instagram,
+        tiktok: d.tiktok,
+        youtube: d.youtube,
+        primary_color: d.primary_color,
+        accent_color: d.accent_color,
+        architecture: d.architecture,
+      };
+
+      // Map locations
+      if (d.locations && Array.isArray(d.locations)) {
+        d.locations.forEach((loc: any, i: number) => {
+          const n = i + 1;
+          if (loc.name) fieldMap[`loc${n}_name`] = loc.name;
+          if (loc.address) fieldMap[`loc${n}_address`] = loc.address;
+          if (loc.city_state_zip) fieldMap[`loc${n}_csz`] = loc.city_state_zip;
+          if (loc.brands) fieldMap[`loc${n}_brands`] = loc.brands;
+        });
+      }
+
+      // Map business hours
+      if (d.business_hours && Array.isArray(d.business_hours)) {
+        // Store as a readable summary
+        const hoursStr = d.business_hours.map((h: any) => `${h.days}: ${h.hours}`).join("\n");
+        if (hoursStr) fieldMap["business_hours_summary"] = hoursStr;
+      }
+
+      // Apply all found values (don't overwrite existing answers)
+      let filled = 0;
+      setAnswers((prev) => {
+        const next = { ...prev };
+        for (const [key, val] of Object.entries(fieldMap)) {
+          if (val && val.trim() && !next[key]?.trim()) {
+            next[key] = val;
+            filled++;
+          }
+        }
+        return next;
+      });
+
+      setDirty(true);
+      toast.success(`Auto-filled ${filled} fields from ${d.dealership_name || "website"}`);
+    } catch (err: any) {
+      console.error("Scrape error:", err);
+      toast.error("Failed to scrape website: " + (err.message || "Unknown error"));
+    }
+    setScraping(false);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     const activeDealershipId = targetDealershipId || "default";

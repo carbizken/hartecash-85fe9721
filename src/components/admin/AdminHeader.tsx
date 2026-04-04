@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import harteLogoWhiteFallback from "@/assets/harte-logo-white.png";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { ROLE_LABELS } from "@/lib/adminConstants";
 import { supabase } from "@/integrations/supabase/client";
 

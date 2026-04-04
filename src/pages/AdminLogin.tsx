@@ -20,6 +20,7 @@ const getSafeAuthError = (message: string, isSignup: boolean): string => {
 };
 
 const AdminLogin = () => {
+  const { config } = useSiteConfig();
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

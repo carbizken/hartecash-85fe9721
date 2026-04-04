@@ -11,12 +11,10 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
-import { useToast } from "@/hooks/use-toast";
 import {
-  ArrowLeft, Car, DollarSign, TrendingUp, TrendingDown, Minus, Target,
-  Gauge, Wrench, ChevronDown, Save, AlertTriangle, CheckCircle, XCircle,
-  Pencil, ArrowDown, Loader2, ClipboardCheck, BarChart3, ArrowRight,
-  Calendar, Plus, Trash2, Shield, SlidersHorizontal, CheckSquare, Zap, Lock, Unlock,
+  ArrowLeft, Car, DollarSign, TrendingUp, TrendingDown, Minus,
+  Gauge, ChevronDown, Save, AlertTriangle, CheckCircle, XCircle,
+  Pencil, ArrowDown, Loader2, SlidersHorizontal, CheckSquare, Lock, Unlock,
 } from "lucide-react";
 import AppraisalConditionInputs from "@/components/appraisal/AppraisalConditionInputs";
 import AppraisalTireBrakeHealth from "@/components/appraisal/AppraisalTireBrakeHealth";

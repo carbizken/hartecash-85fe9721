@@ -91,6 +91,10 @@ export interface FormData {
   // Store assignment
   preferredLocationId: string;
   salespersonName: string;
+  // Manual YMM fallback
+  manualYear: string;
+  manualMake: string;
+  manualModel: string;
 }
 
 export const initialFormData: FormData = {

@@ -27,18 +27,17 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 const DEFAULT_MILESTONES: AboutMilestone[] = [
-  { year: "1951", label: "George Harte Sr. opens his first Chevrolet dealership in Connecticut" },
-  { year: "1970s", label: "The Harte family expands into West Haven, Wallingford & beyond" },
-  { year: "2014", label: "New state-of-the-art Infiniti facility built in Wallingford" },
-  { year: "2020s", label: "Tom & Greg Harte launch Harte Cash — a digital-first vehicle buying platform" },
-  { year: "Today", label: "Four generations, five locations, and 14,000+ vehicles purchased from neighbors across CT" },
+  { year: "Day 1", label: "Founded with a mission to make selling your car simple" },
+  { year: "Growth", label: "Expanded operations and built a reputation for fairness" },
+  { year: "Digital", label: "Launched an online platform for instant cash offers" },
+  { year: "Today", label: "Thousands of vehicles purchased from happy customers" },
 ];
 
 const DEFAULT_VALUES: AboutValue[] = [
-  { icon: "HandshakeIcon", title: "You're Family Here", text: "George Harte Sr. believed every customer deserves to be treated like family. Four generations later, that's still the standard. No pressure, no games — just honest conversations." },
-  { icon: "Shield", title: "Nothing Hidden, Ever", text: "Every offer includes a full breakdown. We show you exactly how we valued your vehicle, what we factored in, and what you'll walk away with. Transparency isn't a buzzword here — it's how we were raised." },
-  { icon: "Clock", title: "Your Time Matters", text: "We built Harte Cash so you can get a real offer in under 2 minutes — not 2 hours at a dealership. We handle the loan payoffs, the paperwork, and we'll even come pick up your car." },
-  { icon: "Award", title: "Earned Trust, Not Bought", text: "A 4.9-star rating across 2,400+ reviews doesn't happen by accident. It comes from decades of keeping our word and treating people right. Ask your neighbor — chances are they've worked with us." },
+  { icon: "HandshakeIcon", title: "You're Family Here", text: "Every customer deserves to be treated like family. No pressure, no games — just honest conversations." },
+  { icon: "Shield", title: "Nothing Hidden, Ever", text: "Every offer includes a full breakdown. We show you exactly how we valued your vehicle, what we factored in, and what you'll walk away with." },
+  { icon: "Clock", title: "Your Time Matters", text: "Get a real offer in under 2 minutes — not 2 hours at a dealership. We handle the loan payoffs, the paperwork, and we'll even come pick up your car." },
+  { icon: "Award", title: "Earned Trust, Not Bought", text: "Our reputation comes from decades of keeping our word and treating people right." },
 ];
 
 const DEFAULT_STORY = "";

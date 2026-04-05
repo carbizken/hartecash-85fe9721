@@ -33,6 +33,7 @@ import ReportsExport from "./ReportsExport";
 import ReferralManagement from "./ReferralManagement";
 import MyReferrals from "./MyReferrals";
 import EmbedToolkit from "./EmbedToolkit";
+import PromotionManagement from "./PromotionManagement";
 import AdminLoadingSkeleton from "./AdminLoadingSkeleton";
 import AdminEmptyState from "./AdminEmptyState";
 import { UserCheck as UserCheckIcon } from "lucide-react";
@@ -253,6 +254,7 @@ const AdminSectionRenderer = (props: AdminSectionRendererProps) => {
         <OfferSettings userId={userId || undefined} userRole={userRole} />
       )}
       {activeSection === "site-config" && canManageAccess && <SiteConfiguration />}
+      {activeSection === "promotions" && canManageAccess && <PromotionManagement />}
       {activeSection === "notifications" && canManageAccess && <NotificationSettings />}
       {activeSection === "form-config" && canManageAccess && <FormConfiguration />}
       {activeSection === "inspection-config" && canManageAccess && <InspectionConfiguration />}

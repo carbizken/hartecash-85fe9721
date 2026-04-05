@@ -1,4 +1,4 @@
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Megaphone } from "lucide-react";
 import { useMemo } from "react";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { calculateOffer, type OfferSettings, type OfferRule } from "@/lib/offerCalculator";
@@ -10,13 +10,15 @@ interface Props {
   selectedAddDeducts?: string[];
   offerSettings?: OfferSettings | null;
   offerRules?: OfferRule[];
+  promoBonus?: number;
+  promoName?: string;
 }
 
-const LiveOfferPreview = ({ formData, bbVehicle, selectedAddDeducts = [], offerSettings, offerRules = [] }: Props) => {
+const LiveOfferPreview = ({ formData, bbVehicle, selectedAddDeducts = [], offerSettings, offerRules = [], promoBonus = 0, promoName }: Props) => {
   const estimate = useMemo(() => {
     if (!bbVehicle?.tradein?.avg) return null;
-    return calculateOffer(bbVehicle, formData, selectedAddDeducts, offerSettings, offerRules);
-  }, [formData, bbVehicle, selectedAddDeducts, offerSettings, offerRules]);
+    return calculateOffer(bbVehicle, formData, selectedAddDeducts, offerSettings, offerRules, promoBonus);
+  }, [formData, bbVehicle, selectedAddDeducts, offerSettings, offerRules, promoBonus]);
 
   if (!estimate) return null;
 
@@ -29,6 +31,12 @@ const LiveOfferPreview = ({ formData, bbVehicle, selectedAddDeducts = [], offerS
       <div className="text-2xl font-extrabold text-card-foreground tracking-tight">
         <AnimatedCounter target={estimate.high} prefix="$" duration={600} />
       </div>
+      {promoBonus > 0 && (
+        <div className="flex items-center justify-center gap-1 text-xs font-semibold text-accent mt-1">
+          <Megaphone className="w-3 h-3" />
+          Includes ${promoBonus.toLocaleString()} bonus{promoName ? ` — ${promoName}` : ""}!
+        </div>
+      )}
       <p className="text-[11px] text-muted-foreground mt-1">Updates as you answer · final offer may vary</p>
     </div>
   );

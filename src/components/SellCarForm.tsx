@@ -80,13 +80,29 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
   const [showTrimStep, setShowTrimStep] = useState(false);
   const [offerSettingsEarly, setOfferSettingsEarly] = useState<OfferSettings | null>(null);
   const [offerRulesEarly, setOfferRulesEarly] = useState<OfferRule[]>([]);
+  const [promoBonus, setPromoBonus] = useState(0);
 
-  // Fetch offer settings early so LiveOfferPreview uses the real waterfall
+  // Fetch offer settings and active promos early
   useEffect(() => {
     resolveEffectiveSettings(tenant.dealership_id).then(({ settings, rules }) => {
       if (settings) setOfferSettingsEarly(settings);
       if (rules) setOfferRulesEarly(rules);
     }).catch(() => {});
+
+    // Fetch active promo bonus
+    supabase
+      .from("promotions")
+      .select("bonus_amount")
+      .eq("dealership_id", tenant.dealership_id)
+      .eq("is_active", true)
+      .lte("starts_at", new Date().toISOString())
+      .then(({ data }) => {
+        const active = (data as any[] || []).filter(
+          (p: any) => !p.ends_at || new Date(p.ends_at) > new Date()
+        );
+        const total = active.reduce((sum: number, p: any) => sum + (p.bonus_amount || 0), 0);
+        setPromoBonus(total);
+      });
   }, [tenant.dealership_id]);
   // ── Abandoned form auto-save ──
   // Save a partial submission when the user has contact info but leaves
@@ -381,7 +397,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
         }
       }
 
-      const estimate = calculateOffer(finalBBVehicle, formData, selectedAddDeducts, offerSettingsData, offerRulesData);
+      const estimate = calculateOffer(finalBBVehicle, formData, selectedAddDeducts, offerSettingsData, offerRulesData, promoBonus);
       const bbPayload = buildSubmissionBBPayload(finalBBVehicle);
 
       // Resolve store assignment based on admin config
@@ -523,7 +539,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
       case "Condition":
         return (
           <>
-            <LiveOfferPreview formData={formData} bbVehicle={bbSelectedVehicle} selectedAddDeducts={selectedAddDeducts} offerSettings={offerSettingsEarly} offerRules={offerRulesEarly} />
+            <LiveOfferPreview formData={formData} bbVehicle={bbSelectedVehicle} selectedAddDeducts={selectedAddDeducts} offerSettings={offerSettingsEarly} offerRules={offerRulesEarly} promoBonus={promoBonus} />
             <StepCondition formData={formData} updateArray={updateArray} update={update} formConfig={formConfig} bbVehicle={bbSelectedVehicle} vehicleInfo={vehicleInfo} />
           </>
         );

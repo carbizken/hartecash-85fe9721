@@ -57,7 +57,7 @@ const ReferralPage = () => {
     const link = `${window.location.origin}/?ref=${code}`;
 
     const { error } = await supabase.from("referrals").insert({
-      dealership_id: config.dealership_id || "default",
+      dealership_id: tenant.dealership_id,
       referral_code: code,
       referrer_name: name,
       referrer_email: email,

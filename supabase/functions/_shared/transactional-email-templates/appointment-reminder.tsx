@@ -1,7 +1,7 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Hr, Html, Preview, Section, Text,
+  Body, Container, Head, Heading, Hr, Html, Preview, Section, Text, Button as EmailButton,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
@@ -14,9 +14,10 @@ interface Props {
   appointmentTime?: string
   location?: string
   dealershipName?: string
+  docsLink?: string
 }
 
-const AppointmentReminderEmail = ({ customerName, vehicle, appointmentDate, appointmentTime, location, dealershipName }: Props) => (
+const AppointmentReminderEmail = ({ customerName, vehicle, appointmentDate, appointmentTime, location, dealershipName, docsLink }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Reminder: your appointment is tomorrow — here's what to bring!</Preview>
@@ -49,6 +50,16 @@ const AppointmentReminderEmail = ({ customerName, vehicle, appointmentDate, appo
               <Text style={checklistItem}>🔑  All keys &amp; remotes</Text>
               <Text style={checklistItem}>💳  Loan payoff info (if applicable)</Text>
             </Section>
+            {docsLink && (
+              <Text style={{ ...checklistSubtext, marginTop: '12px', marginBottom: '0' }}>
+                📲 <strong>Upload ahead of time?</strong> Skip the paperwork line by uploading your documents now:
+              </Text>
+            )}
+            {docsLink && (
+              <EmailButton href={docsLink} style={uploadBtn}>
+                Upload Documents Now →
+              </EmailButton>
+            )}
           </Section>
 
           <Section style={tipBox}>
@@ -76,6 +87,7 @@ export const template = {
     appointmentTime: '10:00 AM',
     location: 'Harte Nissan — Hartford',
     dealershipName: 'Harte Nissan',
+    docsLink: 'https://example.com/upload-docs/abc123',
   },
 } satisfies TemplateEntry
 
@@ -95,6 +107,7 @@ const checklistSubtext = { fontSize: '13px', color: 'hsl(220, 9%, 46%)', margin:
 const checklistItems = { margin: '0' }
 const checklistItem = { fontSize: '14px', color: 'hsl(210, 29%, 24%)', margin: '0 0 10px', lineHeight: '1.4', paddingLeft: '4px' }
 
+const uploadBtn = { backgroundColor: 'hsl(210, 100%, 25%)', color: '#ffffff', fontSize: '14px', fontWeight: 'bold' as const, padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', display: 'inline-block' as const, marginTop: '10px' }
 const tipBox = { backgroundColor: '#fffbeb', borderRadius: '8px', padding: '14px 16px', margin: '0 0 20px', border: '1px solid #fde68a' }
 const tipText = { fontSize: '13px', color: 'hsl(210, 29%, 24%)', margin: '0', lineHeight: '1.5' }
 

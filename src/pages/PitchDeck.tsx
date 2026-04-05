@@ -181,12 +181,13 @@ export default function PitchDeck() {
   }, [isPresenting]);
 
   useEffect(() => {
+    const dealerName = config.dealership_name || "AutoCurb";
     const ogTags: Record<string, string> = {
-      "og:title": "End-to-End Inventory Acquisition | Harte Auto Group",
+      "og:title": `End-to-End Inventory Acquisition | ${dealerName}`,
       "og:description": "A dealer-branded platform that captures, manages, and converts direct consumer vehicle purchases — from submission to check request.",
       "og:image": `${window.location.origin}/og-pitch.jpg`,
       "og:url": `${window.location.origin}/pitch`,
-      "twitter:title": "End-to-End Inventory Acquisition | Harte Auto Group",
+      "twitter:title": `End-to-End Inventory Acquisition | ${dealerName}`,
       "twitter:description": "A dealer-branded platform for direct consumer vehicle purchases that scales with your business.",
       "twitter:image": `${window.location.origin}/og-pitch.jpg`,
     };
@@ -204,7 +205,7 @@ export default function PitchDeck() {
       }
       el.setAttribute("content", content);
     });
-    document.title = "End-to-End Inventory Acquisition | Harte Auto Group";
+    document.title = `End-to-End Inventory Acquisition | ${dealerName}`;
     return () => {
       Object.entries(originals).forEach(([prop, original]) => {
         const isOg = prop.startsWith("og:");
@@ -213,9 +214,9 @@ export default function PitchDeck() {
         if (el && original !== null) el.setAttribute("content", original);
         else if (el && original === null) el.remove();
       });
-      document.title = "Sell Your Car - Get Cash Offer in 2 Minutes | Harte Auto Group";
+      document.title = `Sell Your Car - Get Cash Offer in 2 Minutes | ${dealerName}`;
     };
-  }, []);
+  }, [config.dealership_name]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

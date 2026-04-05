@@ -126,9 +126,9 @@ export default function ServiceDriveInlineContent({ onBackToTop }: { onBackToTop
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-6 max-w-sm mx-auto">
                   <div className="text-xs text-white/40 mb-4 uppercase tracking-wider">SMS Preview</div>
                   <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-left text-sm text-white/70 leading-relaxed">
-                    <p>Hi Sarah! Your service appointment at <strong className="text-white/90">Harte Auto Group</strong> is confirmed for <strong className="text-white/90">Feb 21 at 9:30 AM</strong>.</p>
+                    <p>Hi Sarah! Your service appointment at <strong className="text-white/90">Your Dealership</strong> is confirmed for <strong className="text-white/90">Feb 21 at 9:30 AM</strong>.</p>
                     <p className="mt-3">💰 Curious what your 2021 RAV4 is worth? Get a no-obligation cash offer:</p>
-                    <p className="mt-2 text-emerald-400 underline">hartecash.com/service?vin=...</p>
+                    <p className="mt-2 text-emerald-400 underline">yourdealership.com/service?vin=...</p>
                   </div>
                 </div>
               </div>

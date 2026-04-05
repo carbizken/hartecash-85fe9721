@@ -328,7 +328,7 @@ const TenantManagement = ({ onSetupDealer }: TenantManagementProps) => {
                   onChange={e => setForm(prev => ({ ...prev, slug: e.target.value }))}
                   placeholder="smith"
                 />
-                <p className="text-[10px] text-muted-foreground">Used for subdomain: smith.hartecash.com</p>
+                <p className="text-[10px] text-muted-foreground">Used for subdomain: smith.yourdomain.com</p>
               </div>
             </div>
             <div className="space-y-1.5">

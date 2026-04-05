@@ -87,6 +87,7 @@ export const template = {
     appointmentTime: '10:00 AM',
     location: 'Harte Nissan — Hartford',
     dealershipName: 'Harte Nissan',
+    docsLink: 'https://example.com/upload-docs/abc123',
   },
 } satisfies TemplateEntry
 

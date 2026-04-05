@@ -682,25 +682,88 @@ export default function PitchDeck() {
         </Section>
 
         {/* ═══ 9 — WHY US ═══ */}
-        <Section id="why-us" isPresenting={isPresenting} currentSlide={current} key={isPresenting ? current : "why-us"}>
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center">
-            <LightBadge label="Why This Platform" />
-            <motion.h2 variants={fadeUp} custom={0} className="text-4xl md:text-6xl font-black mb-14 leading-tight">
-              Your <span className="text-primary">Unfair Advantage</span>
-            </motion.h2>
-            <motion.div variants={fadeUp} custom={1} className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <Section id="why-us" dark isPresenting={isPresenting} currentSlide={current} key={isPresenting ? current : "why-us"}>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }}>
+            <div className="text-center mb-16">
+              <GlowBadge label="Why This Platform" />
+              <motion.h2 variants={fadeUp} custom={0} className="text-4xl md:text-6xl font-black mb-6 leading-tight">
+                Your <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Unfair Advantage</span>
+              </motion.h2>
+              <motion.p variants={fadeUp} custom={1} className="text-lg text-white/50 max-w-3xl mx-auto leading-relaxed">
+                Other tools give you a widget. We give you the entire acquisition engine — from submission to check request — under your brand, on your domain.
+              </motion.p>
+            </div>
+
+            {/* Competitive comparison table */}
+            <motion.div variants={fadeUp} custom={2} className="mb-16 overflow-x-auto">
+              <table className="w-full max-w-4xl mx-auto text-sm">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-4 px-4 text-white/40 font-medium uppercase text-xs tracking-wider">Capability</th>
+                    <th className="text-center py-4 px-4">
+                      <span className="text-blue-400 font-bold text-base">AutoCurb</span>
+                    </th>
+                    <th className="text-center py-4 px-4">
+                      <span className="text-white/40 font-medium">AutoHub</span>
+                    </th>
+                    <th className="text-center py-4 px-4">
+                      <span className="text-white/40 font-medium">KBB ICO / TradePending</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { feature: "Off-Street Direct Purchase", us: true, them: false, others: false },
+                    { feature: "Service Drive Acquisition", us: true, them: true, others: false },
+                    { feature: "In-Store Trade Capture", us: true, them: false, others: false },
+                    { feature: "Full Deal Pipeline (Submit → Check)", us: true, them: false, others: false },
+                    { feature: "Customer Portal & Offer Acceptance", us: true, them: false, others: false },
+                    { feature: "Photo Upload with Camera Guides", us: true, them: false, others: false },
+                    { feature: "Document Upload (DL, Title, Reg)", us: true, them: false, others: false },
+                    { feature: "AI Damage Detection", us: true, them: false, others: false },
+                    { feature: "Appointment Scheduling", us: true, them: false, others: false },
+                    { feature: "Custom Domain & Full White-Label", us: true, them: "partial", others: false },
+                    { feature: "Multi-Location Smart Routing", us: true, them: false, others: false },
+                    { feature: "Configurable Pricing Engine", us: true, them: true, others: "partial" },
+                    { feature: "Referral Program Built-In", us: true, them: false, others: false },
+                    { feature: "Transactional Email Sequences", us: true, them: false, others: false },
+                    { feature: "Condition & Inspection Tools", us: true, them: "partial", others: false },
+                  ].map((row, i) => (
+                    <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                      <td className="py-3 px-4 text-white/70">{row.feature}</td>
+                      <td className="py-3 px-4 text-center">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400 mx-auto" />
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {row.them === true ? <CheckCircle2 className="w-5 h-5 text-white/30 mx-auto" /> :
+                         row.them === "partial" ? <span className="text-xs text-yellow-400/70">Partial</span> :
+                         <XCircle className="w-5 h-5 text-white/15 mx-auto" />}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {row.others === true ? <CheckCircle2 className="w-5 h-5 text-white/30 mx-auto" /> :
+                         row.others === "partial" ? <span className="text-xs text-yellow-400/70">Partial</span> :
+                         <XCircle className="w-5 h-5 text-white/15 mx-auto" />}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </motion.div>
+
+            {/* Differentiator cards */}
+            <motion.div variants={fadeUp} custom={3} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { icon: DollarSign, title: "Higher Margins", desc: "Skip the auction. Skip the transport. Acquire at wholesale directly from consumers and keep the spread." },
-                { icon: Zap, title: "Faster Deals", desc: "Submission to check request — every step managed. Less time per deal means more deals per month." },
-                { icon: Award, title: "Your Brand", desc: "Not CarMax. Not a white-label widget. YOUR dealership, YOUR customer, YOUR relationship. Full stop." },
-                { icon: TrendingUp, title: "First-Mover Moat", desc: "Be the only dealer in your market with a professional direct-buy platform. The advantage compounds." },
+                { icon: DollarSign, title: "Higher Margins", desc: "Skip the auction, transport, and recon surprises. Acquire at wholesale directly from consumers — keep the $2K+ spread per unit." },
+                { icon: Layers, title: "3 Channels, 1 Pipeline", desc: "Others give you a trade widget. We give you off-street, service drive, AND in-store trade — all feeding one dashboard with full deal tracking." },
+                { icon: Award, title: "Your Brand, Your Domain", desc: "Not a modal widget on your site. A standalone platform on YOUR domain, YOUR colors, YOUR emails. Customers think it's yours — because it is." },
+                { icon: TrendingUp, title: "End-to-End, Not Just Leads", desc: "Competitors hand you a lead and walk away. We manage submission → offer → acceptance → photos → docs → inspection → check request." },
               ].map((item, i) => (
-                <motion.div key={i} variants={scaleIn} custom={i + 2} className="bg-card border border-border rounded-2xl p-8 text-center hover:shadow-md transition-shadow">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                    <item.icon className="w-8 h-8 text-primary" />
+                <motion.div key={i} variants={scaleIn} custom={i + 4} className="bg-white/5 border border-white/10 rounded-2xl p-8 text-center hover:border-blue-400/30 transition-colors">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center mx-auto mb-6">
+                    <item.icon className="w-8 h-8 text-blue-400" />
                   </div>
-                  <h3 className="font-bold text-lg text-foreground mb-3">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <h3 className="font-bold text-lg text-white mb-3">{item.title}</h3>
+                  <p className="text-sm text-white/50 leading-relaxed">{item.desc}</p>
                 </motion.div>
               ))}
             </motion.div>

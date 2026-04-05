@@ -14,6 +14,7 @@ interface Props {
   appointmentTime?: string
   location?: string
   dealershipName?: string
+  docsLink?: string
 }
 
 const AppointmentReminderEmail = ({ customerName, vehicle, appointmentDate, appointmentTime, location, dealershipName }: Props) => (

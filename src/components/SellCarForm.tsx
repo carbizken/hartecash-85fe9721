@@ -397,7 +397,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
         }
       }
 
-      const estimate = calculateOffer(finalBBVehicle, formData, selectedAddDeducts, offerSettingsData, offerRulesData);
+      const estimate = calculateOffer(finalBBVehicle, formData, selectedAddDeducts, offerSettingsData, offerRulesData, promoBonus);
       const bbPayload = buildSubmissionBBPayload(finalBBVehicle);
 
       // Resolve store assignment based on admin config

@@ -35,7 +35,7 @@ export const SignupEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Text style={logoText}>HARTE AUTO GROUP</Text>
+          <Text style={logoText}>AUTOCURB</Text>
         </Section>
         <Section style={content}>
           <Heading style={h1}>Confirm your email</Heading>

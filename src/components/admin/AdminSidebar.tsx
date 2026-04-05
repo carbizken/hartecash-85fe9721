@@ -88,6 +88,7 @@ const AdminSidebar = ({
   const teamBadgeCount = canManageAccess ? pendingRequestCount + permissionRequestCount : 0;
   const systemItems = [
     ...(canManageAccess ? [{ key: "staff", label: "Staff & Permissions", icon: Users, badge: teamBadgeCount > 0 ? String(teamBadgeCount) : undefined, badgeVariant: "destructive" as const }] : []),
+    ...(canManageAccess ? [{ key: "referrals", label: "Referrals", icon: Gift }] : []),
     { key: "compliance", label: "Compliance", icon: ShieldCheck },
     { key: "reports", label: "Reports & Export", icon: Send },
     ...(isPlatformAdmin ? [{ key: "tenants", label: "Dealer Tenants", icon: Network }] : []),

@@ -293,6 +293,7 @@ const AdminSectionRenderer = (props: AdminSectionRendererProps) => {
       )}
       {activeSection === "onboarding-script" && <OnboardingScript targetDealershipId={onboardingDealershipId} />}
       {activeSection === "reports" && <ReportsExport />}
+      {activeSection === "referrals" && canManageAccess && <ReferralManagement />}
     </>
   );
 

@@ -392,7 +392,7 @@ const SubmissionsTable = ({
                           )}
                         </div>
                       </td>
-                      <td className="px-3 py-3 text-right">
+                      <td className={`${cellPad} text-right`}>
                         <div className="flex justify-end gap-1">
                           <Button variant="ghost" size="sm" onClick={() => onView(sub)}><Eye className="w-4 h-4" /></Button>
                           {canDelete && <Button variant="ghost" size="sm" onClick={() => onDelete(sub.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>}

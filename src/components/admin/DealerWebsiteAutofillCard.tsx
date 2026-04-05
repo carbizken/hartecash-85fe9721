@@ -612,7 +612,7 @@ export default function DealerWebsiteAutofillCard({
           {previewData.missing.length > 0 && (
             <div className="border border-amber-200 bg-amber-50/50 rounded-lg p-3 dark:border-amber-800 dark:bg-amber-950/20">
               <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                 <span className="text-xs font-semibold text-amber-800 dark:text-amber-400">Still needs attention</span>
               </div>
               <div className="flex flex-wrap gap-2">

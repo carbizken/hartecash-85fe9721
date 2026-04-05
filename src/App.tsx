@@ -40,6 +40,7 @@ const MobileInspection = lazy(() => import("./pages/MobileInspection"));
 const AppraisalTool = lazy(() => import("./pages/AppraisalTool"));
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const OnboardingMobile = lazy(() => import("./pages/OnboardingMobile"));
+const EmailUnsubscribe = lazy(() => import("./pages/EmailUnsubscribe"));
 
 const queryClient = new QueryClient();
 

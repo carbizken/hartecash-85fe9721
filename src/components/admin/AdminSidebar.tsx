@@ -72,6 +72,7 @@ const AdminSidebar = ({
     ...(canManageAccess ? [{ key: "inspection-config", label: "Inspection Sheet", icon: Shield }] : []),
     ...(canManageAccess ? [{ key: "photo-config", label: "Photo Requirements", icon: Camera }] : []),
     ...(canManageAccess ? [{ key: "depth-policies", label: "Depth Policies", icon: Gauge }] : []),
+    ...(canManageAccess ? [{ key: "promotions", label: "Promotions", icon: Megaphone }] : []),
     ...(canManageAccess ? [{ key: "notifications", label: "Notifications", icon: Bell }] : []),
   ].filter((item) => isAllowed(item.key));
 

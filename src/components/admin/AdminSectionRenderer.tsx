@@ -254,6 +254,7 @@ const AdminSectionRenderer = (props: AdminSectionRendererProps) => {
         <OfferSettings userId={userId || undefined} userRole={userRole} />
       )}
       {activeSection === "site-config" && canManageAccess && <SiteConfiguration />}
+      {activeSection === "promotions" && canManageAccess && <PromotionManagement />}
       {activeSection === "notifications" && canManageAccess && <NotificationSettings />}
       {activeSection === "form-config" && canManageAccess && <FormConfiguration />}
       {activeSection === "inspection-config" && canManageAccess && <InspectionConfiguration />}

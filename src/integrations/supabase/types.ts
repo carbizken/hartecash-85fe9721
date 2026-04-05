@@ -1432,6 +1432,51 @@ export type Database = {
         }
         Relationships: []
       }
+      promotions: {
+        Row: {
+          bonus_amount: number
+          created_at: string
+          dealership_id: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          name: string
+          show_on_portal: boolean
+          show_on_widget: boolean
+          starts_at: string
+          updated_at: string
+        }
+        Insert: {
+          bonus_amount?: number
+          created_at?: string
+          dealership_id?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          show_on_portal?: boolean
+          show_on_widget?: boolean
+          starts_at?: string
+          updated_at?: string
+        }
+        Update: {
+          bonus_amount?: number
+          created_at?: string
+          dealership_id?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          show_on_portal?: boolean
+          show_on_widget?: boolean
+          starts_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           converted_at: string | null

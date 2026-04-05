@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Shield, Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import CalculatingOffer from "@/components/CalculatingOffer";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { Button } from "@/components/ui/button";

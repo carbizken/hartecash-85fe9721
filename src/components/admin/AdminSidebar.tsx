@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Inbox, CalendarDays, Users, ShieldCheck, SlidersHorizontal,
-  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, MapPin, Car, ScrollText, Shield, Lock, Wrench, Rocket, Gauge, Network, Camera, Gift, Megaphone, ChevronDown
+  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, MapPin, Car, ScrollText, Shield, Lock, Wrench, Rocket, Gauge, Network, Camera, Gift, Megaphone, ChevronDown, Link2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -112,6 +112,7 @@ const AdminSidebar = ({
   const teamBadgeCount = canManageAccess ? pendingRequestCount + permissionRequestCount : 0;
   const systemItems = [
     ...(canManageAccess ? [{ key: "staff", label: "Staff & Permissions", icon: Users, badge: teamBadgeCount > 0 ? String(teamBadgeCount) : undefined, badgeVariant: "destructive" as const }] : []),
+    { key: "my-lead-link", label: "My Lead Link", icon: Link2 },
     { key: "my-referrals", label: "My Referrals", icon: Gift },
     ...(canManageAccess ? [{ key: "referrals", label: "Referral Program", icon: Gift }] : []),
     { key: "compliance", label: "Compliance", icon: ShieldCheck },
@@ -120,7 +121,7 @@ const AdminSidebar = ({
     ...(canManageAccess ? [{ key: "image-inventory", label: "Vehicle Images", icon: Car }] : []),
     ...(canManageAccess ? [{ key: "system-settings", label: "System Settings", icon: Wrench }] : []),
     { key: "onboarding", label: "Dealer Setup", icon: Rocket },
-  ].filter((item) => isAllowed(item.key) || (item.key === "compliance" && (isAllowed("consent") || isAllowed("comm-log"))) || item.key === "my-referrals");
+  ].filter((item) => isAllowed(item.key) || (item.key === "compliance" && (isAllowed("consent") || isAllowed("comm-log"))) || item.key === "my-referrals" || item.key === "my-lead-link");
 
   // Locked sections for "Request Access"
   const allSectionKeys = ["submissions", "accepted-appts", "executive", "staff", "offer-settings", "form-config", "inspection-config", "depth-policies", "notifications", "site-config", "locations", "testimonials", "compliance", "image-inventory", "reports", "system-settings"];

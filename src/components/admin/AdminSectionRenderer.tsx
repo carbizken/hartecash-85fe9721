@@ -32,6 +32,7 @@ import OnboardingScript from "./OnboardingScript";
 import ReportsExport from "./ReportsExport";
 import ReferralManagement from "./ReferralManagement";
 import MyReferrals from "./MyReferrals";
+import MyLeadLink from "./MyLeadLink";
 import EmbedToolkit from "./EmbedToolkit";
 import PromotionManagement from "./PromotionManagement";
 import AdminLoadingSkeleton from "./AdminLoadingSkeleton";
@@ -301,6 +302,7 @@ const AdminSectionRenderer = (props: AdminSectionRendererProps) => {
       {activeSection === "my-referrals" && (
         <MyReferrals staffName={props.userName} />
       )}
+      {activeSection === "my-lead-link" && <MyLeadLink />}
       {activeSection === "embed-toolkit" && canManageAccess && <EmbedToolkit />}
     </>
   );

@@ -56,6 +56,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get("ref") || undefined;
+  const repCode = searchParams.get("rep") || undefined;
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [vehicleInfo, setVehicleInfo] = useState<VehicleInfo | null>(null);
@@ -456,6 +457,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
           salesperson_name: formData.salespersonName || null,
           bb_selected_options: selectedAddDeducts.length > 0 ? selectedAddDeducts : [],
           referral_code: referralCode || null,
+          assigned_rep_email: repCode || null,
         } as any);
 
       if (error) throw error;

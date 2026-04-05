@@ -168,8 +168,9 @@ const TenantManagement = ({ onSetupDealer }: TenantManagementProps) => {
   };
 
   const copySlugUrl = (slug: string) => {
-    navigator.clipboard.writeText(`${slug}.hartecash.com`);
-    toast({ title: "Copied", description: `${slug}.hartecash.com copied to clipboard.` });
+    const host = window.location.hostname;
+    navigator.clipboard.writeText(`${slug}.${host}`);
+    toast({ title: "Copied", description: `${slug}.${host} copied to clipboard.` });
   };
 
   if (loading) {

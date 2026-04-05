@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import ServiceDriveInlineContent from "@/components/pitch/ServiceDriveInlineContent";
 import TradePitchInlineContent from "@/components/pitch/TradePitchInlineContent";
+import OffStreetInlineContent from "@/components/pitch/OffStreetInlineContent";
 import { motion, useInView } from "framer-motion";
 import logoFallback from "@/assets/logo-placeholder.png";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
@@ -83,6 +84,7 @@ export default function PitchDeck() {
   const { config } = useSiteConfig();
   const [expandedChannel, setExpandedChannel] = useState<"off-street" | "service" | "trade" | null>(null);
   const channelRef = useRef<HTMLDivElement>(null);
+  const expandedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const name = config.dealership_name || "AutoCurb";
@@ -90,8 +92,21 @@ export default function PitchDeck() {
     return () => { document.title = `Sell Your Car | ${name}`; };
   }, [config.dealership_name]);
 
+  const handleChannelClick = useCallback((key: "off-street" | "service" | "trade") => {
+    const isExpanding = expandedChannel !== key;
+    setExpandedChannel(isExpanding ? key : null);
+    if (isExpanding) {
+      setTimeout(() => {
+        expandedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, [expandedChannel]);
+
   const scrollToChannels = useCallback(() => {
-    channelRef.current?.scrollIntoView({ behavior: "smooth" });
+    setExpandedChannel(null);
+    setTimeout(() => {
+      channelRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
   }, []);
 
   return (
@@ -501,7 +516,7 @@ export default function PitchDeck() {
                 return (
                   <button
                     key={key}
-                    onClick={() => setExpandedChannel(isExpanded ? null : key)}
+                    onClick={() => handleChannelClick(key)}
                     className={`group rounded-2xl border backdrop-blur-sm p-8 text-left transition-all duration-300 cursor-pointer ${
                       isExpanded ? colorMap[color] : "border-white/10 bg-white/5 hover:border-white/20"
                     }`}
@@ -524,8 +539,11 @@ export default function PitchDeck() {
       </section>
 
       {/* Expanded channel content */}
-      {expandedChannel === "service" && <ServiceDriveInlineContent onBackToTop={scrollToChannels} />}
-      {expandedChannel === "trade" && <TradePitchInlineContent onBackToTop={scrollToChannels} />}
+      <div ref={expandedRef}>
+        {expandedChannel === "off-street" && <OffStreetInlineContent onBackToTop={scrollToChannels} />}
+        {expandedChannel === "service" && <ServiceDriveInlineContent onBackToTop={scrollToChannels} />}
+        {expandedChannel === "trade" && <TradePitchInlineContent onBackToTop={scrollToChannels} />}
+      </div>
 
       {/* ═══ 8 — BOTTOM LINE ═══ */}
       <section className="px-6 py-20 md:py-28 bg-[hsl(220,25%,8%)]">

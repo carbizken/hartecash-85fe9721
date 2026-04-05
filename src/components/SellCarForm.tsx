@@ -177,7 +177,8 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
     if (formConfig.step_vehicle_build) steps.push("Vehicle Build");
     if (formConfig.step_condition_history) steps.push("Condition");
     steps.push("History");
-    if (!offerFirst) steps.push("Finalize");
+    // Always include contact capture — even in offer-first mode
+    steps.push("Finalize");
     return steps;
   };
 

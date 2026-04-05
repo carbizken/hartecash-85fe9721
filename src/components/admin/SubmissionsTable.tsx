@@ -71,7 +71,19 @@ const SubmissionsTable = ({
   onDelete,
   onInlineStatusChange,
 }: SubmissionsTableProps) => {
-  const getHoursSinceUpdate = (sub: Submission) => {
+  const [density, setDensity] = useState<"compact" | "spacious">(() => {
+    try { return (localStorage.getItem("admin-table-density") as "compact" | "spacious") || "spacious"; }
+    catch { return "spacious"; }
+  });
+  const isCompact = density === "compact";
+  const toggleDensity = () => {
+    const next = isCompact ? "spacious" : "compact";
+    setDensity(next);
+    localStorage.setItem("admin-table-density", next);
+  };
+
+  const cellPad = isCompact ? "px-2 py-1.5" : "px-3 py-3";
+  const fontSize = isCompact ? "text-xs" : "text-sm";
     const refDate = sub.status_updated_at || sub.created_at;
     return (Date.now() - new Date(refDate).getTime()) / (1000 * 60 * 60);
   };

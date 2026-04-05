@@ -121,6 +121,8 @@ const TenantManagement = ({ onSetupDealer }: TenantManagementProps) => {
         await supabase.from("dealer_accounts").insert({
           dealership_id: payload.dealership_id,
         } as any);
+        // Seed branded notification_templates for the new dealer
+        await seedNotificationTemplates(payload.dealership_id, payload.display_name);
       }
     }
 

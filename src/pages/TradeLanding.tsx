@@ -28,7 +28,7 @@ const TradeLanding = () => {
         description={`Already shopping with us? Submit your trade-in details from home and get your vehicle value ready before you arrive at ${config.dealership_name}.`}
         path="/trade"
       />
-      <SiteHeader />
+      {!embed && <SiteHeader />}
       <main>
         {layout === "offset_right" ? (
           <HeroOffset side="right" leadSource="trade" headlineOverride={tradeHeadline} subtextOverride={tradeSubtext} />

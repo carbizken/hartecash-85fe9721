@@ -125,6 +125,20 @@ Deno.serve(async (req) => {
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+  // ── Resolve tenant branding from site_config ──
+  const dealershipId = templateData.dealershipId || templateData.dealership_id || 'default'
+  let tenantName = templateData.dealershipName || ''
+  if (!tenantName) {
+    const { data: siteRow } = await supabase
+      .from('site_config')
+      .select('dealership_name')
+      .eq('dealership_id', dealershipId)
+      .maybeSingle()
+    tenantName = siteRow?.dealership_name || DEFAULT_SITE_NAME
+  }
+  // Inject into template data so every template gets the branded name
+  templateData.dealershipName = tenantName
+
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
     .from('suppressed_emails')

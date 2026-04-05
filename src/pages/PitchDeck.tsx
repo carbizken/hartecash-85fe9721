@@ -613,22 +613,54 @@ export default function PitchDeck() {
         <div className="absolute inset-0 bg-gradient-to-b from-blue-600/5 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-blue-600/5 blur-[200px] pointer-events-none" />
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="relative max-w-4xl mx-auto">
-          <motion.h2 variants={fadeUp} custom={0} className="text-4xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
-            Ready to{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Own</span>
-            <br />Your Acquisition?
-          </motion.h2>
-          <motion.p variants={fadeUp} custom={1} className="text-xl text-white/50 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Custom-branded. Fully configured. See it live on your brand in 48 hours. No obligation.
-          </motion.p>
-          <motion.div variants={fadeUp} custom={2} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="tel:2035095054" className="inline-flex items-center gap-3 h-16 px-10 rounded-2xl bg-blue-600 text-white font-bold text-lg hover:bg-blue-500 transition shadow-lg shadow-blue-600/30">
-              Schedule a Demo <ArrowRight className="w-5 h-5" />
-            </a>
-            <a href="tel:2035095054" className="inline-flex items-center gap-3 h-16 px-10 rounded-2xl border-2 border-white/20 text-white font-bold text-lg hover:bg-white/5 transition">
-              (203) 509-5054
-            </a>
-          </motion.div>
+          {!showDemoForm ? (
+            <>
+              <motion.h2 variants={fadeUp} custom={0} className="text-4xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
+                Ready to{" "}
+                <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Own</span>
+                <br />Your Acquisition?
+              </motion.h2>
+              <motion.p variants={fadeUp} custom={1} className="text-xl text-white/50 max-w-2xl mx-auto mb-12 leading-relaxed">
+                Custom-branded. Fully configured. See it live on your brand in 48 hours. No obligation.
+              </motion.p>
+              <motion.div variants={fadeUp} custom={2} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button
+                  onClick={() => setShowDemoForm(true)}
+                  className="inline-flex items-center gap-3 h-16 px-10 rounded-2xl bg-blue-600 text-white font-bold text-lg hover:bg-blue-500 transition shadow-lg shadow-blue-600/30"
+                >
+                  Schedule a Demo <ArrowRight className="w-5 h-5" />
+                </button>
+                <a href="tel:2035095054" className="inline-flex items-center gap-3 h-16 px-10 rounded-2xl border-2 border-white/20 text-white font-bold text-lg hover:bg-white/5 transition">
+                  (203) 509-5054
+                </a>
+              </motion.div>
+            </>
+          ) : (
+            <DemoRequestForm
+              submitting={demoSubmitting}
+              onSubmit={async (data) => {
+                setDemoSubmitting(true);
+                try {
+                  const id = crypto.randomUUID();
+                  await supabase.functions.invoke("send-transactional-email", {
+                    body: {
+                      templateName: "demo-request",
+                      recipientEmail: "ken@ken.cc",
+                      idempotencyKey: `demo-request-${id}`,
+                      templateData: data,
+                    },
+                  });
+                  toast.success("Demo request sent! We'll be in touch within 24 hours.");
+                  setShowDemoForm(false);
+                } catch {
+                  toast.error("Something went wrong. Please call us directly.");
+                } finally {
+                  setDemoSubmitting(false);
+                }
+              }}
+              onCancel={() => setShowDemoForm(false)}
+            />
+          )}
           <motion.div variants={fadeUp} custom={3} className="mt-10">
             <p className="text-sm text-white/30">
               <a href="tel:2035095054" className="hover:text-white/50 transition">(203) 509-5054</a> · <a href="mailto:kenc@hartecars.com" className="hover:text-white/50 transition">kenc@hartecars.com</a>
@@ -637,5 +669,73 @@ export default function PitchDeck() {
         </motion.div>
       </section>
     </div>
+  );
+}
+
+/* ─── Demo Request Form ─── */
+function DemoRequestForm({
+  submitting,
+  onSubmit,
+  onCancel,
+}: {
+  submitting: boolean;
+  onSubmit: (data: Record<string, string>) => void;
+  onCancel: () => void;
+}) {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    onSubmit({
+      dealershipName: fd.get("dealershipName") as string,
+      contactName: fd.get("contactName") as string,
+      contactEmail: fd.get("contactEmail") as string,
+      contactPhone: fd.get("contactPhone") as string,
+      monthlyVolume: fd.get("monthlyVolume") as string,
+      message: fd.get("message") as string,
+    });
+  };
+
+  const inputClass = "w-full rounded-xl bg-white/10 border border-white/20 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition text-sm";
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-lg mx-auto">
+      <h2 className="text-3xl md:text-4xl font-black mb-2">Schedule a Demo</h2>
+      <p className="text-white/40 mb-8 text-sm">See it live on your brand — no obligation.</p>
+      <form onSubmit={handleSubmit} className="space-y-4 text-left">
+        <div className="grid grid-cols-2 gap-4">
+          <input name="dealershipName" required placeholder="Dealership Name" className={inputClass} />
+          <input name="contactName" required placeholder="Your Name" className={inputClass} />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <input name="contactEmail" type="email" required placeholder="Email" className={inputClass} />
+          <input name="contactPhone" type="tel" placeholder="Phone" className={inputClass} />
+        </div>
+        <select name="monthlyVolume" className={`${inputClass} appearance-none`}>
+          <option value="" className="bg-zinc-900">Monthly Used Volume (optional)</option>
+          <option value="Under 50" className="bg-zinc-900">Under 50</option>
+          <option value="50-100" className="bg-zinc-900">50–100</option>
+          <option value="100-200" className="bg-zinc-900">100–200</option>
+          <option value="200-400" className="bg-zinc-900">200–400</option>
+          <option value="400+" className="bg-zinc-900">400+</option>
+        </select>
+        <textarea name="message" rows={3} placeholder="Anything else you'd like us to know? (optional)" className={inputClass} />
+        <div className="flex gap-3 pt-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex-1 h-14 rounded-xl bg-blue-600 text-white font-bold text-base hover:bg-blue-500 transition shadow-lg shadow-blue-600/30 disabled:opacity-50"
+          >
+            {submitting ? "Sending..." : "Request Demo"}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="h-14 px-6 rounded-xl border border-white/20 text-white/60 font-medium hover:bg-white/5 transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </motion.div>
   );
 }

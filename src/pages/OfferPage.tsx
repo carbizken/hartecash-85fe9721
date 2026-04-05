@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import InspectionDisclosure from "@/components/portal/InspectionDisclosure";
-import harteLogoFallback from "@/assets/harte-logo-white.png";
+import logoFallback from "@/assets/logo-placeholder-white.png";
 import PortalSkeleton from "@/components/PortalSkeleton";
 import CalculatingOffer from "@/components/CalculatingOffer";
 import { getTaxRateFromZip, calcTradeInValue, STATE_NAMES } from "@/lib/salesTax";
@@ -855,7 +855,7 @@ const OfferPage = () => {
       {/* ─── PRINT-ONLY: Custom one-page layout ─── */}
       <OfferPrintLayout
         config={config}
-        logoFallback={harteLogoFallback}
+        logoFallback={logoFallback}
         submission={s}
         condition={condition}
         vehicleStr={vehicleStr}
@@ -888,7 +888,7 @@ const OfferPage = () => {
             Back to portal
           </Link>
           <div className="flex items-center gap-3">
-            <img src={config.logo_white_url || harteLogoFallback} alt={config.dealership_name || "Dealership"} className="h-[70px] w-auto" />
+            <img src={config.logo_white_url || logoFallback} alt={config.dealership_name || "Dealership"} className="h-[70px] w-auto" />
             <div className="flex-1">
               <h1 className="font-bold text-lg lg:text-xl">Your Offer</h1>
               {firstName && <p className="text-sm opacity-80">{firstName}, here's your personalized offer</p>}

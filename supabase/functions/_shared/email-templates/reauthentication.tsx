@@ -25,7 +25,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Text style={logoText}>HARTE AUTO GROUP</Text>
+          <Text style={logoText}>AUTOCURB</Text>
         </Section>
         <Section style={content}>
           <Heading style={h1}>Confirm reauthentication</Heading>

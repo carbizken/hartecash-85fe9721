@@ -30,7 +30,7 @@ import {
 } from "@/lib/adminConstants";
 import { printSubmissionDetail, printAllDocs, printCheckRequest } from "@/lib/printUtils";
 import { useToast } from "@/hooks/use-toast";
-import harteLogoFallback from "@/assets/harte-logo.png";
+import logoFallback from "@/assets/logo-placeholder.png";
 
 interface SubmissionDetailSheetProps {
   selected: Submission | null;
@@ -209,7 +209,7 @@ const SubmissionDetailSheet = ({
     }
     let logoBase64 = "";
     try {
-      const resp = await fetch(harteLogoFallback);
+      const resp = await fetch(logoFallback);
       const blob = await resp.blob();
       logoBase64 = await new Promise<string>((resolve) => { const r = new FileReader(); r.onloadend = () => resolve(r.result as string); r.readAsDataURL(blob); });
     } catch { logoBase64 = ""; }

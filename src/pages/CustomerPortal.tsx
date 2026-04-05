@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import harteLogoFallback from "@/assets/harte-logo.png";
-import harteLogoWhiteFallback from "@/assets/harte-logo-white.png";
+import logoFallback from "@/assets/logo-placeholder.png";
+import logoWhiteFallback from "@/assets/logo-placeholder-white.png";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 import PortalSkeleton from "@/components/PortalSkeleton";
 import WhatsNextCard from "@/components/portal/WhatsNextCard";
@@ -313,7 +313,7 @@ const CustomerPortal = () => {
             My submissions
           </Link>
           <div className="flex items-center gap-4">
-            <img src={config.logo_white_url || harteLogoWhiteFallback} alt={config.dealership_name || "Dealership"} className="h-[70px] w-auto drop-shadow-lg" />
+            <img src={config.logo_white_url || logoWhiteFallback} alt={config.dealership_name || "Dealership"} className="h-[70px] w-auto drop-shadow-lg" />
             <div className="flex-1 border-l border-primary-foreground/15 pl-4">
               <h1 className="font-display text-xl lg:text-2xl tracking-wide">{vehicleStr || "My Submission"}</h1>
               {firstName && <p className="text-sm text-primary-foreground/70 mt-0.5">Welcome back, {firstName}</p>}

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 
 import { CalendarDays, CheckCircle2, Loader2, ArrowLeft, MapPin, Car, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import harteLogo from "@/assets/harte-logo-white.png";
+import logoFallback from "@/assets/logo-placeholder-white.png";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 import SEO from "@/components/SEO";
 
@@ -253,7 +253,7 @@ const ScheduleVisit = () => {
                 <ArrowLeft className="w-5 h-5" />
               </Link>
             )}
-            <img src={config.logo_white_url || harteLogo} alt={config.dealership_name} className="h-[70px] w-auto" />
+            <img src={config.logo_white_url || logoFallback} alt={config.dealership_name} className="h-[70px] w-auto" />
             <h1 className="font-bold text-lg">Schedule a Visit</h1>
           </div>
         </div>
@@ -328,7 +328,7 @@ const ScheduleVisit = () => {
           <Link to={submissionToken ? `/my-submission/${submissionToken}` : "/"} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <img src={config.logo_white_url || harteLogo} alt={config.dealership_name} className="h-[70px] w-auto" />
+          <img src={config.logo_white_url || logoFallback} alt={config.dealership_name} className="h-[70px] w-auto" />
           <h1 className="font-bold text-lg">Schedule a Visit</h1>
         </div>
       </div>

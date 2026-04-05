@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { UserRound, CalendarCheck, FileText, ArrowLeftRight, Phone, Info } from "lucide-react";
-import harteLogo from "@/assets/harte-logo.png";
+import logoFallback from "@/assets/logo-placeholder.png";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 const SiteHeader = () => {
@@ -12,7 +12,7 @@ const SiteHeader = () => {
   const show = () => { clearTimeout(timeout.current); setOpen(true); };
   const hide = () => { timeout.current = setTimeout(() => setOpen(false), 200); };
 
-  const logoSrc = config.logo_url || harteLogo;
+  const logoSrc = config.logo_url || logoFallback;
   const dealerName = config.dealership_name || "Our Dealership";
 
   return (

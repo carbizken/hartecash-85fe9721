@@ -34,10 +34,9 @@ const PrivacyPolicy = () => {
           <section>
             <h2 className="text-xl font-bold text-foreground">1. Who We Are</h2>
             <p>
-              Our Dealership ("we," "us," or "our") operates the website{" "}
-              <strong>hartecash.com</strong> and related services. We are a family-owned automobile
-              dealership group serving Connecticut since 1952. Our principal office is located at
-              150 Weston Street, Hartford, CT 06120.
+              Our Dealership ("we," "us," or "our") operates this website
+              and related services. This privacy policy applies to all information collected
+              through our platform.
             </p>
           </section>
 
@@ -67,7 +66,7 @@ const PrivacyPolicy = () => {
           <section id="sms-consent">
             <h2 className="text-xl font-bold text-foreground">4. Text Message (SMS/MMS) Consent & Communication</h2>
             <p>
-              By providing your phone number on any form on hartecash.com — including but not limited to
+              By providing your phone number on any form on this website — including but not limited to
               the vehicle appraisal form, appointment scheduling form, and service customer form — you
               expressly consent to receive autodialed and/or pre-recorded text messages (SMS and MMS)
               and phone calls from Our Dealership at the phone number you provided. These communications

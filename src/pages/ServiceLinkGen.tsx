@@ -5,7 +5,7 @@ import { toast } from "@/hooks/use-toast";
 import { Upload, Copy, FileSpreadsheet, Link2, CheckCircle2, Trash2, Sun, Moon } from "lucide-react";
 // @ts-ignore - read-excel-file browser entry
 import readXlsxFile from "read-excel-file/browser";
-import serviceLogo from "@/assets/harte-service-logo.png";
+import serviceLogo from "@/assets/logo-placeholder.png";
 
 interface CustomerRow {
   name: string;
@@ -15,7 +15,7 @@ interface CustomerRow {
   link: string;
 }
 
-const BASE_DOMAIN = "https://hartecash.com";
+const BASE_DOMAIN = typeof window !== "undefined" ? window.location.origin : "https://app.autocurb.io";
 
 function buildLink(vin: string, date: string, time: string): string {
   const parts: string[] = [];

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import ServiceDriveInlineContent from "@/components/pitch/ServiceDriveInlineContent";
 import TradePitchInlineContent from "@/components/pitch/TradePitchInlineContent";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import harteLogo from "@/assets/harte-logo-outline.png";
+import logoFallback from "@/assets/logo-placeholder.png";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 import screenshotLanding from "@/assets/pitch/screenshot-landing.png";
 import screenshotPortal from "@/assets/pitch/screenshot-portal.jpg";
@@ -181,12 +181,13 @@ export default function PitchDeck() {
   }, [isPresenting]);
 
   useEffect(() => {
+    const dealerName = config.dealership_name || "AutoCurb";
     const ogTags: Record<string, string> = {
-      "og:title": "End-to-End Inventory Acquisition | Harte Auto Group",
+      "og:title": `End-to-End Inventory Acquisition | ${dealerName}`,
       "og:description": "A dealer-branded platform that captures, manages, and converts direct consumer vehicle purchases — from submission to check request.",
       "og:image": `${window.location.origin}/og-pitch.jpg`,
       "og:url": `${window.location.origin}/pitch`,
-      "twitter:title": "End-to-End Inventory Acquisition | Harte Auto Group",
+      "twitter:title": `End-to-End Inventory Acquisition | ${dealerName}`,
       "twitter:description": "A dealer-branded platform for direct consumer vehicle purchases that scales with your business.",
       "twitter:image": `${window.location.origin}/og-pitch.jpg`,
     };
@@ -204,7 +205,7 @@ export default function PitchDeck() {
       }
       el.setAttribute("content", content);
     });
-    document.title = "End-to-End Inventory Acquisition | Harte Auto Group";
+    document.title = `End-to-End Inventory Acquisition | ${dealerName}`;
     return () => {
       Object.entries(originals).forEach(([prop, original]) => {
         const isOg = prop.startsWith("og:");
@@ -213,9 +214,9 @@ export default function PitchDeck() {
         if (el && original !== null) el.setAttribute("content", original);
         else if (el && original === null) el.remove();
       });
-      document.title = "Sell Your Car - Get Cash Offer in 2 Minutes | Harte Auto Group";
+      document.title = `Sell Your Car - Get Cash Offer in 2 Minutes | ${dealerName}`;
     };
-  }, []);
+  }, [config.dealership_name]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -275,7 +276,7 @@ export default function PitchDeck() {
           <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none" />
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center relative">
             <motion.div variants={fadeUp} custom={0} className="mb-8">
-              <img src={config.logo_white_url || config.logo_url || harteLogo} alt={config.dealership_name} className="h-40 md:h-60 mx-auto object-contain" />
+              <img src={config.logo_white_url || config.logo_url || logoFallback} alt={config.dealership_name} className="h-40 md:h-60 mx-auto object-contain" />
             </motion.div>
             <motion.div variants={fadeUp} custom={0.5}>
               <GlowBadge label="End-to-End Platform" />

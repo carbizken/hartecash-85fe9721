@@ -13,7 +13,7 @@ import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePhotoConfig, type PhotoShot } from "@/hooks/usePhotoConfig";
 import { classToArchetype, type VehicleArchetype } from "@/lib/vehicleArchetypes";
-import harteLogoFallback from "@/assets/harte-logo-white.png";
+import logoFallback from "@/assets/logo-placeholder-white.png";
 
 interface SubmissionInfo {
   id: string;
@@ -334,7 +334,7 @@ const UploadPhotos = () => {
           <Link to={`/my-submission/${token}`} className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <img src={config.logo_white_url || harteLogoFallback} alt={config.dealership_name} className="h-[70px] w-auto" />
+          <img src={config.logo_white_url || logoFallback} alt={config.dealership_name} className="h-[70px] w-auto" />
           <h1 className="font-bold text-lg">Upload Vehicle Photos</h1>
         </div>
       </div>

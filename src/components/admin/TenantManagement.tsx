@@ -168,8 +168,9 @@ const TenantManagement = ({ onSetupDealer }: TenantManagementProps) => {
   };
 
   const copySlugUrl = (slug: string) => {
-    navigator.clipboard.writeText(`${slug}.hartecash.com`);
-    toast({ title: "Copied", description: `${slug}.hartecash.com copied to clipboard.` });
+    const host = window.location.hostname;
+    navigator.clipboard.writeText(`${slug}.${host}`);
+    toast({ title: "Copied", description: `${slug}.${host} copied to clipboard.` });
   };
 
   if (loading) {
@@ -327,7 +328,7 @@ const TenantManagement = ({ onSetupDealer }: TenantManagementProps) => {
                   onChange={e => setForm(prev => ({ ...prev, slug: e.target.value }))}
                   placeholder="smith"
                 />
-                <p className="text-[10px] text-muted-foreground">Used for subdomain: smith.hartecash.com</p>
+                <p className="text-[10px] text-muted-foreground">Used for subdomain: smith.yourdomain.com</p>
               </div>
             </div>
             <div className="space-y-1.5">

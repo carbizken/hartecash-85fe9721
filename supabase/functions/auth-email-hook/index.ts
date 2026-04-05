@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "hartecash"
+const SITE_NAME = "AutoCurb"
 const SENDER_DOMAIN = "notify.autocurb.io"
 const ROOT_DOMAIN = "autocurb.io"
 const FROM_DOMAIN = "notify.autocurb.io" // Domain shown in From address (may be root or sender subdomain)

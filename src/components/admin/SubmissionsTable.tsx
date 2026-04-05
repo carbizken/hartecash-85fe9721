@@ -380,7 +380,7 @@ const SubmissionsTable = ({
                           )}
                         </div>
                       </td>
-                      <td className="px-2 py-3 text-center">
+                      <td className={`px-2 ${isCompact ? "py-1.5" : "py-3"} text-center`}>
                         <div className="flex flex-col items-center gap-0.5">
                           <span className={`text-xs font-bold ${sla.color}`} title={`${Math.round(hours)}h since last update`}>
                             {formatAge(hours)}

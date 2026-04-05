@@ -44,6 +44,7 @@ export function useAdminDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [userRole, setUserRole] = useState("");
   const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [activityLog, setActivityLog] = useState<ActivityLogEntry[]>([]);
   const [duplicateWarnings, setDuplicateWarnings] = useState<Record<string, string[]>>({});

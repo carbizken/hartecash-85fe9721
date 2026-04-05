@@ -312,7 +312,7 @@ const SubmissionsTable = ({
                         <div>{sub.email || "—"}</div>
                         <div className="text-muted-foreground text-xs">{formatPhone(sub.phone) || ""}</div>
                       </td>
-                      <td className="px-3 py-3">
+                      <td className={cellPad}>
                         <Badge variant={sub.lead_source === "service" ? "secondary" : sub.lead_source === "in_store_trade" || sub.lead_source === "trade" ? "default" : "outline"} className="text-xs">
                           {sub.lead_source === "service" ? "Service" : sub.lead_source === "in_store_trade" ? "In-Store" : sub.lead_source === "trade" ? "Trade-In" : "Off Street"}
                         </Badge>

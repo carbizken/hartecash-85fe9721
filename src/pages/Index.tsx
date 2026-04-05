@@ -53,6 +53,7 @@ const Index = () => {
           <ValueProps />
           <Testimonials />
           <FAQ />
+          <ReferralBanner />
           <CTABanner />
         </Suspense>
       </main>

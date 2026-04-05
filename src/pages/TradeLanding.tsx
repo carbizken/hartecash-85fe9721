@@ -41,6 +41,7 @@ const TradeLanding = () => {
         <ValueProps />
         <Testimonials />
         <FAQ />
+        <ReferralBanner />
         <CTABanner />
       </main>
       <SiteFooter />

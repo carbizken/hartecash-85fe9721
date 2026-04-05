@@ -90,18 +90,26 @@ export function useAdminDashboard() {
   const fetchSubmissions = useCallback(async () => {
     setLoading(true);
     const from = page * PAGE_SIZE;
-    const { data, error, count } = await supabase
+    let query = supabase
       .from("submissions")
       .select("*", { count: "exact" })
       .eq("dealership_id", tenant.dealership_id)
       .order("created_at", { ascending: false })
       .range(from, from + PAGE_SIZE - 1);
+
+    // Sales reps only see leads assigned to them
+    if (userRole === "sales_bdc" && userEmail) {
+      const repCode = userEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "");
+      query = (query as any).eq("assigned_rep_email", repCode);
+    }
+
+    const { data, error, count } = await query;
     if (!error && data) {
       setSubmissions(data as any);
       setTotal(count || 0);
     }
     setLoading(false);
-  }, [page, tenant.dealership_id]);
+  }, [page, tenant.dealership_id, userRole, userEmail]);
 
   const fetchPendingRequests = useCallback(async () => {
     const { data } = await supabase

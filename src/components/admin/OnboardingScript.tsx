@@ -135,17 +135,12 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    title: "10. Offer & Pricing",
+    title: "10. Acquisition Strategy",
     icon: "💵",
     questions: [
-      { id: "value_basis", label: "Value Basis", type: "choice", choices: ["Wholesale Average", "Trade-In Average", "Wholesale Clean"] },
-      { id: "dealer_pack", label: "Used Car Pack ($)", type: "text" },
-      { id: "recon_cost", label: "Default Recon Cost ($)", type: "text" },
-      { id: "hide_pack", label: "Hide pack from appraisal tool?", type: "choice", choices: ["Yes", "No"] },
-      { id: "global_adj", label: "Global Adjustment %", type: "text", hint: "e.g. -5" },
-      { id: "regional_adj", label: "Regional Adjustment %", type: "text" },
-      { id: "offer_floor", label: "Offer Floor ($)", type: "text", hint: "Minimum offer amount" },
-      { id: "offer_ceiling", label: "Offer Ceiling ($)", type: "text", hint: "Leave blank for no cap" },
+      { id: "acquisition_intent", label: "How aggressive should offers be?", type: "choice", choices: ["Conservative", "Market", "Competitive", "Aggressive", "Predator"], hint: "Conservative = own it cheap. Market = fair trade value. Competitive = win more deals. Aggressive = top-dollar sight-unseen. Predator = highest offer, adjust at inspection." },
+      { id: "pricing_model", label: "Starting Pricing Model", type: "choice", choices: ["Default"], hint: "Additional models can be created in Offer Logic after onboarding." },
+      { id: "pricing_notes", label: "Any special pricing instructions?", type: "multiline", hint: "e.g. 'Never go above $30k on trucks' or 'Match Carvana within $200'" },
     ],
   },
   {
@@ -608,7 +603,40 @@ export default function OnboardingScript({ targetDealershipId }: OnboardingScrip
                       </div>
                     )}
 
-                    {q.type === "choice" && q.choices && (
+                    {q.type === "choice" && q.choices && q.id === "acquisition_intent" && (
+                      <div className="w-full space-y-2">
+                        <div className="flex justify-between text-[10px] text-muted-foreground px-1">
+                          <span>🟢 Conservative</span>
+                          <span>🔴 Predator</span>
+                        </div>
+                        <div className="relative h-3 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, hsl(var(--chart-2)), hsl(var(--chart-4)), hsl(var(--destructive)))" }}>
+                          {(() => {
+                            const idx = (q.choices || []).indexOf(answers[q.id] || "");
+                            if (idx < 0) return null;
+                            const pct = (idx / ((q.choices || []).length - 1)) * 100;
+                            return <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-background border-2 border-foreground shadow-md transition-all" style={{ left: `calc(${pct}% - 8px)` }} />;
+                          })()}
+                        </div>
+                        <div className="flex justify-between gap-1">
+                          {q.choices.map((c, i) => (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => toggleChoice(q.id, c)}
+                              className={`flex-1 text-[10px] py-1.5 rounded-md border transition-colors text-center ${
+                                answers[q.id] === c
+                                  ? "bg-primary text-primary-foreground border-primary font-bold"
+                                  : "border-border hover:bg-muted"
+                              }`}
+                            >
+                              {c}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {q.type === "choice" && q.choices && q.id !== "acquisition_intent" && (
                       <div className="flex flex-wrap gap-1.5">
                         {q.choices.map((c) => (
                           <button

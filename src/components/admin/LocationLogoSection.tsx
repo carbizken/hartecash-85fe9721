@@ -28,6 +28,7 @@ const LocationLogoSection = ({ location, dealershipId, onUpdate }: LocationLogoS
   const { toast } = useToast();
   const [uploading, setUploading] = useState<string | null>(null);
   const corpInputRef = useRef<HTMLInputElement>(null);
+  const corpDarkInputRef = useRef<HTMLInputElement>(null);
   const oemInputRef = useRef<HTMLInputElement>(null);
 
   const uploadLogo = async (file: File, path: string): Promise<string | null> => {

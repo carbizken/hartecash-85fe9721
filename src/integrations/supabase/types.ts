@@ -1588,6 +1588,11 @@ export type Database = {
           photo_overlay_color: string
           price_guarantee_days: number
           primary_color: string
+          referral_program_enabled: boolean
+          referral_reward_sell_amount: number
+          referral_reward_sell_enabled: boolean
+          referral_reward_trade_amount: number
+          referral_reward_trade_enabled: boolean
           review_request_message: string
           review_request_subject: string
           service_hero_headline: string
@@ -1648,6 +1653,11 @@ export type Database = {
           photo_overlay_color?: string
           price_guarantee_days?: number
           primary_color?: string
+          referral_program_enabled?: boolean
+          referral_reward_sell_amount?: number
+          referral_reward_sell_enabled?: boolean
+          referral_reward_trade_amount?: number
+          referral_reward_trade_enabled?: boolean
           review_request_message?: string
           review_request_subject?: string
           service_hero_headline?: string
@@ -1708,6 +1718,11 @@ export type Database = {
           photo_overlay_color?: string
           price_guarantee_days?: number
           primary_color?: string
+          referral_program_enabled?: boolean
+          referral_reward_sell_amount?: number
+          referral_reward_sell_enabled?: boolean
+          referral_reward_trade_amount?: number
+          referral_reward_trade_enabled?: boolean
           review_request_message?: string
           review_request_subject?: string
           service_hero_headline?: string

@@ -194,7 +194,7 @@ const EmbedToolkit = () => {
                   ))}
                 </SelectContent>
               </Select>
-              {selectedLocationId && (
+              {selectedLocationId && selectedLocationId !== "__all__" && (
                 <p className="text-[11px] text-primary font-medium">
                   ✓ Leads from this embed will be tagged to {selectedLocLabel?.name} — no store selection shown to customers.
                 </p>

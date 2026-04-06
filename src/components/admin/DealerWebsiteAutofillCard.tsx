@@ -60,6 +60,8 @@ interface ScrapedDealerInfo {
   num_locations?: string;
   hero_headline?: string;
   hero_subtext?: string;
+  about_story?: string;
+  about_hero_headline?: string;
   oem_brands?: string[];
   staff_emails?: string[];
   staff_phones?: string[];

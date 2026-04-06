@@ -262,6 +262,7 @@ export type Database = {
           created_at: string
           dealership_id: string
           id: string
+          max_locations: number
           onboarded_by: string | null
           onboarding_answers: Json | null
           onboarding_signature_dealer: string | null
@@ -281,6 +282,7 @@ export type Database = {
           created_at?: string
           dealership_id?: string
           id?: string
+          max_locations?: number
           onboarded_by?: string | null
           onboarding_answers?: Json | null
           onboarding_signature_dealer?: string | null
@@ -300,6 +302,7 @@ export type Database = {
           created_at?: string
           dealership_id?: string
           id?: string
+          max_locations?: number
           onboarded_by?: string | null
           onboarding_answers?: Json | null
           onboarding_signature_dealer?: string | null

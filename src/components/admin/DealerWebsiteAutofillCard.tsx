@@ -343,8 +343,29 @@ export default function DealerWebsiteAutofillCard({
       if (isFilledText(scraped.about_mission)) aboutItems.push({ label: "Mission", value: scraped.about_mission, isNew: true });
       if (Array.isArray(scraped.about_values_list) && scraped.about_values_list.length > 0) aboutItems.push({ label: "Values", value: scraped.about_values_list.join(", "), isNew: true });
       if (Array.isArray(scraped.certifications) && scraped.certifications.length > 0) aboutItems.push({ label: "Certifications", value: scraped.certifications.join(", "), isNew: true });
+      if (isFilledText(scraped.community_involvement)) aboutItems.push({ label: "Community", value: scraped.community_involvement.slice(0, 150) + (scraped.community_involvement.length > 150 ? "…" : ""), isNew: true });
       if (aboutItems.length > 0) {
         categories.push({ label: "About Us", icon: FileText, items: aboutItems, section: "site-config" });
+      }
+
+      // Milestones / Timeline
+      if (Array.isArray(scraped.about_milestones) && scraped.about_milestones.length > 0) {
+        const milestoneItems = scraped.about_milestones
+          .filter(m => m.year && m.label)
+          .map(m => ({ label: m.year!, value: m.label!, isNew: true }));
+        if (milestoneItems.length > 0) {
+          categories.push({ label: `Timeline (${milestoneItems.length} milestones)`, icon: Clock, items: milestoneItems, section: "site-config" });
+        }
+      }
+
+      // Service Offerings
+      if (Array.isArray(scraped.service_offerings) && scraped.service_offerings.length > 0) {
+        categories.push({
+          label: "Services Offered",
+          icon: Building2,
+          items: scraped.service_offerings.map(s => ({ label: s, value: "✓", isNew: true })),
+          section: "site-config",
+        });
       }
 
       // Social & Reviews

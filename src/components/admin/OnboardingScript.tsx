@@ -135,17 +135,12 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    title: "10. Offer & Pricing",
+    title: "10. Acquisition Strategy",
     icon: "💵",
     questions: [
-      { id: "value_basis", label: "Value Basis", type: "choice", choices: ["Wholesale Average", "Trade-In Average", "Wholesale Clean"] },
-      { id: "dealer_pack", label: "Used Car Pack ($)", type: "text" },
-      { id: "recon_cost", label: "Default Recon Cost ($)", type: "text" },
-      { id: "hide_pack", label: "Hide pack from appraisal tool?", type: "choice", choices: ["Yes", "No"] },
-      { id: "global_adj", label: "Global Adjustment %", type: "text", hint: "e.g. -5" },
-      { id: "regional_adj", label: "Regional Adjustment %", type: "text" },
-      { id: "offer_floor", label: "Offer Floor ($)", type: "text", hint: "Minimum offer amount" },
-      { id: "offer_ceiling", label: "Offer Ceiling ($)", type: "text", hint: "Leave blank for no cap" },
+      { id: "acquisition_intent", label: "How aggressive should offers be?", type: "choice", choices: ["Conservative", "Market", "Competitive", "Aggressive", "Predator"], hint: "Conservative = own it cheap. Market = fair trade value. Competitive = win more deals. Aggressive = top-dollar sight-unseen. Predator = highest offer, adjust at inspection." },
+      { id: "pricing_model", label: "Starting Pricing Model", type: "choice", choices: ["Default"], hint: "Additional models can be created in Offer Logic after onboarding." },
+      { id: "pricing_notes", label: "Any special pricing instructions?", type: "multiline", hint: "e.g. 'Never go above $30k on trucks' or 'Match Carvana within $200'" },
     ],
   },
   {

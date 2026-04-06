@@ -52,6 +52,7 @@ const AboutPage = () => {
   const heroHeadline = config.about_hero_headline || "Our Story";
   const heroSubtext = config.about_hero_subtext || "We're passionate about helping drivers get the most value for their vehicles — no haggling, no stress.";
   const customStory = config.about_story || DEFAULT_STORY;
+  const aboutImage = (config as any).about_image_url || "";
 
   useEffect(() => {
     const fetchLocations = async () => {

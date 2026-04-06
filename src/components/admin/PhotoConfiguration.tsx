@@ -160,10 +160,11 @@ const PhotoConfiguration = () => {
         <div>
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
             <Camera className="w-5 h-5 text-primary" />
-            GhostCar Settings
+            Photo Upload — GhostCar Overlay Settings
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Configure overlay colors, customer permissions, and which photo shots are enabled.
+            These settings control the <strong>camera overlay</strong> customers see when uploading vehicle photos — the transparent silhouette guide that helps them frame each shot.
+            This does <em>not</em> affect the vehicle display image on the offer page (that's configured under Site Configuration → Vehicle Display Image).
           </p>
         </div>
         <Badge variant="secondary">Dealer admin</Badge>

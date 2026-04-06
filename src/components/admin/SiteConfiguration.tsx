@@ -94,6 +94,11 @@ const DEFAULT_CONFIG: SiteConfig = {
   assign_buying_center: false,
   buying_center_location_id: null,
   vehicle_image_angle: "three_quarter",
+  referral_program_enabled: false,
+  referral_reward_sell_enabled: false,
+  referral_reward_sell_amount: 0,
+  referral_reward_trade_enabled: false,
+  referral_reward_trade_amount: 0,
 };
 
 interface SectionProps {

@@ -186,7 +186,7 @@ const EmbedToolkit = () => {
                   <SelectValue placeholder="All locations (auto-assign by ZIP)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All locations (auto-assign)</SelectItem>
+                  <SelectItem value="__all__">All locations (auto-assign)</SelectItem>
                   {locations.map((loc) => (
                     <SelectItem key={loc.id} value={loc.id}>
                       {loc.name} — {loc.city}, {loc.state}

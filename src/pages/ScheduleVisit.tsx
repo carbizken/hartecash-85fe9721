@@ -440,7 +440,18 @@ const ScheduleVisit = () => {
                 </div>
               </div>
 
-              {locations.length > 1 && (
+              {lockedStoreId ? (
+                <div className="space-y-2">
+                  <Label>Store Location</Label>
+                  <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                    {(() => {
+                      const loc = locations.find(l => l.id === lockedStoreId);
+                      return loc ? `${loc.name} — ${loc.city}, ${loc.state}` : "Assigned Location";
+                    })()}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">This location was set based on where your lead originated.</p>
+                </div>
+              ) : locations.length > 1 && (
                 <div className="space-y-2">
                   <Label htmlFor="store_location">Preferred Location *</Label>
                   <select

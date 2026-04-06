@@ -314,6 +314,39 @@ const AboutPageConfig = () => {
                         className="font-mono text-xs"
                       />
                     </div>
+                    {/* Location image upload */}
+                    <div>
+                      <Label className="text-xs">Location Photo</Label>
+                      <p className="text-[10px] text-muted-foreground mb-2">Building exterior, team photo, or storefront image.</p>
+                      <div className="border border-border rounded-lg p-3 bg-muted/30 flex flex-col items-center gap-2 min-h-[80px]">
+                        {loc.about_image_url ? (
+                          <div className="relative">
+                            <img src={loc.about_image_url} alt="Location" className="max-h-24 rounded-md object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => updateLocation(loc.id, "about_image_url", "")}
+                              className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                            >×</button>
+                          </div>
+                        ) : (
+                          <ImagePlus className="w-8 h-8 text-muted-foreground/40" />
+                        )}
+                        <label className="cursor-pointer text-xs text-primary hover:underline">
+                          {loc.about_image_url ? "Replace" : "Upload"}
+                          <input type="file" accept="image/*" className="hidden" onChange={e => {
+                            const f = e.target.files?.[0];
+                            if (f) handleImageUpload(f, (url) => updateLocation(loc.id, "about_image_url", url));
+                            e.target.value = "";
+                          }} />
+                        </label>
+                      </div>
+                      <Input
+                        value={loc.about_image_url}
+                        onChange={(e) => updateLocation(loc.id, "about_image_url", e.target.value)}
+                        placeholder="Or paste URL"
+                        className="text-xs h-8 mt-1"
+                      />
+                    </div>
                   </div>
                 )}
               </div>

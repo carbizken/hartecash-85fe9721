@@ -61,6 +61,16 @@ const LocationLogoSection = ({ location, dealershipId, onUpdate }: LocationLogoS
     if (corpInputRef.current) corpInputRef.current.value = "";
   };
 
+  const handleCorpDarkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading("corporate_dark");
+    const url = await uploadLogo(file, "corporate_dark");
+    if (url) onUpdate("corporate_logo_dark_url", url);
+    setUploading(null);
+    if (corpDarkInputRef.current) corpDarkInputRef.current.value = "";
+  };
+
   const handleOemUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

@@ -56,6 +56,7 @@ const OnboardingChecklist = ({ onNavigate, dealershipId: propDealershipId }: Onb
     const locCount = locRes.data?.length || 0;
     const notif = notifRes.data;
     const staffCount = staffRes.data?.length || 0;
+    const onboardingAnswers = (acct as any)?.onboarding_answers as Record<string, string> | null;
 
     const checks: CheckItem[] = [
       {
@@ -64,6 +65,13 @@ const OnboardingChecklist = ({ onNavigate, dealershipId: propDealershipId }: Onb
         icon: Building2,
         done: !!(acct?.architecture && acct?.bdc_model && acct?.start_date),
         section: "onboarding",
+      },
+      {
+        key: "acquisition_strategy",
+        label: "Acquisition strategy selected",
+        icon: DollarSign,
+        done: !!(onboardingAnswers?.acquisition_intent?.trim()),
+        section: "onboarding-script",
       },
       {
         key: "branding",

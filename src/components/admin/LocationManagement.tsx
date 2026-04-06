@@ -191,7 +191,7 @@ const LocationManagement = () => {
                 <GripVertical className="w-4 h-4 text-muted-foreground/40" />
                 <button onClick={() => moveDown(index)} disabled={index === locations.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs">▼</button>
               </div>
-              <div className="flex-1 grid grid-cols-3 gap-2">
+              <div className="flex-1 grid grid-cols-4 gap-2">
                 <Input
                   value={loc.name}
                   onChange={(e) => updateLocation(loc.id, "name", e.target.value)}
@@ -210,6 +210,25 @@ const LocationManagement = () => {
                   placeholder="State"
                   className="text-sm w-20"
                 />
+                <Select
+                  value={loc.location_type || "primary"}
+                  onValueChange={(val) => setLocations(prev => prev.map(l => l.id === loc.id ? { ...l, location_type: val } : l))}
+                >
+                  <SelectTrigger className="text-xs h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOCATION_TYPE_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        <span className="flex items-center gap-1.5">
+                          <opt.icon className="w-3 h-3" />
+                          {opt.label}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5" title="Active">

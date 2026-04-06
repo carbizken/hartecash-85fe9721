@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Save, Loader2, ChevronDown, Building2, Palette, Type, BarChart3, Upload, Star, Sparkles, Eye, ScanLine, MapPin, FileText, GitCompare, Clock, Facebook, Instagram, Youtube, Globe, Plus, Trash2 } from "lucide-react";
+import { Save, Loader2, ChevronDown, Building2, Palette, Type, BarChart3, Upload, Star, Sparkles, Eye, ScanLine, MapPin, FileText, GitCompare, Clock, Facebook, Instagram, Youtube, Globe, Plus, Trash2, Gift } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CalculatingOffer from "@/components/CalculatingOffer";
 import AboutPageConfig from "@/components/admin/AboutPageConfig";
@@ -51,6 +51,11 @@ interface SiteConfig {
   assign_buying_center: boolean;
   buying_center_location_id: string | null;
   vehicle_image_angle: string;
+  referral_program_enabled: boolean;
+  referral_reward_sell_enabled: boolean;
+  referral_reward_sell_amount: number;
+  referral_reward_trade_enabled: boolean;
+  referral_reward_trade_amount: number;
 }
 
 const DEFAULT_CONFIG: SiteConfig = {
@@ -89,6 +94,11 @@ const DEFAULT_CONFIG: SiteConfig = {
   assign_buying_center: false,
   buying_center_location_id: null,
   vehicle_image_angle: "three_quarter",
+  referral_program_enabled: false,
+  referral_reward_sell_enabled: false,
+  referral_reward_sell_amount: 0,
+  referral_reward_trade_enabled: false,
+  referral_reward_trade_amount: 0,
 };
 
 interface SectionProps {
@@ -814,6 +824,102 @@ const SiteConfiguration = () => {
         </div>
       </Section>
       )}
+
+      {/* Referral Program */}
+      <Section icon={Gift} title="Referral Program">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm font-semibold">Enable Referral Program</Label>
+              <p className="text-xs text-muted-foreground">Allow customers to refer others and earn rewards</p>
+            </div>
+            <Switch
+              checked={config.referral_program_enabled}
+              onCheckedChange={v => {
+                setConfig(prev => {
+                  const next = { ...prev, referral_program_enabled: v };
+                  setHasChanges(JSON.stringify(next) !== JSON.stringify(savedConfig));
+                  return next;
+                });
+              }}
+            />
+          </div>
+
+          {config.referral_program_enabled && (
+            <div className="space-y-4 pl-1 border-l-2 border-primary/20 ml-2 pl-4">
+              {/* Sell Reward */}
+              <div className="space-y-3 p-4 bg-muted/40 rounded-xl border border-border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm font-semibold">Reward: Referred Customer Sells Us Their Car</Label>
+                    <p className="text-xs text-muted-foreground">Pay the referrer when the person they sent sells us a vehicle</p>
+                  </div>
+                  <Switch
+                    checked={config.referral_reward_sell_enabled}
+                    onCheckedChange={v => {
+                      setConfig(prev => {
+                        const next = { ...prev, referral_reward_sell_enabled: v };
+                        setHasChanges(JSON.stringify(next) !== JSON.stringify(savedConfig));
+                        return next;
+                      });
+                    }}
+                  />
+                </div>
+                {config.referral_reward_sell_enabled && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold">Reward Amount ($)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={config.referral_reward_sell_amount}
+                      onChange={e => update("referral_reward_sell_amount", Number(e.target.value))}
+                      className="max-w-[160px]"
+                      placeholder="e.g. 200"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Trade-In Reward */}
+              <div className="space-y-3 p-4 bg-muted/40 rounded-xl border border-border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm font-semibold">Bonus: Referred Customer Also Trades In</Label>
+                    <p className="text-xs text-muted-foreground">Additional reward when the referred person buys a new or preowned vehicle from you</p>
+                  </div>
+                  <Switch
+                    checked={config.referral_reward_trade_enabled}
+                    onCheckedChange={v => {
+                      setConfig(prev => {
+                        const next = { ...prev, referral_reward_trade_enabled: v };
+                        setHasChanges(JSON.stringify(next) !== JSON.stringify(savedConfig));
+                        return next;
+                      });
+                    }}
+                  />
+                </div>
+                {config.referral_reward_trade_enabled && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold">Bonus Amount ($)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={config.referral_reward_trade_amount}
+                      onChange={e => update("referral_reward_trade_amount", Number(e.target.value))}
+                      className="max-w-[160px]"
+                      placeholder="e.g. 100"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <p className="text-xs text-muted-foreground italic">
+                Example: $200 when a referred customer sells us their car + $100 bonus if they also purchase a vehicle = $300 total reward.
+              </p>
+            </div>
+          )}
+        </div>
+      </Section>
 
       {/* About Page */}
       <Section icon={FileText} title="About Page Content">

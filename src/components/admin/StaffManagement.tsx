@@ -22,6 +22,12 @@ interface StaffMember {
   role_id: string;
   phone_number?: string | null;
   profile_image_url?: string | null;
+  location_id?: string | null;
+}
+
+interface DealerLocation {
+  id: string;
+  name: string;
 }
 
 const ROLE_LABELS: Record<string, string> = {

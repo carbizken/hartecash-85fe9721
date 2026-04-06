@@ -64,6 +64,7 @@ const LocationManagement = () => {
   const [zipInputs, setZipInputs] = useState<Record<string, string>>({});
   const [brandInputs, setBrandInputs] = useState<Record<string, string>>({});
   const [excludedBrandInputs, setExcludedBrandInputs] = useState<Record<string, string>>({});
+  const [newLocationType, setNewLocationType] = useState("primary");
 
   const fetchLocations = async () => {
     const { data, error } = await supabase

@@ -51,7 +51,7 @@ const AdminDashboard = () => {
             }}
           />
 
-          <div className="flex-1 px-3 md:px-4 py-4 md:py-6 overflow-auto">
+          <div ref={contentRef} className="flex-1 px-3 md:px-4 py-4 md:py-6 overflow-auto">
             <div className="max-w-[1400px] mx-auto space-y-4">
               <div className="flex items-center justify-between">
                 <AdminBreadcrumbNav activeSection={db.activeSection} onNavigate={db.setActiveSection} />

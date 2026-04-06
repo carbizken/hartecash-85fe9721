@@ -84,6 +84,13 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
   const [offerRulesEarly, setOfferRulesEarly] = useState<OfferRule[]>([]);
   const [promoBonus, setPromoBonus] = useState(0);
 
+  // Pre-set store from embed param
+  useEffect(() => {
+    if (storeParam) {
+      setFormData(prev => ({ ...prev, preferredLocationId: storeParam }));
+    }
+  }, [storeParam]);
+
   // Fetch offer settings and active promos early
   useEffect(() => {
     resolveEffectiveSettings(tenant.dealership_id).then(({ settings, rules }) => {

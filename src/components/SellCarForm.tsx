@@ -57,6 +57,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get("ref") || undefined;
   const repCode = searchParams.get("rep") || undefined;
+  const storeParam = searchParams.get("store") || undefined;
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [vehicleInfo, setVehicleInfo] = useState<VehicleInfo | null>(null);

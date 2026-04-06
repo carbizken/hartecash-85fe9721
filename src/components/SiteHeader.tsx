@@ -21,7 +21,9 @@ const SiteHeader = () => {
   const dealerName = config.dealership_name || "Our Dealership";
 
   const isLandingPage = LANDING_ROUTES.includes(location.pathname);
-  const showCorporate = logos.show_corporate_logo && logos.corporate_logo_url &&
+  const isDark = document.documentElement.classList.contains("dark");
+  const corporateUrl = isDark ? (logos.corporate_logo_url || logos.corporate_logo_dark_url) : (logos.corporate_logo_dark_url || logos.corporate_logo_url);
+  const showCorporate = logos.show_corporate_logo && corporateUrl &&
     (!logos.show_corporate_on_landing_only || isLandingPage);
   const hasOemLogos = logos.oem_logo_urls && logos.oem_logo_urls.length > 0;
   const isStacked = logos.logo_layout === "stacked";
@@ -35,7 +37,7 @@ const SiteHeader = () => {
             {/* Corporate logo */}
             {showCorporate && (
               <img
-                src={logos.corporate_logo_url!}
+                src={corporateUrl!}
                 alt="Corporate"
                 className="h-[40px] md:h-[48px] w-auto object-contain"
               />

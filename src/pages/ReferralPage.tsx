@@ -12,6 +12,7 @@ import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { useTenant } from "@/contexts/TenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTenantBaseUrl } from "@/hooks/useTenantBaseUrl";
 
 const steps = [
   { icon: Users, title: "Sign Up as a Referrer", desc: "Register below with your name, email, and phone. You'll get your own unique referral link." },

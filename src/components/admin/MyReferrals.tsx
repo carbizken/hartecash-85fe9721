@@ -107,7 +107,7 @@ const MyReferrals = ({ staffName }: { staffName: string }) => {
     setSending(true);
 
     const inviteCode = generateInviteCode();
-    const inviteLink = `${window.location.origin}/?ref=${inviteCode}`;
+    const inviteLink = `${tenantBaseUrl}/?ref=${inviteCode}`;
 
     // Create referral record
     await supabase.from("referrals").insert({

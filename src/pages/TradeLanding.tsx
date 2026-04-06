@@ -30,7 +30,6 @@ const TradeLanding = () => {
         path="/trade"
       />
       {!embed && <SiteHeader />}
-      <StoreSelector>
         <main>
           {layout === "offset_right" ? (
             <HeroOffset side="right" leadSource="trade" headlineOverride={tradeHeadline} subtextOverride={tradeSubtext} />

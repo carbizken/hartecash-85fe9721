@@ -155,7 +155,8 @@ const AboutPageConfig = () => {
         about_hero_headline: loc.about_hero_headline || null,
         about_hero_subtext: loc.about_hero_subtext || null,
         about_story: loc.about_story || null,
-        about_image_url: loc.about_image_url || null,
+        about_image_url: loc.about_image_urls[0] || null,
+        about_image_urls: loc.about_image_urls || [],
       } as any)
       .eq("id", loc.id);
 

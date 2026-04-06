@@ -48,7 +48,10 @@ const BDC_OPTIONS = [
 ];
 
 const PLAN_TIERS = [
-  { value: "standard", label: "Standard", cost: 1995 },
+  { value: "standard", label: "Standard (1–2 locations)", cost: 1995 },
+  { value: "multi_store", label: "Multi-Store (3–5 locations)", cost: 2995 },
+  { value: "group", label: "Group (6–10 locations)", cost: 3995 },
+  { value: "enterprise", label: "Enterprise (11+ locations)", cost: 0 },
 ];
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {

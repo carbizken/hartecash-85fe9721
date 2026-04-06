@@ -8,6 +8,7 @@ import AdminSectionRenderer from "@/components/admin/AdminSectionRenderer";
 import RequestAccessDialog from "@/components/admin/RequestAccessDialog";
 import SubmissionDetailSheet from "@/components/admin/SubmissionDetailSheet";
 import { useAdminDashboard } from "@/hooks/useAdminDashboard";
+import { useRef, useEffect } from "react";
 
 const AdminDashboard = () => {
   const db = useAdminDashboard();

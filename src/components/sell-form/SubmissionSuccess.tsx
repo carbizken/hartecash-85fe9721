@@ -21,6 +21,15 @@ const formatCurrency = (n: number) =>
 
 const SubmissionSuccess = ({ uploadUrl, vehicleInfo, nextStep, offerEstimate }: Props) => {
   const { config } = useSiteConfig();
+  const [, setSearchParams] = useSearchParams();
+
+  const handleStoreSelected = useCallback((locationId: string) => {
+    setSearchParams((prev) => {
+      prev.set("store", locationId);
+      return prev;
+    });
+  }, [setSearchParams]);
+
   useEffect(() => {
     const duration = 2000;
     const end = Date.now() + duration;

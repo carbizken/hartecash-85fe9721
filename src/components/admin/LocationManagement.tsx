@@ -99,7 +99,7 @@ const LocationManagement = () => {
       toast({ title: "Failed to add location", variant: "destructive" });
     } else {
       toast({ title: "Location added" });
-      setNewName(""); setNewCity(""); setNewState("CT");
+      setNewName(""); setNewCity(""); setNewState("CT"); setNewLocationType("primary");
       fetchLocations();
     }
   };

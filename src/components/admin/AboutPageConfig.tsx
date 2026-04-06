@@ -111,6 +111,9 @@ const AboutPageConfig = () => {
             about_hero_subtext: l.about_hero_subtext || "",
             about_story: l.about_story || "",
             about_image_url: l.about_image_url || "",
+            about_image_urls: Array.isArray(l.about_image_urls) && l.about_image_urls.length > 0
+              ? l.about_image_urls
+              : (l.about_image_url ? [l.about_image_url] : []),
           }))
         );
       }

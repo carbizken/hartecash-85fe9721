@@ -330,6 +330,23 @@ const StaffManagement = () => {
                 </SelectContent>
               </Select>
             </div>
+            {locations.length > 0 && addRole !== "admin" && (
+              <div className="space-y-2">
+                <Label>Store Location</Label>
+                <Select value={addLocationId} onValueChange={setAddLocationId}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Stores</SelectItem>
+                    {locations.map(loc => (
+                      <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Which store can this employee see leads for?</p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>

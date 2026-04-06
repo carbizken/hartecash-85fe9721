@@ -127,6 +127,30 @@ const StaffManagement = () => {
     setPermGroups((data as any[] || []).map((g: any) => ({ id: g.id, name: g.name, allowed_sections: g.allowed_sections })));
   };
 
+  const fetchLocations = async () => {
+    const { data } = await supabase
+      .from("dealership_locations" as any)
+      .select("id, name")
+      .eq("dealership_id", dealershipId)
+      .eq("is_active", true)
+      .order("sort_order");
+    setLocations((data as any[] || []).map((l: any) => ({ id: l.id, name: l.name })));
+  };
+
+  const handleLocationChange = async (member: StaffMember, locationId: string) => {
+    const newVal = locationId === "all" ? null : locationId;
+    const { error } = await supabase
+      .from("user_roles")
+      .update({ location_id: newVal } as any)
+      .eq("id", member.role_id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Store updated" });
+      setStaff(prev => prev.map(s => s.role_id === member.role_id ? { ...s, location_id: newVal } : s));
+    }
+  };
+
   const handleSaveStaffSections = async (userId: string, sections: string[]) => {
     const { data: existing } = await supabase
       .from("staff_permission_assignments" as any)

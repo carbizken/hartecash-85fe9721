@@ -81,7 +81,7 @@ const AboutPageConfig = () => {
           .maybeSingle(),
         supabase
           .from("dealership_locations")
-          .select("id, name, use_corporate_about, about_hero_headline, about_hero_subtext, about_story")
+          .select("id, name, use_corporate_about, about_hero_headline, about_hero_subtext, about_story, about_image_url")
           .eq("dealership_id", dealershipId)
           .eq("is_active", true)
           .order("sort_order", { ascending: true }),

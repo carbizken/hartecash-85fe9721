@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenantBaseUrl } from "@/hooks/useTenantBaseUrl";
 import { useTenant } from "@/contexts/TenantContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ const STATUS_COLORS: Record<string, string> = {
 const ReferralManagement = () => {
   const { tenant } = useTenant();
   const { toast } = useToast();
+  const tenantBaseUrl = useTenantBaseUrl();
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -99,7 +101,7 @@ const ReferralManagement = () => {
       toast({ title: "No email", description: "This referrer has no email address.", variant: "destructive" });
       return;
     }
-    const referralLink = `${window.location.origin}/?ref=${referral.referral_code}`;
+    const referralLink = `${tenantBaseUrl}/?ref=${referral.referral_code}`;
     await supabase.functions.invoke("send-transactional-email", {
       body: {
         templateName: "referral-invite",
@@ -117,7 +119,7 @@ const ReferralManagement = () => {
   };
 
   const copyLink = (code: string) => {
-    const link = `${window.location.origin}/?ref=${code}`;
+    const link = `${tenantBaseUrl}/?ref=${code}`;
     navigator.clipboard.writeText(link);
     toast({ title: "Copied!", description: "Referral link copied to clipboard." });
   };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenantBaseUrl } from "@/hooks/useTenantBaseUrl";
 import { useTenant } from "@/contexts/TenantContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ const STATUS_COLORS: Record<string, string> = {
 const MyReferrals = ({ staffName }: { staffName: string }) => {
   const { tenant } = useTenant();
   const { toast } = useToast();
+  const tenantBaseUrl = useTenantBaseUrl();
   const [referrals, setReferrals] = useState<MyReferral[]>([]);
   const [loading, setLoading] = useState(true);
   const [staffEmail, setStaffEmail] = useState("");
@@ -47,7 +49,7 @@ const MyReferrals = ({ staffName }: { staffName: string }) => {
   }, []);
 
   const staffCode = `STAFF-${(staffEmail || "unknown").split("@")[0].toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8)}`;
-  const referralLink = `${window.location.origin}/?ref=${staffCode}`;
+  const referralLink = `${tenantBaseUrl}/?ref=${staffCode}`;
 
   const fetchMyReferrals = async () => {
     setLoading(true);
@@ -105,7 +107,7 @@ const MyReferrals = ({ staffName }: { staffName: string }) => {
     setSending(true);
 
     const inviteCode = generateInviteCode();
-    const inviteLink = `${window.location.origin}/?ref=${inviteCode}`;
+    const inviteLink = `${tenantBaseUrl}/?ref=${inviteCode}`;
 
     // Create referral record
     await supabase.from("referrals").insert({

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenantBaseUrl } from "@/hooks/useTenantBaseUrl";
 import { useTenant } from "@/contexts/TenantContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ const DEFAULT_MESSAGE = "Hey! I can get you a cash offer on your vehicle in unde
 const MyLeadLink = () => {
   const { tenant } = useTenant();
   const { toast } = useToast();
+  const tenantBaseUrl = useTenantBaseUrl();
   const { config: siteConfig } = useSiteConfig();
   const [staffEmail, setStaffEmail] = useState("");
   const [showQR, setShowQR] = useState(false);
@@ -43,7 +45,7 @@ const MyLeadLink = () => {
   const repCode = staffEmail
     ? staffEmail.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "")
     : "";
-  const leadLink = `${window.location.origin}/trade?rep=${repCode}`;
+  const leadLink = `${tenantBaseUrl}/trade?rep=${repCode}`;
 
   useEffect(() => {
     if (!repCode) return;

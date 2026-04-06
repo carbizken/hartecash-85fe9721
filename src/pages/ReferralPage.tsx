@@ -12,6 +12,7 @@ import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { useTenant } from "@/contexts/TenantContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTenantBaseUrl } from "@/hooks/useTenantBaseUrl";
 
 const steps = [
   { icon: Users, title: "Sign Up as a Referrer", desc: "Register below with your name, email, and phone. You'll get your own unique referral link." },
@@ -31,6 +32,7 @@ const ReferralPage = () => {
   const { config } = useSiteConfig();
   const { tenant } = useTenant();
   const { toast } = useToast();
+  const tenantBaseUrl = useTenantBaseUrl();
   const [searchParams] = useSearchParams();
   const dealerName = config.dealership_name || "Our Dealership";
 
@@ -56,7 +58,7 @@ const ReferralPage = () => {
     if (!name.trim() || !email.trim()) return;
     setSubmitting(true);
     const code = generateCode();
-    const link = `${window.location.origin}/?ref=${code}`;
+    const link = `${tenantBaseUrl}/?ref=${code}`;
 
     const { error } = await supabase.from("referrals").insert({
       dealership_id: tenant.dealership_id,

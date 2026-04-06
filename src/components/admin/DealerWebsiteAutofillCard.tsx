@@ -545,6 +545,19 @@ export default function DealerWebsiteAutofillCard({
         }
       }
 
+      // Execute mutations
+      const mutations: any[] = [];
+      if (Object.keys(configUpdates).length > 0) {
+        mutations.push(supabase.from("site_config").update(configUpdates).eq("dealership_id", dealershipId));
+      }
+      if (Object.keys(accountUpdates).length > 0) {
+        if (currentAccount?.id) {
+          mutations.push(supabase.from("dealer_accounts").update(accountUpdates).eq("id", currentAccount.id));
+        } else {
+          mutations.push(supabase.from("dealer_accounts").insert({ dealership_id: dealershipId, ...accountUpdates } as never));
+        }
+      }
+
       // Auto-populate notification recipients from scraped staff emails
       const allStaffEmails = new Set<string>();
       if (Array.isArray(scraped.staff_emails)) scraped.staff_emails.forEach(e => allStaffEmails.add(e.trim()));
@@ -559,19 +572,6 @@ export default function DealerWebsiteAutofillCard({
           mutations.push(supabase.from("notification_settings").update({
             email_recipients: Array.from(allStaffEmails),
           }).eq("id", notifData.id));
-        }
-      }
-
-      // Execute mutations
-      const mutations: any[] = [];
-      if (Object.keys(configUpdates).length > 0) {
-        mutations.push(supabase.from("site_config").update(configUpdates).eq("dealership_id", dealershipId));
-      }
-      if (Object.keys(accountUpdates).length > 0) {
-        if (currentAccount?.id) {
-          mutations.push(supabase.from("dealer_accounts").update(accountUpdates).eq("id", currentAccount.id));
-        } else {
-          mutations.push(supabase.from("dealer_accounts").insert({ dealership_id: dealershipId, ...accountUpdates } as never));
         }
       }
 

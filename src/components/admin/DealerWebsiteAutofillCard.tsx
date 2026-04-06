@@ -310,6 +310,17 @@ export default function DealerWebsiteAutofillCard({
         categories.push({ label: "Hero Content", icon: FileText, items: heroItems, section: "site-config" });
       }
 
+      // About Us
+      const aboutItems: PreviewCategory["items"] = [];
+      if (isFilledText(scraped.about_story)) aboutItems.push({ label: "About Story", value: scraped.about_story.slice(0, 200) + (scraped.about_story.length > 200 ? "…" : ""), isNew: !isFilledText((cfg as any)?.about_story) });
+      if (isFilledText(scraped.about_hero_headline)) aboutItems.push({ label: "About Headline", value: scraped.about_hero_headline, isNew: !isFilledText((cfg as any)?.about_hero_headline) });
+      if (isFilledText(scraped.about_mission)) aboutItems.push({ label: "Mission", value: scraped.about_mission, isNew: true });
+      if (Array.isArray(scraped.about_values_list) && scraped.about_values_list.length > 0) aboutItems.push({ label: "Values", value: scraped.about_values_list.join(", "), isNew: true });
+      if (Array.isArray(scraped.certifications) && scraped.certifications.length > 0) aboutItems.push({ label: "Certifications", value: scraped.certifications.join(", "), isNew: true });
+      if (aboutItems.length > 0) {
+        categories.push({ label: "About Us", icon: FileText, items: aboutItems, section: "site-config" });
+      }
+
       // Social & Reviews
       const socialItems: PreviewCategory["items"] = [];
       if (isFilledText(scraped.google_review)) socialItems.push({ label: "Google Reviews", value: scraped.google_review, isNew: !isFilledText(cfg?.google_review_url) });
@@ -323,6 +334,7 @@ export default function DealerWebsiteAutofillCard({
 
       // Stats
       const statsItems: PreviewCategory["items"] = [];
+      if (isFilledText(scraped.established_year)) statsItems.push({ label: "Established", value: scraped.established_year, isNew: !(cfg as any)?.established_year });
       if (isFilledText(scraped.stats_rating)) statsItems.push({ label: "Rating", value: scraped.stats_rating, isNew: !isFilledText(cfg?.stats_rating) });
       if (isFilledText(scraped.stats_reviews_count)) statsItems.push({ label: "Reviews", value: scraped.stats_reviews_count, isNew: !isFilledText(cfg?.stats_reviews_count) });
       if (isFilledText(scraped.stats_years_in_business)) statsItems.push({ label: "Years in Business", value: scraped.stats_years_in_business, isNew: !isFilledText(cfg?.stats_years_in_business) });

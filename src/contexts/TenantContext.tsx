@@ -98,7 +98,7 @@ async function resolveTenant(): Promise<TenantInfo> {
 }
 
 export const TenantProvider = ({ children }: { children: ReactNode }) => {
-  const [tenant, setTenant] = useState<TenantInfo>(cachedTenant || DEFAULT_TENANT);
+  const [tenant, setTenant] = useState<TenantInfo>(cachedTenant?.tenant || DEFAULT_TENANT);
   const [loading, setLoading] = useState(!cachedTenant);
 
   useEffect(() => {

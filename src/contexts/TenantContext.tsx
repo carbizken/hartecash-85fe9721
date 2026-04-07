@@ -27,7 +27,8 @@ const TenantContext = createContext<TenantContextValue>({
 
 export const useTenant = () => useContext(TenantContext);
 
-let cachedTenant: TenantInfo | null = null;
+/** Cache keyed by hostname to avoid re-fetching on the same domain */
+let cachedTenant: { hostname: string; tenant: TenantInfo } | null = null;
 
 /**
  * Resolves the current tenant from the hostname.
@@ -41,9 +42,9 @@ let cachedTenant: TenantInfo | null = null;
  * that specific store's branding overrides instead of corporate defaults.
  */
 async function resolveTenant(): Promise<TenantInfo> {
-  if (cachedTenant) return cachedTenant;
-
   const hostname = window.location.hostname;
+
+  if (cachedTenant && cachedTenant.hostname === hostname) return cachedTenant.tenant;
 
   // Skip resolution for localhost / preview domains — use default
   if (
@@ -52,7 +53,7 @@ async function resolveTenant(): Promise<TenantInfo> {
     hostname.includes("lovable.app") ||
     hostname.includes("lovable.dev")
   ) {
-    cachedTenant = DEFAULT_TENANT;
+    cachedTenant = { hostname, tenant: DEFAULT_TENANT };
     return DEFAULT_TENANT;
   }
 
@@ -68,7 +69,7 @@ async function resolveTenant(): Promise<TenantInfo> {
       display_name: domainMatch[0].display_name,
       location_id: domainMatch[0].location_id ?? null,
     };
-    cachedTenant = t;
+    cachedTenant = { hostname, tenant: t };
     return t;
   }
 
@@ -86,18 +87,18 @@ async function resolveTenant(): Promise<TenantInfo> {
         display_name: slugMatch[0].display_name,
         location_id: slugMatch[0].location_id ?? null,
       };
-      cachedTenant = t;
+      cachedTenant = { hostname, tenant: t };
       return t;
     }
   }
 
   // 3. Fallback to default
-  cachedTenant = DEFAULT_TENANT;
+  cachedTenant = { hostname, tenant: DEFAULT_TENANT };
   return DEFAULT_TENANT;
 }
 
 export const TenantProvider = ({ children }: { children: ReactNode }) => {
-  const [tenant, setTenant] = useState<TenantInfo>(cachedTenant || DEFAULT_TENANT);
+  const [tenant, setTenant] = useState<TenantInfo>(cachedTenant?.tenant || DEFAULT_TENANT);
   const [loading, setLoading] = useState(!cachedTenant);
 
   useEffect(() => {

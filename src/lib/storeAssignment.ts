@@ -15,18 +15,19 @@ interface LocationWithZips {
   use_bdc: boolean;
 }
 
-let cachedLocations: LocationWithZips[] | null = null;
+let cachedLocations: Record<string, LocationWithZips[]> = {};
 
-async function getLocations(): Promise<LocationWithZips[]> {
-  if (!cachedLocations) {
+async function getLocations(dealershipId: string = "default"): Promise<LocationWithZips[]> {
+  if (!cachedLocations[dealershipId]) {
     const { data } = await supabase
       .from("dealership_locations")
       .select("id, name, city, state, zip_codes, oem_brands, center_zip, coverage_radius_miles, all_brands, excluded_oem_brands, temporarily_offline, use_bdc")
+      .eq("dealership_id", dealershipId)
       .eq("is_active", true)
       .order("sort_order");
-    cachedLocations = (data as any) || [];
+    cachedLocations[dealershipId] = (data as any) || [];
   }
-  return cachedLocations!;
+  return cachedLocations[dealershipId];
 }
 
 /** Returns only locations that are not temporarily offline */
@@ -37,10 +38,10 @@ function getAvailableLocations(locations: LocationWithZips[]): LocationWithZips[
 /**
  * Find the best matching dealership location for a given customer ZIP code.
  */
-export async function findStoreByZip(customerZip: string): Promise<string | null> {
+export async function findStoreByZip(customerZip: string, dealershipId: string = "default"): Promise<string | null> {
   if (!customerZip || customerZip.length < 5) return null;
   const zip5 = customerZip.slice(0, 5);
-  const allLocations = await getLocations();
+  const allLocations = await getLocations(dealershipId);
   const locations = getAvailableLocations(allLocations);
 
   if (locations.length === 0) return allLocations.length > 0 ? allLocations[0].id : null;
@@ -72,9 +73,9 @@ export async function findStoreByZip(customerZip: string): Promise<string | null
  * Find the best matching dealership by OEM brand of the vehicle being sold.
  * Falls back to null if no brand match found.
  */
-export async function findStoreByBrand(vehicleMake: string): Promise<string | null> {
+export async function findStoreByBrand(vehicleMake: string, dealershipId: string = "default"): Promise<string | null> {
   if (!vehicleMake) return null;
-  const allLocations = await getLocations();
+  const allLocations = await getLocations(dealershipId);
   const locations = getAvailableLocations(allLocations);
   const make = vehicleMake.toLowerCase();
 
@@ -104,8 +105,9 @@ export async function findStoreByBrand(vehicleMake: string): Promise<string | nu
 async function applyBdcRedirect(
   locationId: string,
   buyingCenterLocationId?: string | null,
+  dealershipId: string = "default",
 ): Promise<string> {
-  const allLocations = await getLocations();
+  const allLocations = await getLocations(dealershipId);
   const loc = allLocations.find(l => l.id === locationId);
   if (loc?.use_bdc && buyingCenterLocationId) {
     return buyingCenterLocationId;
@@ -119,10 +121,13 @@ export async function resolveStoreAssignment(
     buying_center_location_id?: string | null;
     assign_oem_brand_match?: boolean;
     assign_auto_zip?: boolean;
+    dealership_id?: string;
   },
   vehicleMake: string,
   customerZip: string,
 ): Promise<string | null> {
+  const dealershipId = config.dealership_id || "default";
+
   // 1. Buying center overrides everything (group-level)
   if (config.assign_buying_center && config.buying_center_location_id) {
     return config.buying_center_location_id;
@@ -130,14 +135,14 @@ export async function resolveStoreAssignment(
 
   // 2. OEM brand match
   if (config.assign_oem_brand_match) {
-    const brandMatch = await findStoreByBrand(vehicleMake);
-    if (brandMatch) return applyBdcRedirect(brandMatch, config.buying_center_location_id);
+    const brandMatch = await findStoreByBrand(vehicleMake, dealershipId);
+    if (brandMatch) return applyBdcRedirect(brandMatch, config.buying_center_location_id, dealershipId);
   }
 
   // 3. ZIP auto-assign
   if (config.assign_auto_zip !== false) {
-    const zipMatch = await findStoreByZip(customerZip);
-    if (zipMatch) return applyBdcRedirect(zipMatch, config.buying_center_location_id);
+    const zipMatch = await findStoreByZip(customerZip, dealershipId);
+    if (zipMatch) return applyBdcRedirect(zipMatch, config.buying_center_location_id, dealershipId);
   }
 
   return null;
@@ -146,6 +151,10 @@ export async function resolveStoreAssignment(
 /**
  * Clear the cached locations (call after admin updates locations).
  */
-export function clearStoreCache() {
-  cachedLocations = null;
+export function clearStoreCache(dealershipId?: string) {
+  if (dealershipId) {
+    delete cachedLocations[dealershipId];
+  } else {
+    cachedLocations = {};
+  }
 }

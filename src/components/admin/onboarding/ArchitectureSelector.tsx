@@ -89,13 +89,13 @@ const ArchitectureSelector = ({ selected, onSelect }: Props) => {
               {/* Icon */}
               <div
                 className={cn(
-                  "flex items-center justify-center w-12 h-12 rounded-xl shrink-0 transition-colors",
+                  "flex items-center justify-center w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl shrink-0 transition-colors",
                   isSelected
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
                 )}
               >
-                <Icon className="w-6 h-6" />
+                <Icon className="w-4 h-4 sm:w-6 sm:h-6" />
               </div>
 
               {/* Content */}

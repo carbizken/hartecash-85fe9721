@@ -313,6 +313,10 @@ const SuperAdminDashboard = () => {
                 </button>
               ))}
             </div>
+            {/* Add Tenant */}
+            <Button size="sm" onClick={() => setShowAddTenant(true)} className="gap-1.5 text-xs">
+              <Plus className="w-3.5 h-3.5" /> Add Tenant
+            </Button>
             {/* Dark/Light toggle */}
             <button
               onClick={() => setDark(!dark)}

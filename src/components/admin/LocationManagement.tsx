@@ -302,7 +302,7 @@ const LocationManagement = () => {
               className={`rounded-xl border transition-all ${loc.is_active ? "bg-card border-border shadow-sm" : "bg-muted/30 border-border/40 opacity-60"}`}
             >
               {/* Collapsed header row */}
-              <div className="flex items-center gap-3 p-3">
+              <div className="flex items-center gap-3 p-3 cursor-pointer" onClick={() => toggleExpanded(loc.id)}>
                 {/* Reorder */}
                 <div className="flex flex-col gap-0.5">
                   <button onClick={() => moveUp(index)} disabled={index === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs">▲</button>

@@ -1217,7 +1217,11 @@ const InspectionSheet = () => {
               <p className="text-xs opacity-80">{vehicleTitle} • VIN: {submission.vin || "N/A"}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/20 gap-1"
+              onClick={handleRefreshInspection} disabled={refreshing}>
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} /> {refreshing ? "Syncing…" : "Sync"}
+            </Button>
             {/* #4 — Progress Ring */}
             <ProgressRing progress={progressPct} size={42} strokeWidth={4} />
             <div className="hidden md:block text-xs text-right">

@@ -151,6 +151,10 @@ export async function resolveStoreAssignment(
 /**
  * Clear the cached locations (call after admin updates locations).
  */
-export function clearStoreCache() {
-  cachedLocations = null;
+export function clearStoreCache(dealershipId?: string) {
+  if (dealershipId) {
+    delete cachedLocations[dealershipId];
+  } else {
+    cachedLocations = {};
+  }
 }

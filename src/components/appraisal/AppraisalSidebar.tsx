@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
+import type { RetailStats } from "@/components/admin/RetailMarketPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,13 +39,14 @@ interface Props {
   activeSettings: any;
   dealerZip?: string;
   onRefreshInspection?: () => Promise<void>;
+  onRetailStatsLoaded?: (stats: RetailStats | null) => void;
 }
 
 export default function AppraisalSidebar({
   sub, bbVehicle, offerResult, finalValue, currentOffer,
   wholesaleAvg, tradeinAvg, retailAvg,
   reconCost, effectivePack, projectedProfit, profitMargin, activeSettings, dealerZip,
-  onRefreshInspection,
+  onRefreshInspection, onRetailStatsLoaded,
 }: Props) {
   const [refreshingInspection, setRefreshingInspection] = useState(false);
   const hasTires = !!(sub.tire_lf && sub.tire_rf && sub.tire_lr && sub.tire_rr);
@@ -175,6 +177,7 @@ export default function AppraisalSidebar({
             dealerZip={dealerZip}
             radiusMiles={activeSettings?.retail_search_radius || 100}
             offerHigh={offerResult?.high || currentOffer}
+            onStatsLoaded={onRetailStatsLoaded}
           />
         </div>
       )}

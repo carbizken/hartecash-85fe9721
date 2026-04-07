@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-interface RetailStats {
+export interface RetailStats {
   mean_days_to_turn: number | null;
   market_days_supply: number | null;
   active: {
@@ -58,9 +58,10 @@ interface Props {
   dealerZip?: string;
   radiusMiles?: number;
   offerHigh: number;
+  onStatsLoaded?: (stats: RetailStats | null) => void;
 }
 
-export default function RetailMarketPanel({ vin, uvc, zipcode, dealerZip, radiusMiles = 100, offerHigh }: Props) {
+export default function RetailMarketPanel({ vin, uvc, zipcode, dealerZip, radiusMiles = 100, offerHigh, onStatsLoaded }: Props) {
   const [stats, setStats] = useState<RetailStats | null>(null);
   const [listings, setListings] = useState<RetailListing[]>([]);
   const [loading, setLoading] = useState(false);
@@ -89,6 +90,7 @@ export default function RetailMarketPanel({ vin, uvc, zipcode, dealerZip, radius
       if (fnError) throw fnError;
       if (data?.error) { setError(data.error); return; }
       setStats(data.statistics);
+      onStatsLoaded?.(data.statistics);
       setFetched(true);
     } catch (e) {
       setError((e as Error).message || "Failed to fetch market data");

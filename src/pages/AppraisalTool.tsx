@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import type { RetailStats } from "@/components/admin/RetailMarketPanel";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/contexts/TenantContext";
@@ -212,6 +213,7 @@ export default function AppraisalTool() {
   const [depthPolicies, setDepthPolicies] = useState<{ id: string; name: string; policy_type: string; oem_brands: string[]; all_brands: boolean; max_vehicle_age_years: number | null; max_mileage: number | null; min_tire_depth: number; min_brake_depth: number }[]>([]);
   const [dealerZip, setDealerZip] = useState<string>("");
   const [showACVSheet, setShowACVSheet] = useState(false);
+  const [retailMarketStats, setRetailMarketStats] = useState<RetailStats | null>(null);
   const acvSheetRef = useRef<HTMLDivElement>(null);
 
   // Editable overrides
@@ -1264,6 +1266,7 @@ export default function AppraisalTool() {
             activeSettings={activeSettings}
             dealerZip={dealerZip}
             onRefreshInspection={handleRefreshInspection}
+            onRetailStatsLoaded={setRetailMarketStats}
           />
         </div>
       </div>
@@ -1285,6 +1288,24 @@ export default function AppraisalTool() {
             projectedProfit={projectedProfit}
             profitMargin={profitMargin}
             condition={condition}
+            dealerName={tenant.display_name}
+            retailMarketData={retailMarketStats ? {
+              activeCount: retailMarketStats.active?.vehicle_count,
+              activeMean: retailMarketStats.active?.mean_price,
+              activeMedian: retailMarketStats.active?.median_price,
+              soldCount: retailMarketStats.sold?.vehicle_count,
+              soldMean: retailMarketStats.sold?.mean_price,
+              soldMedian: retailMarketStats.sold?.median_price,
+              marketDaysSupply: retailMarketStats.market_days_supply ?? undefined,
+              meanDaysToTurn: retailMarketStats.mean_days_to_turn ?? undefined,
+            } : undefined}
+            waterfallBlocks={waterfallBlocks.map(b => ({ label: b.label, value: b.value, runningTotal: b.runningTotal, type: b.type }))}
+            deductionDetails={{
+              accidents, drivable, smokedIn, tiresReplaced, numKeys, windshield, moonroof,
+              exteriorItems, interiorItems, mechItems, engineItems, techItems,
+              deductionAmounts: (activeSettings?.deduction_amounts || {}) as Record<string, number>,
+              deductionsConfig: (activeSettings?.deductions_config || {}) as Record<string, boolean>,
+            }}
           />
         </div>
       )}

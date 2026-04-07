@@ -171,6 +171,7 @@ const MobileInspection = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastAdjustment, setLastAdjustment] = useState<{ adjustment: number; avg_depth: number } | null>(null);
+  const [tireBrakeInputMode, setTireBrakeInputMode] = useState<"measurement" | "pass_fail">("measurement");
 
   // Tire depths
   const [tireLF, setTireLF] = useState<number | null>(null);
@@ -253,6 +254,15 @@ const MobileInspection = () => {
         const sub = (subRes.data as any[])[0];
         setSubmission(sub);
         setOverallGrade(sub.overall_condition || "");
+        
+        // Fetch inspection config for this submission's dealership to get input mode
+        const { data: subFull } = await supabase.from("submissions").select("dealership_id").eq("id", id).maybeSingle();
+        if (subFull?.dealership_id) {
+          const { data: cfgData } = await supabase.from("inspection_config").select("tire_brake_input_mode").eq("dealership_id", subFull.dealership_id).maybeSingle();
+          if (cfgData && (cfgData as any).tire_brake_input_mode === "pass_fail") {
+            setTireBrakeInputMode("pass_fail");
+          }
+        }
       }
       if (dmgRes.data) {
         const items = (dmgRes.data as any[]).flatMap((r: any) => {
@@ -443,6 +453,7 @@ const MobileInspection = () => {
             <BrakePadDepthWidget
               tireDepths={{ leftFront: tireLF, rightFront: tireRF, leftRear: tireLR, rightRear: tireRR }}
               brakeDepths={{ leftFront: brakeLF, rightFront: brakeRF, leftRear: brakeLR, rightRear: brakeRR }}
+              inputMode={tireBrakeInputMode}
               onTireChange={(pos, depth) => {
                 if (pos === "leftFront") setTireLF(depth);
                 else if (pos === "rightFront") setTireRF(depth);

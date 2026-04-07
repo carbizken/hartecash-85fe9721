@@ -101,6 +101,7 @@ const InspectionConfiguration = () => {
   // Tire credit/deduction policy
   const [enableTireAdjustments, setEnableTireAdjustments] = useState(false);
   const [defaultInspectionMode, setDefaultInspectionMode] = useState<"standard" | "full">("standard");
+  const [tireBrakeInputMode, setTireBrakeInputMode] = useState<"measurement" | "pass_fail">("measurement");
   const [tireAdjustmentMode, setTireAdjustmentMode] = useState<"whole" | "per_tire">("whole");
   const [tireCreditThreshold, setTireCreditThreshold] = useState(6);
   const [tireDeductThreshold, setTireDeductThreshold] = useState(3);
@@ -155,6 +156,7 @@ const InspectionConfiguration = () => {
         setTireDeductPer32((data as any).tire_deduct_per_32 ?? 50);
         setTireAdjustmentMode((data as any).tire_adjustment_mode || 'whole');
         setDefaultInspectionMode((data as any).default_inspection_mode === 'full' ? 'full' : 'standard');
+        setTireBrakeInputMode((data as any).tire_brake_input_mode === 'pass_fail' ? 'pass_fail' : 'measurement');
       }
       setLoading(false);
     };
@@ -190,6 +192,7 @@ const InspectionConfiguration = () => {
         tire_deduct_per_32: tireDeductPer32,
         tire_adjustment_mode: tireAdjustmentMode,
         default_inspection_mode: defaultInspectionMode,
+        tire_brake_input_mode: tireBrakeInputMode,
         updated_at: new Date().toISOString(),
       } as any)
       .eq("id", configId);
@@ -409,6 +412,41 @@ const InspectionConfiguration = () => {
                   {/* Special sub-toggles for tires */}
                   {sectionKey === "tires" && (
                     <div className="space-y-3">
+                      {/* Input Mode: Measurement vs Pass/Fail */}
+                      <div className="border border-border rounded-lg p-3 bg-muted/20">
+                        <label className="text-sm font-semibold block mb-1">Tire & Brake Input Mode</label>
+                        <p className="text-[10px] text-muted-foreground mb-2">
+                          Choose how inspectors record tire and brake condition
+                        </p>
+                        <div className="flex items-center gap-1 bg-muted rounded-lg p-1 w-fit">
+                          <button
+                            onClick={() => setTireBrakeInputMode("measurement")}
+                            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                              tireBrakeInputMode === "measurement"
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            Depth Measurements
+                          </button>
+                          <button
+                            onClick={() => setTireBrakeInputMode("pass_fail")}
+                            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                              tireBrakeInputMode === "pass_fail"
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            Pass / Fail
+                          </button>
+                        </div>
+                        <p className="text-[9px] text-muted-foreground mt-1.5">
+                          {tireBrakeInputMode === "measurement"
+                            ? "Inspectors enter exact tread depth (/32\") and brake pad thickness (mm) for each position."
+                            : "Inspectors simply tap each tire/brake position to toggle between Pass and Fail — no measurements needed."}
+                        </p>
+                      </div>
+
                       <label className="flex items-center justify-between text-sm">
                         <span>Tire tread depth (32nds)</span>
                         <Switch checked={showTireTread} onCheckedChange={setShowTireTread} />

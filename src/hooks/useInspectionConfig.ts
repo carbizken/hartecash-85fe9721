@@ -23,6 +23,7 @@ export interface InspectionConfig {
   require_notes: Record<string, boolean>;
   custom_items: { section: string; label: string; sort_order: number }[];
   default_inspection_mode: "standard" | "full";
+  tire_brake_input_mode: "measurement" | "pass_fail";
 }
 
 const DEFAULTS: InspectionConfig = {
@@ -46,6 +47,7 @@ const DEFAULTS: InspectionConfig = {
   require_notes: {},
   custom_items: [],
   default_inspection_mode: "standard",
+  tire_brake_input_mode: "measurement",
 };
 
 export const useInspectionConfig = () => {
@@ -83,6 +85,7 @@ export const useInspectionConfig = () => {
           require_notes: (data.require_notes as any) || {},
           custom_items: (data.custom_items as any) || [],
           default_inspection_mode: ((data as any).default_inspection_mode === "full" ? "full" : "standard") as "standard" | "full",
+          tire_brake_input_mode: ((data as any).tire_brake_input_mode === "pass_fail" ? "pass_fail" : "measurement") as "measurement" | "pass_fail",
         });
       }
       setLoading(false);

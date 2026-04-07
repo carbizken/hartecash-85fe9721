@@ -35,6 +35,7 @@ interface Props {
   projectedProfit: number;
   profitMargin: number;
   activeSettings: any;
+  dealerZip?: string;
 }
 
 export default function AppraisalSidebar({

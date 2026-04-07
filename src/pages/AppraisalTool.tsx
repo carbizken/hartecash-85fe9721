@@ -1208,6 +1208,7 @@ export default function AppraisalTool() {
             profitMargin={profitMargin}
             activeSettings={activeSettings}
             dealerZip={dealerZip}
+            onRefreshInspection={handleRefreshInspection}
           />
         </div>
       </div>

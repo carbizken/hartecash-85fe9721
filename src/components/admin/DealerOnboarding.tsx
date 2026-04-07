@@ -313,7 +313,32 @@ const DealerOnboarding = ({ isAdmin = false, onNavigate, targetDealershipId, onD
         </CardContent>
       </Card>
 
-      {/* Billing & Plan */}
+      {/* Offer Logic Approver */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Store className="w-4 h-4 text-primary" />
+            Offer Logic Approver
+          </CardTitle>
+          <CardDescription>
+            When a manager builds or modifies offer logic, this role must approve before it goes live.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Select
+            value={account.offer_logic_approver_role}
+            onValueChange={(v) => updateField("offer_logic_approver_role", v)}
+            disabled={readOnly}
+          >
+            <SelectTrigger className="max-w-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gsm_gm">GSM / General Manager</SelectItem>
+              <SelectItem value="admin">Dealership Admin</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">

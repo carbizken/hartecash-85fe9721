@@ -1303,8 +1303,8 @@ export default function AppraisalTool() {
             deductionDetails={{
               accidents, drivable, smokedIn, tiresReplaced, numKeys, windshield, moonroof,
               exteriorItems, interiorItems, mechItems, engineItems, techItems,
-              deductionAmounts: activeSettings?.deduction_amounts || {},
-              deductionsConfig: activeSettings?.deductions_config || {},
+              deductionAmounts: (activeSettings?.deduction_amounts || {}) as Record<string, number>,
+              deductionsConfig: (activeSettings?.deductions_config || {}) as Record<string, boolean>,
             }}
           />
         </div>

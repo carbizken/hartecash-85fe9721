@@ -304,7 +304,7 @@ const OfferPrintLayout = ({
       </div>
 
       {/* No-VIN Disclaimer */}
-      {!submission.vin && (
+      {!s.vin && (
         <div className="border border-warning/40 bg-warning/5 rounded p-2 mb-2 text-center">
           <p className="text-[9px] font-bold text-warning uppercase tracking-wider">⚠ No VIN on File</p>
           <p className="text-[8px] text-muted-foreground mt-0.5">

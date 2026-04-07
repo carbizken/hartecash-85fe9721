@@ -1190,6 +1190,7 @@ export default function AppraisalTool() {
             projectedProfit={projectedProfit}
             profitMargin={profitMargin}
             activeSettings={activeSettings}
+            dealerZip={dealerZip}
           />
         </div>
       </div>

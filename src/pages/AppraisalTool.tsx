@@ -668,6 +668,29 @@ export default function AppraisalTool() {
     }
     setSaving(false);
   };
+  const handlePrintACVSheet = useCallback(() => {
+    setShowACVSheet(true);
+    setTimeout(() => {
+      if (acvSheetRef.current) {
+        const printWindow = window.open("", "_blank");
+        if (printWindow) {
+          printWindow.document.write(`
+            <html><head><title>ACV Worksheet</title>
+            <style>
+              body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+              @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+            </style>
+            <script src="https://cdn.tailwindcss.com"><\/script>
+            </head><body>${acvSheetRef.current.innerHTML}</body></html>
+          `);
+          printWindow.document.close();
+          setTimeout(() => { printWindow.print(); }, 500);
+        }
+      }
+      setShowACVSheet(false);
+    }, 100);
+  }, []);
+
   const inspectionData = useMemo(() => {
     if (!sub?.internal_notes) return null;
     if (!sub.internal_notes.includes("[INSPECTION")) return null;

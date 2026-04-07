@@ -77,6 +77,7 @@ const SuperAdminDashboard = () => {
   const [subs, setSubs] = useState<Sub[]>([]);
   const [timeRange, setTimeRange] = useState<"30" | "60" | "90" | "all">("all");
   const [dark, setDark] = useState(() => localStorage.getItem("super-admin-dark") === "true");
+  const [showAddTenant, setShowAddTenant] = useState(false);
 
   // Dark mode
   useEffect(() => {

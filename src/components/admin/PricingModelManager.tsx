@@ -99,13 +99,20 @@ const DEFAULT_MODEL_SETTINGS = {
 interface Props {
   onModelChange?: (settings: OfferSettings) => void;
   onRegisterSync?: (syncFn: (settings: OfferSettings) => void) => void;
-  /** Expose save trigger so the workbench can call save */
   onRegisterSave?: (saveFn: () => Promise<void>) => void;
-  /** Expose model name for workbench header */
   onModelNameChange?: (name: string, isNew: boolean) => void;
+  /** Current user's role — needed for approval workflow */
+  userRole?: string;
 }
 
-const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, onModelNameChange }: Props) => {
+const APPROVAL_BADGE: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ElementType }> = {
+  draft: { label: "Draft", variant: "outline", icon: Clock },
+  pending: { label: "Pending Approval", variant: "secondary", icon: Clock },
+  approved: { label: "Approved", variant: "default", icon: ShieldCheck },
+  rejected: { label: "Rejected", variant: "destructive", icon: XCircle },
+};
+
+const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, onModelNameChange, userRole }: Props) => {
   const { tenant } = useTenant();
   const dealershipId = tenant.dealership_id;
   const { toast } = useToast();
@@ -121,6 +128,12 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
   const [scheduleModelId, setScheduleModelId] = useState<string | null>(null);
   const [scheduleStart, setScheduleStart] = useState("");
   const [scheduleEnd, setScheduleEnd] = useState("");
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectModelId, setRejectModelId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
+  const isApprover = userRole === "gsm_gm" || userRole === "admin";
+  const isManager = userRole === "used_car_manager" || userRole === "gsm_gm" || userRole === "admin";
 
   useEffect(() => { fetchModels(); }, []);
 

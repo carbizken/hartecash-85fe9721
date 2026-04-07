@@ -52,6 +52,7 @@ serve(async (req) => {
       plan_tier = "standard",
       architecture = "single_store",
       bdc_model = "no_bdc",
+      offer_logic_approver_role = "gsm_gm",
       // Optional AI-scraped data
       scraped_data,
     } = body;

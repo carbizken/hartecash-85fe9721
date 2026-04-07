@@ -104,7 +104,8 @@ export function architectureToDbValue(arch: ArchitectureType): string {
     case "multi_location":
       return "multi_location";
     case "dealer_group":
-    case "enterprise":
       return "dealer_group";
+    case "enterprise":
+      return "enterprise";
   }
 }

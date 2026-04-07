@@ -40,7 +40,7 @@ interface DealerAccount {
 }
 
 function dbArchToArchType(dbArch: string, planTier: string): ArchitectureType {
-  if (planTier === "enterprise") return "enterprise";
+  if (planTier === "enterprise" || dbArch === "enterprise") return "enterprise";
   if (dbArch === "dealer_group") return "dealer_group";
   if (dbArch === "multi_location") return "multi_location";
   if (dbArch === "single_store_secondary") return "single_store_secondary";

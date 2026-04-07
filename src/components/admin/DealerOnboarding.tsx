@@ -211,7 +211,7 @@ const DealerOnboarding = ({ isAdmin = false, onNavigate, targetDealershipId, onD
     } else {
       toast({
         title: "Auto-configured",
-        description: `Platform settings updated for ${ARCHITECTURE_OPTIONS.find(a => a.value === account.architecture)?.label} + ${BDC_OPTIONS.find(b => b.value === account.bdc_model)?.label}.`,
+        description: `Platform settings updated for ${ARCH_LABELS[account.architecture] || account.architecture} + ${BDC_LABELS[account.bdc_model] || account.bdc_model}.`,
       });
     }
   };

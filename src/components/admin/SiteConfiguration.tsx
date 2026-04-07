@@ -357,7 +357,7 @@ const SiteConfiguration = ({ focusField }: { focusField?: string }) => {
       </Section>
 
       {/* Social & Review Links */}
-      <Section icon={Globe} title="Social Media & Review Links">
+      <Section icon={Globe} title="Social Media & Review Links" sectionId="social" forceOpen={focusField === "social"}>
         <p className="text-xs text-muted-foreground mb-3">Add your social profiles and Google review link. These appear in the footer and contact cards.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">

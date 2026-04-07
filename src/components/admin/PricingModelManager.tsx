@@ -347,6 +347,11 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
   };
 
   const handleSetDefault = async (id: string) => {
+    const model = models.find(m => m.id === id);
+    if (model && model.approval_status !== "approved") {
+      toast({ title: "Cannot set default", description: "Only approved models can be set as default.", variant: "destructive" });
+      return;
+    }
     await supabase.from("pricing_models" as any).update({ is_default: false } as any).eq("dealership_id", dealershipId);
     await supabase.from("pricing_models" as any).update({ is_default: true, is_active: true } as any).eq("id", id);
     toast({ title: "Default set" });
@@ -357,10 +362,56 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
   };
 
   const handleToggleActive = async (id: string, current: boolean) => {
-    await supabase.from("pricing_models" as any).update({ is_active: !current } as any).eq("id", id);
+    const model = models.find(m => m.id === id);
+    if (!current && model && model.approval_status !== "approved") {
+      toast({ title: "Approval required", description: "This model must be approved before it can be activated.", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase.from("pricing_models" as any).update({ is_active: !current } as any).eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
     fetchModels();
     if (editModel && selectedModelId === id) {
       setEditModel({ ...editModel, is_active: !current });
+    }
+  };
+
+  const handleSubmitForApproval = async (id: string) => {
+    const { error } = await supabase.from("pricing_models" as any).update({ approval_status: "pending" } as any).eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Submitted for approval", description: "A GM or admin will need to approve this model before it can go live." });
+      fetchModels();
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    const { error } = await supabase.from("pricing_models" as any).update({ approval_status: "approved" } as any).eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "✓ Model approved", description: "This model can now be activated." });
+      fetchModels();
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectModelId) return;
+    const { error } = await supabase.from("pricing_models" as any).update({
+      approval_status: "rejected",
+      rejection_reason: rejectReason || null,
+    } as any).eq("id", rejectModelId);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Model rejected" });
+      setShowRejectDialog(false);
+      setRejectModelId(null);
+      setRejectReason("");
+      fetchModels();
     }
   };
 
@@ -377,6 +428,11 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
 
   const handleSchedule = async () => {
     if (!scheduleModelId) return;
+    const model = models.find(m => m.id === scheduleModelId);
+    if (model && model.approval_status !== "approved") {
+      toast({ title: "Approval required", description: "Model must be approved before scheduling.", variant: "destructive" });
+      return;
+    }
     await supabase.from("pricing_models" as any).update({
       schedule_start: scheduleStart || null,
       schedule_end: scheduleEnd || null,

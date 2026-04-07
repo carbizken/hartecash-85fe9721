@@ -1,10 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Building2, Users, TrendingUp, TrendingDown, DollarSign, ArrowLeft,
   BarChart3, CheckCircle2, Clock, XCircle, Car, Target, AlertTriangle,
-  UserCheck, Moon, Sun,
+  UserCheck, Moon, Sun, Plus,
 } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+const AddTenantWizard = lazy(() => import("@/components/admin/AddTenantWizard"));
 
 /* ── types ───────────────────────────────────────── */
 
@@ -76,6 +77,7 @@ const SuperAdminDashboard = () => {
   const [subs, setSubs] = useState<Sub[]>([]);
   const [timeRange, setTimeRange] = useState<"30" | "60" | "90" | "all">("all");
   const [dark, setDark] = useState(() => localStorage.getItem("super-admin-dark") === "true");
+  const [showAddTenant, setShowAddTenant] = useState(false);
 
   // Dark mode
   useEffect(() => {
@@ -311,6 +313,10 @@ const SuperAdminDashboard = () => {
                 </button>
               ))}
             </div>
+            {/* Add Tenant */}
+            <Button size="sm" onClick={() => setShowAddTenant(true)} className="gap-1.5 text-xs">
+              <Plus className="w-3.5 h-3.5" /> Add Tenant
+            </Button>
             {/* Dark/Light toggle */}
             <button
               onClick={() => setDark(!dark)}
@@ -527,6 +533,11 @@ const SuperAdminDashboard = () => {
           </>
         )}
       </div>
+      {showAddTenant && (
+        <Suspense fallback={null}>
+          <AddTenantWizard onClose={() => setShowAddTenant(false)} onCreated={loadData} />
+        </Suspense>
+      )}
     </div>
   );
 };

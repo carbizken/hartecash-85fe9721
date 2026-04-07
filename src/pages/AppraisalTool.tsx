@@ -647,6 +647,27 @@ export default function AppraisalTool() {
       setSub(prev => prev ? { ...prev, acv_value: saveVal, appraisal_finalized: true, appraisal_finalized_at: new Date().toISOString(), appraisal_finalized_by: sub.appraised_by || "Staff" } : prev);
       setAcvOverride(saveVal);
       toast({ title: "Appraisal Finalized", description: `Locked at $${saveVal.toLocaleString()}. Check request can now be generated.` });
+
+      // Auto-save ACV sheet to customer documents
+      setShowACVSheet(true);
+      setTimeout(async () => {
+        try {
+          if (acvSheetRef.current) {
+            const html = `<html><head><title>ACV Worksheet</title>
+              <style>body{margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style>
+              <script src="https://cdn.tailwindcss.com"><\/script>
+              </head><body>${acvSheetRef.current.innerHTML}</body></html>`;
+            const blob = new Blob([html], { type: "text/html" });
+            const fileName = `acv-worksheet-${new Date().toISOString().slice(0, 10)}.html`;
+            await supabase.storage
+              .from("customer-documents")
+              .upload(`${sub.token}/appraisal/${fileName}`, blob, { contentType: "text/html", upsert: true });
+          }
+        } catch (e) {
+          console.error("Failed to save ACV sheet to documents:", e);
+        }
+        setShowACVSheet(false);
+      }, 150);
     }
     setSaving(false);
   };

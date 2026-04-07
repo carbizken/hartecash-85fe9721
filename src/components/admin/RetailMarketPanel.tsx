@@ -58,9 +58,10 @@ interface Props {
   dealerZip?: string;
   radiusMiles?: number;
   offerHigh: number;
+  onStatsLoaded?: (stats: RetailStats | null) => void;
 }
 
-export default function RetailMarketPanel({ vin, uvc, zipcode, dealerZip, radiusMiles = 100, offerHigh }: Props) {
+export default function RetailMarketPanel({ vin, uvc, zipcode, dealerZip, radiusMiles = 100, offerHigh, onStatsLoaded }: Props) {
   const [stats, setStats] = useState<RetailStats | null>(null);
   const [listings, setListings] = useState<RetailListing[]>([]);
   const [loading, setLoading] = useState(false);

@@ -260,7 +260,29 @@ export default function AppraisalSidebar({
         </Card>
       )}
 
-      {/* AI Damage */}
+      {/* No inspection yet — show refresh button */}
+      {!hasInspection && onRefreshInspection && (
+        <Card className="border-dashed">
+          <CardContent className="py-4 text-center space-y-2">
+            <Wrench className="w-5 h-5 text-muted-foreground mx-auto" />
+            <p className="text-xs text-muted-foreground">No inspection data yet</p>
+            <Button
+              variant="outline" size="sm"
+              className="text-xs gap-1.5"
+              disabled={refreshingInspection}
+              onClick={async () => {
+                setRefreshingInspection(true);
+                await onRefreshInspection();
+                setRefreshingInspection(false);
+              }}
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshingInspection ? "animate-spin" : ""}`} />
+              {refreshingInspection ? "Checking…" : "Pull Inspection Data"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {sub.ai_damage_summary && (
         <Card>
           <CardHeader className="pb-2">

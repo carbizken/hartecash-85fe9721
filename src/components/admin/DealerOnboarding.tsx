@@ -25,6 +25,42 @@ import { architectureToDbValue, architectureToplanTier } from "./onboarding/type
 import type { ArchitectureType } from "./onboarding/types";
 import type { BDCType } from "./onboarding/BDCSelector";
 
+interface DealerAccount {
+  id: string;
+  dealership_id: string;
+  architecture: string;
+  bdc_model: string;
+  start_date: string | null;
+  billing_date: number | null;
+  plan_tier: string;
+  plan_cost: number;
+  special_instructions: string;
+  onboarding_status: string;
+  onboarded_by: string | null;
+}
+
+function dbArchToArchType(dbArch: string, planTier: string): ArchitectureType {
+  if (planTier === "enterprise") return "enterprise";
+  if (dbArch === "dealer_group") return "dealer_group";
+  if (dbArch === "multi_location") return "multi_location";
+  return "single_store";
+}
+
+const ARCH_LABELS: Record<string, string> = {
+  single_store: "Single Store",
+  single_store_secondary: "Single + Secondary",
+  multi_location: "Multi-Location",
+  dealer_group: "Dealer Group",
+  enterprise: "Enterprise",
+};
+
+const BDC_LABELS: Record<string, string> = {
+  no_bdc: "No BDC",
+  single_bdc: "Single BDC",
+  multi_bdc: "Multi-Location BDC",
+  ai_bdc: "AI BDC",
+};
+
 const PLAN_TIERS = [
   { value: "standard", label: "Standard (1–2 locations)", cost: 1995 },
   { value: "multi_store", label: "Multi-Store (3–5 locations)", cost: 3495 },

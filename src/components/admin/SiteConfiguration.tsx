@@ -385,7 +385,7 @@ const SiteConfiguration = ({ focusField }: { focusField?: string }) => {
       </Section>
 
       {/* Logos */}
-      <Section icon={Upload} title="Logos & Branding Assets">
+      <Section icon={Upload} title="Logos & Branding Assets" sectionId="logos" forceOpen={focusField === "logos"}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {(["logo_url", "logo_white_url", "favicon_url"] as const).map(field => {
             const labels: Record<string, string> = {

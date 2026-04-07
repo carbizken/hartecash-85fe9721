@@ -413,7 +413,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
       const storeLocationId = formData.preferredLocationId
         ? formData.preferredLocationId
         : await resolveStoreAssignment(
-            config as any,
+            { ...config as any, dealership_id: tenant.dealership_id },
             vehicleInfo?.make || "",
             formData.zip || "",
           );

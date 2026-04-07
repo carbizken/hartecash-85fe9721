@@ -81,6 +81,7 @@ const DEFAULT_ACCOUNT: Omit<DealerAccount, "id"> = {
   dealership_id: "default",
   architecture: "single_store",
   bdc_model: "single_bdc",
+  offer_logic_approver_role: "gsm_gm",
   start_date: null,
   billing_date: null,
   plan_tier: "standard",

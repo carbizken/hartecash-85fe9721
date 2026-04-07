@@ -54,11 +54,12 @@ interface Props {
   vin?: string;
   uvc?: string;
   zipcode?: string;
+  dealerZip?: string;
   radiusMiles?: number;
   offerHigh: number;
 }
 
-export default function RetailMarketPanel({ vin, uvc, zipcode, radiusMiles = 100, offerHigh }: Props) {
+export default function RetailMarketPanel({ vin, uvc, zipcode, dealerZip, radiusMiles = 100, offerHigh }: Props) {
   const [stats, setStats] = useState<RetailStats | null>(null);
   const [listings, setListings] = useState<RetailListing[]>([]);
   const [loading, setLoading] = useState(false);
@@ -67,8 +68,13 @@ export default function RetailMarketPanel({ vin, uvc, zipcode, radiusMiles = 100
   const [fetched, setFetched] = useState(false);
   const [showListings, setShowListings] = useState(false);
   const [radius, setRadius] = useState(radiusMiles);
+  const [searchZip, setSearchZip] = useState(dealerZip || zipcode || "");
 
   useEffect(() => { setRadius(radiusMiles); }, [radiusMiles]);
+  useEffect(() => {
+    // Default to dealer ZIP, fall back to customer ZIP
+    setSearchZip(dealerZip || zipcode || "");
+  }, [dealerZip, zipcode]);
 
   const fetchStats = useCallback(async () => {
     if (!vin && !uvc) return;

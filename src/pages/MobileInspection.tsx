@@ -455,16 +455,18 @@ const MobileInspection = () => {
               brakeDepths={{ leftFront: brakeLF, rightFront: brakeRF, leftRear: brakeLR, rightRear: brakeRR }}
               inputMode={tireBrakeInputMode}
               onTireChange={(pos, depth) => {
-                if (pos === "leftFront") setTireLF(depth);
-                else if (pos === "rightFront") setTireRF(depth);
-                else if (pos === "leftRear") setTireLR(depth);
-                else if (pos === "rightRear") setTireRR(depth);
+                const val = depth === -1 ? null : depth;
+                if (pos === "leftFront") setTireLF(val);
+                else if (pos === "rightFront") setTireRF(val);
+                else if (pos === "leftRear") setTireLR(val);
+                else if (pos === "rightRear") setTireRR(val);
               }}
               onBrakeChange={(pos, depth) => {
-                if (pos === "leftFront") setBrakeLF(depth);
-                else if (pos === "rightFront") setBrakeRF(depth);
-                else if (pos === "leftRear") setBrakeLR(depth);
-                else if (pos === "rightRear") setBrakeRR(depth);
+                const val = depth === -1 ? null : depth;
+                if (pos === "leftFront") setBrakeLF(val);
+                else if (pos === "rightFront") setBrakeRF(val);
+                else if (pos === "leftRear") setBrakeLR(val);
+                else if (pos === "rightRear") setBrakeRR(val);
               }}
               compact
             />

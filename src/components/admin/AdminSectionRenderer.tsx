@@ -124,12 +124,17 @@ const submissionsTableProps = (
 
 const AdminSectionRenderer = (props: AdminSectionRendererProps) => {
   const {
-    activeSection, setActiveSection, submissions, appointments, setAppointments,
+    activeSection: rawActiveSection, setActiveSection, submissions, appointments, setAppointments,
     canManageAccess, userRole, userId, pendingRequests, approveRole, setApproveRole,
     onboardingDealershipId, setOnboardingDealershipId, onboardingDealerName, setOnboardingDealerName,
     tenant, handleView, handleApprove, handleReject, fetchSubmissions, fetchAppointments, toast,
     dealerLocations,
   } = props;
+
+  // Parse compound section keys like "site-config:logos"
+  const colonIdx = rawActiveSection.indexOf(":");
+  const activeSection = colonIdx > -1 ? rawActiveSection.slice(0, colonIdx) : rawActiveSection;
+  const focusField = colonIdx > -1 ? rawActiveSection.slice(colonIdx + 1) : undefined;
 
   // ── Pipeline sections ──
   if (activeSection === "submissions") {

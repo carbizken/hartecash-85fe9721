@@ -98,6 +98,9 @@ const LocationManagement = () => {
   const [brandInputs, setBrandInputs] = useState<Record<string, string>>({});
   const [excludedBrandInputs, setExcludedBrandInputs] = useState<Record<string, string>>({});
   const [newLocationType, setNewLocationType] = useState("primary");
+  const [domainMap, setDomainMap] = useState<Record<string, { id: string; custom_domain: string | null; slug: string }>>({});
+  const [domainInputs, setDomainInputs] = useState<Record<string, string>>({});
+  const [domainSaving, setDomainSaving] = useState<Record<string, boolean>>({});
 
   const fetchLocations = async () => {
     const { data, error } = await supabase

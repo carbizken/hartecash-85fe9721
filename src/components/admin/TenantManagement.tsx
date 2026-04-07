@@ -22,12 +22,13 @@ interface Tenant {
   created_at: string;
 }
 
-const EMPTY_TENANT: Omit<Tenant, "id" | "created_at"> = {
+const EMPTY_TENANT: Omit<Tenant, "id" | "created_at"> & { offerLogicApproverRole: string } = {
   dealership_id: "",
   slug: "",
   display_name: "",
   custom_domain: null,
   is_active: true,
+  offerLogicApproverRole: "gsm_gm",
 };
 
 interface TenantManagementProps {

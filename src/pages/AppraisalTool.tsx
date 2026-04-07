@@ -311,6 +311,16 @@ export default function AppraisalTool() {
       const { data: policiesData } = await supabase.from("depth_policies").select("*").eq("dealership_id", dealershipId).eq("is_active", true).order("sort_order");
       if (policiesData) setDepthPolicies(policiesData as any);
 
+      // Fetch dealer's primary location ZIP for market data default
+      const { data: locData } = await supabase
+        .from("dealership_locations")
+        .select("center_zip")
+        .eq("dealership_id", dealershipId)
+        .eq("location_type", "primary")
+        .eq("is_active", true)
+        .maybeSingle();
+      if (locData?.center_zip) setDealerZip(locData.center_zip);
+
       // BB lookup
       if (s.vin) {
         setBbLoading(true);

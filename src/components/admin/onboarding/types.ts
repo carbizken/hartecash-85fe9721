@@ -52,6 +52,7 @@ export const DEFAULT_WIZARD_STATE: WizardState = {
   planTier: "standard",
   bdcModel: "no_bdc",
   locationCount: 1,
+  offerLogicApproverRole: "gsm_gm",
   websiteUrl: "",
   scrapedData: null,
   corporateLogoUrl: "",

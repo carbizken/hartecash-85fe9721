@@ -1246,6 +1246,27 @@ export default function AppraisalTool() {
           />
         </div>
       </div>
+
+      {/* Hidden ACV Sheet for printing */}
+      {showACVSheet && (
+        <div className="fixed left-[-9999px] top-0">
+          <ACVSheet
+            ref={acvSheetRef}
+            sub={sub}
+            bbVehicle={bbVehicle}
+            offerResult={offerResult}
+            finalValue={finalValue}
+            wholesaleAvg={wholesaleAvg}
+            tradeinAvg={tradeinAvg}
+            retailAvg={retailAvg}
+            reconCost={reconCost}
+            dealerPack={effectivePack}
+            projectedProfit={projectedProfit}
+            profitMargin={profitMargin}
+            condition={condition}
+          />
+        </div>
+      )}
     </div>
   );
 }

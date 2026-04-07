@@ -171,6 +171,7 @@ const MobileInspection = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastAdjustment, setLastAdjustment] = useState<{ adjustment: number; avg_depth: number } | null>(null);
+  const [tireBrakeInputMode, setTireBrakeInputMode] = useState<"measurement" | "pass_fail">("measurement");
 
   // Tire depths
   const [tireLF, setTireLF] = useState<number | null>(null);

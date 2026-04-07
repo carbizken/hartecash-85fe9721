@@ -577,20 +577,32 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
 
   return (
     <div ref={formRef} className={`bg-card rounded-2xl shadow-xl p-6 md:p-8 relative z-10 ${variant === "split" ? "w-full" : "mx-auto -mt-10 mb-10 max-w-lg w-[calc(100%-40px)]"}`}>
-      {/* Progress */}
-      <div className="mb-6 pb-5 border-b-2 border-muted">
-        <div className="flex justify-center items-center gap-3 mb-3">
-          {displaySteps.map((_, i) => (
-            <div
-              key={i}
-              className={`w-3 h-3 rounded-full transition-all ${
-                i < step ? "bg-success" : i === step ? "bg-accent scale-125" : "bg-border"
-              }`}
-            />
+      {/* Progress - Premium numbered stepper */}
+      <div className="mb-6 pb-5 border-b border-border/50">
+        <div className="flex justify-center items-center gap-1 mb-3">
+          {displaySteps.map((s, i) => (
+            <div key={i} className="flex items-center">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                  i < step
+                    ? "bg-success text-success-foreground shadow-md shadow-success/30"
+                    : i === step
+                    ? "bg-gradient-to-br from-accent to-[hsl(var(--accent)/0.8)] text-accent-foreground shadow-lg shadow-accent/30 scale-110 ring-2 ring-accent/20 ring-offset-2 ring-offset-card"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {i < step ? "✓" : i + 1}
+              </div>
+              {i < displaySteps.length - 1 && (
+                <div className={`w-6 lg:w-10 h-0.5 mx-0.5 rounded-full transition-all duration-300 ${
+                  i < step ? "bg-success" : "bg-border"
+                }`} />
+              )}
+            </div>
           ))}
         </div>
         <p className="text-center text-sm text-muted-foreground font-medium">
-          Step {step + 1} of {totalSteps}: <strong className="text-card-foreground font-bold">{currentStepName}</strong>
+          <strong className="text-card-foreground font-bold">{currentStepName}</strong>
           <span className="text-xs opacity-70 ml-1.5">· ~{stepTimeEstimates[currentStepName] || "30 sec"}</span>
         </p>
       </div>

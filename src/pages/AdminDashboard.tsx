@@ -25,7 +25,7 @@ const AdminDashboard = () => {
           {/* Subtle grid pattern for premium depth */}
           <div className="absolute inset-0 bg-[radial-gradient(hsl(var(--border)/0.5)_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-30 dark:opacity-10" />
         <AdminSidebar
-          activeSection={db.activeSection}
+          activeSection={baseSectionId}
           onSectionChange={db.setActiveSection}
           canManageAccess={db.canManageAccess}
           submissionCount={db.total}

@@ -51,6 +51,36 @@ interface Location {
   location_type: string;
   established_year: number | null;
   use_corporate_established_year: boolean;
+  // Landing page overrides
+  dealership_name: string | null;
+  phone: string | null;
+  email: string | null;
+  website_url: string | null;
+  logo_url: string | null;
+  logo_white_url: string | null;
+  favicon_url: string | null;
+  primary_color: string | null;
+  accent_color: string | null;
+  success_color: string | null;
+  tagline: string | null;
+  hero_headline: string | null;
+  hero_subtext: string | null;
+  hero_layout: string | null;
+  service_hero_headline: string | null;
+  service_hero_subtext: string | null;
+  trade_hero_headline: string | null;
+  trade_hero_subtext: string | null;
+  business_hours: any;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  google_review_url: string | null;
+  tiktok_url: string | null;
+  youtube_url: string | null;
+  stats_cars_purchased: string | null;
+  stats_years_in_business: string | null;
+  stats_rating: string | null;
+  stats_reviews_count: string | null;
+  price_guarantee_days: number | null;
 }
 
 const LocationManagement = () => {

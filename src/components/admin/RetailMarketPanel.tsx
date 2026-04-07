@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-interface RetailStats {
+export interface RetailStats {
   mean_days_to_turn: number | null;
   market_days_supply: number | null;
   active: {

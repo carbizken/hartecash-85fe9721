@@ -19,6 +19,11 @@ import {
 } from "lucide-react";
 import OnboardingChecklist from "./OnboardingChecklist";
 import DealerWebsiteAutofillCard from "./DealerWebsiteAutofillCard";
+import ArchitectureSelector from "./onboarding/ArchitectureSelector";
+import BDCSelector from "./onboarding/BDCSelector";
+import { architectureToDbValue, architectureToplanTier } from "./onboarding/types";
+import type { ArchitectureType } from "./onboarding/types";
+import type { BDCType } from "./onboarding/BDCSelector";
 
 interface DealerAccount {
   id: string;
@@ -34,18 +39,27 @@ interface DealerAccount {
   onboarded_by: string | null;
 }
 
-const ARCHITECTURE_OPTIONS = [
-  { value: "single_store", label: "Single Store", icon: Store, desc: "One rooftop, one location. Simplest setup — hides multi-location routing." },
-  { value: "multi_location", label: "Multi-Location", icon: Building2, desc: "Multiple stores under one brand. Enables ZIP/OEM routing and per-store settings." },
-  { value: "dealer_group", label: "Dealer Group", icon: Network, desc: "Multiple brands/franchises. Full routing engine, buying center, and brand matching." },
-];
+function dbArchToArchType(dbArch: string, planTier: string): ArchitectureType {
+  if (planTier === "enterprise") return "enterprise";
+  if (dbArch === "dealer_group") return "dealer_group";
+  if (dbArch === "multi_location") return "multi_location";
+  return "single_store";
+}
 
-const BDC_OPTIONS = [
-  { value: "no_bdc", label: "No BDC", icon: Store, desc: "No dedicated BDC team. Leads go directly to sales staff or managers at each location." },
-  { value: "single_bdc", label: "Single BDC", icon: PhoneIcon, desc: "One centralized team handles all inbound leads across locations." },
-  { value: "multi_bdc", label: "Multi-Location BDC", icon: Building, desc: "Each location has its own BDC team. Leads route to the matched store's team." },
-  { value: "ai_bdc", label: "AI BDC", icon: Bot, desc: "AI-powered lead handling with automated follow-ups and intelligent routing." },
-];
+const ARCH_LABELS: Record<string, string> = {
+  single_store: "Single Store",
+  single_store_secondary: "Single + Secondary",
+  multi_location: "Multi-Location",
+  dealer_group: "Dealer Group",
+  enterprise: "Enterprise",
+};
+
+const BDC_LABELS: Record<string, string> = {
+  no_bdc: "No BDC",
+  single_bdc: "Single BDC",
+  multi_bdc: "Multi-Location BDC",
+  ai_bdc: "AI BDC",
+};
 
 const PLAN_TIERS = [
   { value: "standard", label: "Standard (1–2 locations)", cost: 1995 },
@@ -197,7 +211,7 @@ const DealerOnboarding = ({ isAdmin = false, onNavigate, targetDealershipId, onD
     } else {
       toast({
         title: "Auto-configured",
-        description: `Platform settings updated for ${ARCHITECTURE_OPTIONS.find(a => a.value === account.architecture)?.label} + ${BDC_OPTIONS.find(b => b.value === account.bdc_model)?.label}.`,
+        description: `Platform settings updated for ${ARCH_LABELS[account.architecture] || account.architecture} + ${BDC_LABELS[account.bdc_model] || account.bdc_model}.`,
       });
     }
   };
@@ -263,91 +277,35 @@ const DealerOnboarding = ({ isAdmin = false, onNavigate, targetDealershipId, onD
       {/* Onboarding Checklist */}
       <OnboardingChecklist key={`${dealershipId}-${checklistVersion}`} onNavigate={onNavigate} dealershipId={dealershipId} />
 
-      {/* Architecture */}
+      {/* Architecture — Premium Selector */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-primary" />
-            Dealership Architecture
-          </CardTitle>
-          <CardDescription>How is this dealership structured?</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3">
-            {ARCHITECTURE_OPTIONS.map(opt => {
-              const Icon = opt.icon;
-              const selected = account.architecture === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  onClick={() => !readOnly && updateField("architecture", opt.value)}
-                  disabled={readOnly}
-                  className={cn(
-                    "flex items-start gap-3 p-4 rounded-lg border text-left transition-all",
-                    readOnly && "opacity-70 cursor-default",
-                    selected
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                      : "border-border hover:border-primary/40 hover:bg-muted/30"
-                  )}
-                >
-                  <div className={cn(
-                    "p-2 rounded-md shrink-0",
-                    selected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                  )}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-card-foreground">{opt.label}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{opt.desc}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+        <CardContent className="pt-6">
+          <ArchitectureSelector
+            selected={dbArchToArchType(account.architecture, account.plan_tier)}
+            onSelect={(arch) => {
+              if (readOnly) return;
+              const dbArch = architectureToDbValue(arch);
+              const tier = architectureToplanTier(arch);
+              updateField("architecture", dbArch);
+              updateField("plan_tier", tier);
+              const planTier = PLAN_TIERS.find(t => t.value === tier);
+              if (planTier && planTier.cost > 0) updateField("plan_cost", planTier.cost);
+            }}
+          />
         </CardContent>
       </Card>
 
-      {/* BDC Model */}
+      {/* BDC Model — Premium Selector */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <PhoneIcon className="w-4 h-4 text-primary" />
-            BDC Model
-          </CardTitle>
-          <CardDescription>How does the dealership handle inbound leads?</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3">
-            {BDC_OPTIONS.map(opt => {
-              const Icon = opt.icon;
-              const selected = account.bdc_model === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  onClick={() => !readOnly && updateField("bdc_model", opt.value)}
-                  disabled={readOnly}
-                  className={cn(
-                    "flex items-start gap-3 p-4 rounded-lg border text-left transition-all",
-                    readOnly && "opacity-70 cursor-default",
-                    selected
-                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                      : "border-border hover:border-primary/40 hover:bg-muted/30"
-                  )}
-                >
-                  <div className={cn(
-                    "p-2 rounded-md shrink-0",
-                    selected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                  )}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-card-foreground">{opt.label}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{opt.desc}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+        <CardContent className="pt-6">
+          <BDCSelector
+            selected={account.bdc_model as BDCType}
+            onSelect={(bdc) => {
+              if (readOnly) return;
+              updateField("bdc_model", bdc);
+            }}
+            disabled={readOnly}
+          />
         </CardContent>
       </Card>
 

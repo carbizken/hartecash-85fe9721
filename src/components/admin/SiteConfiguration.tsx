@@ -276,7 +276,7 @@ const SiteConfiguration = ({ focusField }: { focusField?: string }) => {
       </div>
 
       {/* Dealership Info */}
-      <Section icon={Building2} title="Dealership Information" defaultOpen>
+      <Section icon={Building2} title="Dealership Information" defaultOpen sectionId="dealership-info" forceOpen={focusField === "dealership-info"}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Dealership Name</Label>

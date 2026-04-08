@@ -895,8 +895,8 @@ export default function AppraisalTool() {
             // Strategy Mode badge
             const stratMode = activeSettings?.strategy_mode || offerResult?.strategyMode || "custom";
             const stratBadge = { conservative: "text-muted-foreground bg-card border-border/60", standard: "text-primary bg-primary/5 border-primary/25", aggressive: "text-amber-600 bg-amber-500/5 border-amber-500/25", predator: "text-destructive bg-destructive/5 border-destructive/25", custom: "text-muted-foreground bg-card border-border/60" }[stratMode] || "bg-card border-border/60";
-            metrics.push({ label: "Strategy", value: (stratMode || "custom").toUpperCase(), color: stratBadge.split(" ")[0], bg: stratBadge, sub: stratMode === "predator" ? "⚠ High risk" : null });
-
+             metrics.push({ label: "Strategy", value: (stratMode || "custom").toUpperCase(), color: stratBadge.split(" ")[0], bg: stratBadge, sub: stratMode === "predator" ? "⚠ High risk" : null });
+            // Market Signal badge data is rendered separately
             if (hidePackFromAppraisal) {
               metrics.push({ label: "Recon Cost", value: `$${Math.floor(reconCost + effectivePack).toLocaleString()}`, color: "text-destructive", bg: "bg-card border-border/60 shadow-sm", sub: null });
             } else {

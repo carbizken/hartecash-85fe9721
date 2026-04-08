@@ -774,8 +774,72 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
         </Section>
       )}
 
-      {/* All pricing adjustments now happen in the Workbench above. Only Rules remain below. */}
+      {/* ── Archetype Overrides ── */}
+      {settings && (
+        <Section
+          icon={<Truck className="w-5 h-5 text-primary" />}
+          title="Archetype Deduction Overrides"
+          defaultOpen={false}
+          headerRight={
+            (settings as any).archetype_deduction_overrides && Object.keys((settings as any).archetype_deduction_overrides).length > 0
+              ? <Badge variant="secondary" className="text-[9px]">{Object.keys((settings as any).archetype_deduction_overrides).length} overrides</Badge>
+              : undefined
+          }
+        >
+          <ArchetypeOverrides
+            value={(settings as any).archetype_deduction_overrides || null}
+            onChange={(v) => setSettings({ ...settings, archetype_deduction_overrides: Object.keys(v).length > 0 ? v : null } as any)}
+            defaultAmounts={{
+              tires_not_replaced: settings.deduction_amounts.tires_not_replaced || 400,
+              exterior_damage_per_item: settings.deduction_amounts.exterior_damage_per_item || 300,
+              smoked_in: settings.deduction_amounts.smoked_in || 500,
+            }}
+          />
+          <div className="flex justify-end mt-4">
+            <Button size="sm" onClick={handleSaveSettings} disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
+              Save Settings
+            </Button>
+          </div>
+        </Section>
+      )}
 
+      {/* ── Intelligence Learning Layer ── */}
+      {settings && (
+        <Section
+          icon={<Brain className="w-5 h-5 text-primary" />}
+          title="Intelligence Learning Layer"
+          defaultOpen={false}
+          headerRight={<Badge variant="outline" className="text-[9px]">Threshold: {(settings as any).learning_threshold || 250}</Badge>}
+        >
+          <div className="space-y-4">
+            <p className="text-xs text-muted-foreground">
+              The learning engine activates automatically once your dealership reaches the configured threshold of finalized appraisals with known outcomes. It provides historical acceptance rates, recon accuracy, and price realization insights per vehicle segment.
+            </p>
+            <div>
+              <Label className="text-sm font-semibold">Activation Threshold</Label>
+              <p className="text-[10px] text-muted-foreground mb-1.5">
+                Minimum finalized appraisals with outcomes before historical insights appear on the appraisal page.
+              </p>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number" min={50} max={1000} step={25}
+                  value={(settings as any).learning_threshold ?? 250}
+                  onChange={(e) => setSettings({ ...settings, learning_threshold: Number(e.target.value) || 250 } as any)}
+                  className="w-28"
+                />
+                <span className="text-sm text-muted-foreground">finalized appraisals</span>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button size="sm" onClick={handleSaveSettings} disabled={saving}>
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
+                Save Settings
+              </Button>
+            </div>
+          </div>
+        </Section>
+      )}
 
       {/* ── Section 5: Criteria-Based Rules ── */}
       <Section

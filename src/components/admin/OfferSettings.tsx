@@ -352,6 +352,10 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
       wholesale_only_mileage: (settings as any).wholesale_only_mileage || 120000,
       wholesale_only_age_years: (settings as any).wholesale_only_age_years || 10,
       max_market_pct: (settings as any).max_market_pct ?? 90,
+      floor_plan_rate_pct: (settings as any).floor_plan_rate_pct ?? 6.5,
+      lot_cost_per_day: (settings as any).lot_cost_per_day ?? 8,
+      learning_threshold: (settings as any).learning_threshold ?? 250,
+      archetype_deduction_overrides: (settings as any).archetype_deduction_overrides ?? null,
       updated_at: new Date().toISOString(),
     } as any).eq("id", settings.id);
 

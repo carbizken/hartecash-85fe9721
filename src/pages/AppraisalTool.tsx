@@ -581,9 +581,18 @@ export default function AppraisalTool() {
       running = clamped;
     }
 
+    // Safety Cap
+    if (offerResult.isCapped) {
+      const capDiff = offerResult.high - running;
+      if (capDiff !== 0) {
+        running = offerResult.high;
+        blocks.push({ id: "safety_cap", label: "⚠ Safety Cap", value: capDiff, runningTotal: running, type: "subtract", editable: false });
+      }
+    }
+
     blocks.push({ id: "final", label: "FINAL OFFER", value: running, runningTotal: running, type: "total", editable: false });
     return blocks;
-  }, [offerResult, activeSettings, bbVehicle, condition, sub, effectivePack, equipmentTotal, hidePackFromAppraisal]);
+  }, [offerResult, activeSettings, bbVehicle, condition, sub, effectivePack, equipmentTotal, hidePackFromAppraisal, retailMarketStats]);
 
   const maxVal = Math.max(...waterfallBlocks.map(s => Math.max(Math.abs(s.runningTotal), Math.abs(s.value), s.type === "base" ? s.value : 0)), 1);
 

@@ -74,6 +74,7 @@ export async function resolveEffectiveSettings(
 /** Map a pricing_models row to the OfferSettings shape used by the calculator */
 function modelToSettings(model: any): OfferSettings {
   return {
+    strategy_mode: model.strategy_mode || "standard",
     bb_value_basis: model.bb_value_basis || "tradein_avg",
     global_adjustment_pct: model.global_adjustment_pct || 0,
     deductions_config: model.deductions_config || {},

@@ -300,6 +300,16 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
         retail_profit_basis: d.retail_profit_basis || "retail_avg",
         low_mileage_bonus: d.low_mileage_bonus || { enabled: false, avg_miles_per_year: 12000, bonus_pct_per_step: 2, step_size_pct: 20, max_bonus_pct: 8, min_miles_per_year: 4000 },
       } as OfferSettingsRow);
+      // Detect strategy_mode from saved data
+      if (d.strategy_mode) {
+        setStrategyMode(d.strategy_mode as StrategyMode);
+      } else if (d.condition_basis_map) {
+        const basis = d.condition_basis_map;
+        if (basis?.excellent?.startsWith("wholesale")) setStrategyMode("conservative");
+        else if (basis?.very_good === "retail_clean") setStrategyMode("predator");
+        else if (basis?.good === "tradein_clean") setStrategyMode("aggressive");
+        else setStrategyMode("standard");
+      }
       setSavedSettings({
         ...d,
         deduction_amounts: d.deduction_amounts || DEFAULT_DEDUCTION_AMOUNTS,
@@ -318,6 +328,16 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
         retail_profit_basis: d.retail_profit_basis || "retail_avg",
         low_mileage_bonus: d.low_mileage_bonus || { enabled: false, avg_miles_per_year: 12000, bonus_pct_per_step: 2, step_size_pct: 20, max_bonus_pct: 8, min_miles_per_year: 4000 },
       } as OfferSettingsRow);
+      // Detect strategy_mode from saved data (savedSettings mirror)
+      if (d.strategy_mode) {
+        setStrategyMode(d.strategy_mode as StrategyMode);
+      } else if (d.condition_basis_map) {
+        const basis = d.condition_basis_map;
+        if (basis?.excellent?.startsWith("wholesale")) setStrategyMode("conservative");
+        else if (basis?.very_good === "retail_clean") setStrategyMode("predator");
+        else if (basis?.good === "tradein_clean") setStrategyMode("aggressive");
+        else setStrategyMode("standard");
+      }
     }
     if (rulesRes.data) {
       setRules((rulesRes.data as any[]).map(r => ({ ...r, adjustment_type: r.adjustment_type || "pct" })) as OfferRule[]);
@@ -356,6 +376,7 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
       lot_cost_per_day: (settings as any).lot_cost_per_day ?? 8,
       learning_threshold: (settings as any).learning_threshold ?? 250,
       archetype_deduction_overrides: (settings as any).archetype_deduction_overrides ?? null,
+      strategy_mode: strategyMode,
       updated_at: new Date().toISOString(),
     } as any).eq("id", settings.id);
 
@@ -518,9 +539,10 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
               const preset = STRATEGY_MODE_PRESETS[mode];
               setSettings({
                 ...settings,
+                strategy_mode: mode,
                 condition_basis_map: preset.condition_basis_map as any,
                 global_adjustment_pct: preset.global_adjustment_pct,
-              });
+              } as any);
             }
           }}
         />

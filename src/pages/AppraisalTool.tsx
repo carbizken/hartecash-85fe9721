@@ -1248,6 +1248,26 @@ export default function AppraisalTool() {
               </Collapsible>
             )}
 
+            {/* Deal Maker Section — for declined offers or manual toggle */}
+            <DealMakerSection
+              customerExpected={sub.offered_price || sub.estimated_offer_high || 0}
+              currentAppraisal={finalValue}
+              bbVehicle={bbVehicle}
+              reconCost={reconCost}
+              targetGrossMin={targetGrossMin}
+              show={sub.progress_status === "offer_declined" || sub.progress_status === "scheduled" || sub.progress_status === "visiting"}
+            />
+
+            {/* Management Override — requires PIN */}
+            {!sub.appraisal_finalized && (
+              <ManagementOverride
+                managerPin={managerPin}
+                currentValue={finalValue}
+                onOverrideChange={(amount, reason) => setManagerOverride({ amount, reason, by: "Manager" })}
+                existingOverride={managerOverride}
+              />
+            )}
+
             {/* Final Appraised Value + Finalize */}
             <div className={`rounded-xl border-2 p-4 ${sub.appraisal_finalized ? "border-emerald-500/50 bg-emerald-500/5" : "border-primary/30 bg-primary/5"}`}>
               <div className="flex items-center justify-between mb-3">

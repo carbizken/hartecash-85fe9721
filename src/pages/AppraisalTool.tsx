@@ -919,7 +919,18 @@ export default function AppraisalTool() {
             >
               <div className="text-[9px] uppercase tracking-[0.08em] font-bold text-muted-foreground mb-0.5">
                 {metric.label === "__RETAIL__" ? (RETAIL_TIER_LABELS[retailProfitBasis] || "Retail Avg") : metric.label}
-              </div>
+        </div>
+        {/* Market Signal Badge */}
+        {retailMarketStats && (
+          <div className="mb-3 flex items-center gap-2">
+            <MarketSignalBadge
+              mds={retailMarketStats.market_days_supply}
+              soldAvg={retailMarketStats.sold?.mean_price}
+              askingAvg={retailMarketStats.active?.mean_price}
+              activeCount={retailMarketStats.active?.vehicle_count}
+            />
+          </div>
+        )}
               <div className={`text-lg font-black tracking-tight ${metric.color}`}>{metric.value}</div>
               {metric.sub && <div className={`mt-0.5 ${metric.label === "Appraisal Value" && sub?.appraisal_finalized ? "text-[10px] font-bold text-emerald-600" : "text-[10px] font-bold text-muted-foreground"}`}>{metric.sub}</div>}
             </div>

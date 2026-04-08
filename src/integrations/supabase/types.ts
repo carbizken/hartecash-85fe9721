@@ -1189,6 +1189,7 @@ export type Database = {
           retail_search_radius: number
           retail_search_zip: string | null
           seasonal_adjustment: Json
+          strategy_mode: string | null
           target_gross_min: number
           updated_at: string
           wholesale_only_age_years: number
@@ -1227,6 +1228,7 @@ export type Database = {
           retail_search_radius?: number
           retail_search_zip?: string | null
           seasonal_adjustment?: Json
+          strategy_mode?: string | null
           target_gross_min?: number
           updated_at?: string
           wholesale_only_age_years?: number
@@ -1265,6 +1267,7 @@ export type Database = {
           retail_search_radius?: number
           retail_search_zip?: string | null
           seasonal_adjustment?: Json
+          strategy_mode?: string | null
           target_gross_min?: number
           updated_at?: string
           wholesale_only_age_years?: number

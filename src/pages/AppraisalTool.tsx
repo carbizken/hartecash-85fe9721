@@ -561,7 +561,14 @@ export default function AppraisalTool() {
       }
     }
 
-    // 13. Tire adjustment
+    // 13. Market Adjustment (NEW — from live market data)
+    if (offerResult.marketAdjustment !== 0) {
+      running += offerResult.marketAdjustment;
+      const mdsLabel = offerResult.marketDaysSupply != null ? ` (MDS ${offerResult.marketDaysSupply}d)` : "";
+      blocks.push({ id: "market_adj", label: `Market Adj${mdsLabel}`, value: offerResult.marketAdjustment, runningTotal: running, type: offerResult.marketAdjustment >= 0 ? "add" : "subtract", editable: false });
+    }
+
+    // 14. Tire adjustment
     if (sub?.tire_adjustment && sub.tire_adjustment !== 0) {
       running += Number(sub.tire_adjustment);
       blocks.push({ id: "tire_adj", label: "Tire Adjustment", value: Number(sub.tire_adjustment), runningTotal: running, type: Number(sub.tire_adjustment) >= 0 ? "add" : "subtract", editable: false });

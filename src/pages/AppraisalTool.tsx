@@ -1367,14 +1367,6 @@ export default function AppraisalTool() {
               onRetailStatsLoaded={setRetailMarketStats}
             />
 
-            {/* Carrying Cost Panel */}
-            <CarryingCostPanel
-              acv={finalValue}
-              avgDaysToTurn={retailMarketStats?.mean_days_to_turn ?? null}
-              floorPlanRatePct={(activeSettings as any)?.floor_plan_rate_pct ?? 6.5}
-              lotCostPerDay={(activeSettings as any)?.lot_cost_per_day ?? 8}
-              projectedProfit={projectedProfit}
-            />
 
             {/* Historical Intelligence Panel */}
             <HistoricalInsightPanel

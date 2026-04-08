@@ -1335,27 +1335,57 @@ export default function AppraisalTool() {
               )}
               {!sub.appraisal_finalized && sub.appraised_by && <p className="text-[10px] text-muted-foreground mt-1">Last appraised by: {sub.appraised_by}</p>}
             </div>
+            {/* Outcome Entry — appears after finalization */}
+            {sub.appraisal_finalized && (
+              <OutcomeEntryPanel
+                submissionId={sub.id}
+                appraisalFinalizedAt={sub.appraisal_finalized_at}
+                existingOutcome={sub as any}
+                onSaved={() => handleRefreshInspection()}
+              />
+            )}
           </div>
 
           {/* ── RIGHT: Final Offer, Profit, Inspection, Market ── */}
-          <AppraisalSidebar
-            sub={sub}
-            bbVehicle={bbVehicle}
-            offerResult={offerResult}
-            finalValue={finalValue}
-            currentOffer={currentOffer}
-            wholesaleAvg={wholesaleAvg}
-            tradeinAvg={tradeinAvg}
-            retailAvg={retailAvg}
-            reconCost={reconCost}
-            effectivePack={effectivePack}
-            projectedProfit={projectedProfit}
-            profitMargin={profitMargin}
-            activeSettings={activeSettings}
-            dealerZip={dealerZip}
-            onRefreshInspection={handleRefreshInspection}
-            onRetailStatsLoaded={setRetailMarketStats}
-          />
+          <div className="space-y-4">
+            <AppraisalSidebar
+              sub={sub}
+              bbVehicle={bbVehicle}
+              offerResult={offerResult}
+              finalValue={finalValue}
+              currentOffer={currentOffer}
+              wholesaleAvg={wholesaleAvg}
+              tradeinAvg={tradeinAvg}
+              retailAvg={retailAvg}
+              reconCost={reconCost}
+              effectivePack={effectivePack}
+              projectedProfit={projectedProfit}
+              profitMargin={profitMargin}
+              activeSettings={activeSettings}
+              dealerZip={dealerZip}
+              onRefreshInspection={handleRefreshInspection}
+              onRetailStatsLoaded={setRetailMarketStats}
+            />
+
+            {/* Carrying Cost Panel */}
+            <CarryingCostPanel
+              acv={finalValue}
+              avgDaysToTurn={retailMarketStats?.mean_days_to_turn ?? null}
+              floorPlanRatePct={(activeSettings as any)?.floor_plan_rate_pct ?? 6.5}
+              lotCostPerDay={(activeSettings as any)?.lot_cost_per_day ?? 8}
+              projectedProfit={projectedProfit}
+            />
+
+            {/* Historical Intelligence Panel */}
+            <HistoricalInsightPanel
+              dealershipId={dealershipId}
+              bbClassName={liveBbVehicle?.class_name || sub.bb_class_name}
+              overallCondition={condition}
+              mileage={sub.mileage}
+              reconEstimate={reconCost}
+              learningThreshold={(activeSettings as any)?.learning_threshold ?? 250}
+            />
+          </div>
         </div>
       </div>
 

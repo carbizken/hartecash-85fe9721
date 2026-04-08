@@ -539,9 +539,10 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
               const preset = STRATEGY_MODE_PRESETS[mode];
               setSettings({
                 ...settings,
+                strategy_mode: mode,
                 condition_basis_map: preset.condition_basis_map as any,
                 global_adjustment_pct: preset.global_adjustment_pct,
-              });
+              } as any);
             }
           }}
         />

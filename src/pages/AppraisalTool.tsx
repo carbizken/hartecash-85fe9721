@@ -30,7 +30,7 @@ import ACVSheet from "@/components/offer/ACVSheet";
 import OutcomeEntryPanel from "@/components/appraisal/OutcomeEntryPanel";
 import HistoricalInsightPanel from "@/components/appraisal/HistoricalInsightPanel";
 import MarketSignalBadge from "@/components/appraisal/MarketSignalBadge";
-import CarryingCostPanel from "@/components/appraisal/CarryingCostPanel";
+
 
 // ── Types ──
 interface Submission {

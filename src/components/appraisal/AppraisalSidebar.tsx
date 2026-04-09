@@ -178,6 +178,8 @@ export default function AppraisalSidebar({
             dealerZip={dealerZip}
             radiusMiles={activeSettings?.retail_search_radius || 100}
             offerHigh={offerResult?.high || currentOffer}
+            vehicleMileage={sub.mileage}
+            currentAcv={finalValue}
             onStatsLoaded={onRetailStatsLoaded}
           />
         </div>

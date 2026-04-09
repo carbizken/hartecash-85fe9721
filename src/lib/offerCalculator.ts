@@ -379,7 +379,7 @@ export interface OfferRule {
 // INTERNAL DEFAULTS
 // ─────────────────────────────────────────────────────────────
 
-const DEFAULT_DEDUCTION_AMOUNTS: DeductionAmounts = {
+export const DEFAULT_DEDUCTION_AMOUNTS: DeductionAmounts = {
   accidents_1: 800,
   accidents_2: 1800,
   accidents_3plus: 3000,

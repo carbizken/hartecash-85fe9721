@@ -1,3 +1,10 @@
+/**
+ * SubmissionDetailSheet.tsx — Two-column layout
+ * LEFT  (~40%, sticky): Deal summary — money, status, actions
+ * RIGHT (~60%, scroll): Contact, condition, loan, photos, notes, activity
+ * ALL LOGIC IS IDENTICAL TO ORIGINAL — only JSX restructured.
+ */
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
@@ -9,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { QRCodeSVG } from "qrcode.react";
 import VehicleImage from "@/components/sell-form/VehicleImage";
@@ -132,7 +138,6 @@ const SubmissionDetailSheet = ({
   const { toast } = useToast();
   const [editState, setEditState] = useState<Submission | null>(null);
 
-  // Sync editState with selected
   const sub = editState?.id === selected?.id ? editState : selected;
 
   const updateField = (updates: Partial<Submission>) => {
@@ -267,7 +272,6 @@ const SubmissionDetailSheet = ({
     }).eq("id", sub.id);
 
     if (!error) {
-      // Log changes
       if (selected && selected.progress_status !== sub.progress_status) {
         await supabase.from("activity_log").insert({
           submission_id: sub.id, action: "Status Changed",
@@ -292,7 +296,6 @@ const SubmissionDetailSheet = ({
           performed_by: auditLabel,
         });
       }
-      // Notifications
       if (selected) {
         if (!selected.offered_price && sub.offered_price) {
           supabase.functions.invoke("send-notification", { body: { trigger_key: "customer_offer_ready", submission_id: sub.id } }).catch(console.error);
@@ -328,9 +331,9 @@ const SubmissionDetailSheet = ({
 
   return (
     <Sheet open={!!selected} onOpenChange={() => { setEditState(null); onClose(); }}>
-      <SheetContent side="right" className="w-full sm:max-w-3xl lg:max-w-4xl p-0 flex flex-col overflow-hidden [&>button]:hidden">
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-4">
+      <SheetContent side="right" className="w-full sm:max-w-5xl lg:max-w-6xl p-0 flex flex-col overflow-hidden [&>button]:hidden">
+        {/* ── Sticky Header ── */}
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-4 shrink-0">
           <SheetHeader>
             <div className="flex items-center justify-between">
               <SheetTitle className="text-xl font-bold text-primary-foreground font-display tracking-wide">
@@ -366,9 +369,9 @@ const SubmissionDetailSheet = ({
           </SheetHeader>
         </div>
 
-        <ScrollArea className="flex-1">
-          <div className="p-6 space-y-5">
-            {/* Alerts */}
+        {/* ── Alerts (full width) ── */}
+        {(duplicateWarnings[sub.id]?.length > 0 || optOutStatus.email || optOutStatus.sms) && (
+          <div className="px-6 pt-4 space-y-2 shrink-0">
             {duplicateWarnings[sub.id]?.length > 0 && (
               <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 flex items-start gap-2">
                 <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
@@ -391,134 +394,83 @@ const SubmissionDetailSheet = ({
                 </div>
               </div>
             )}
+          </div>
+        )}
 
-            {/* Contact + Vehicle */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <SectionCard icon={Users} title="Contact Information">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Name</Label>
-                    <Input value={sub.name || ""} onChange={(e) => updateField({ name: e.target.value || null })} placeholder="Full name" className="h-8 text-sm" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Phone</Label>
-                    <Input value={sub.phone || ""} onChange={(e) => updateField({ phone: e.target.value || null })} placeholder="(555) 123-4567" className="h-8 text-sm" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Email</Label>
-                    <Input type="email" value={sub.email || ""} onChange={(e) => updateField({ email: e.target.value || null })} placeholder="email@example.com" className="h-8 text-sm" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">ZIP</Label>
-                    <Input value={sub.zip || ""} onChange={(e) => updateField({ zip: e.target.value || null })} placeholder="ZIP code" className="h-8 text-sm" />
-                  </div>
-                </div>
-                <div className="mt-3 pt-3 border-t border-border">
-                  <Label className="text-xs text-muted-foreground font-semibold block mb-2">Address</Label>
-                  <div className="space-y-2">
-                    <Input value={sub.address_street || ""} onChange={(e) => updateField({ address_street: e.target.value || null })} placeholder="Street address" className="h-8 text-sm" />
-                    <div className="grid grid-cols-3 gap-2">
-                      <Input value={sub.address_city || ""} onChange={(e) => updateField({ address_city: e.target.value || null })} placeholder="City" className="h-8 text-sm" />
-                      <Input value={sub.address_state || ""} onChange={(e) => updateField({ address_state: e.target.value || null })} placeholder="State" className="h-8 text-sm" />
-                      <Input value={sub.zip || ""} placeholder="ZIP" className="h-8 text-sm" disabled />
-                    </div>
-                  </div>
-                </div>
-              </SectionCard>
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* TWO-COLUMN BODY                                                 */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
 
-              <SectionCard
-                icon={Car}
-                title="Vehicle Details"
-                headerRight={(() => {
-                  const INSPECTED_STATUSES = ['inspection_completed','appraisal_completed','manager_approval','price_agreed','title_verified','ownership_verified','purchase_complete'];
-                  const isInspected = INSPECTED_STATUSES.includes(sub.progress_status);
-                  const inspClass = isInspected
-                    ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 border-0"
-                    : "bg-gradient-to-r from-orange-400 to-amber-500 text-white hover:from-orange-500 hover:to-amber-600 border-0";
-                  const inspLabel = isInspected ? "Inspection Completed" : "Inspection Needed";
-                  return (
-                    <Button size="sm" className={`h-7 text-xs gap-1 ${inspClass}`} onClick={() => window.open(`${window.location.origin}/inspection/${sub.id}`, "_blank")}>
-                      <ClipboardList className="w-3.5 h-3.5" /> {inspLabel}
-                    </Button>
-                  );
-                })()}
-              >
-                {sub.vehicle_year && sub.vehicle_make && sub.vehicle_model && (
-                  <div className="mb-4 rounded-lg overflow-hidden bg-gradient-to-b from-muted/30 to-transparent" style={{ aspectRatio: "16/7" }}>
-                    <VehicleImage year={sub.vehicle_year} make={sub.vehicle_make} model={sub.vehicle_model} selectedColor={sub.exterior_color || ""} compact />
+          {/* ────────────────────────────────────────────────────────────── */}
+          {/* LEFT COLUMN — sticky deal summary (~40%)                      */}
+          {/* ────────────────────────────────────────────────────────────── */}
+          <div className="lg:w-[40%] lg:border-r border-border overflow-y-auto p-4 lg:p-5 space-y-4 shrink-0">
+
+            {/* Offered Price */}
+            {(canSetPrice || sub.offered_price) && (
+              <SectionCard icon={DollarSign} title="Offered Price" headerRight={
+                sub.offered_price != null ? (
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full cursor-help ${isAutoPopulated ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"}`}>
+                          {isAutoPopulated ? "Auto · Customer Accepted" : "Staff Set"}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[240px] text-xs">
+                        {isAutoPopulated ? "Automatically set when the customer accepted." : "Manually entered by a manager or admin."}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : undefined
+              }>
+                {canSetPrice ? (
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      className="pl-7"
+                      value={sub.offered_price != null ? Number(sub.offered_price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9.]/g, "");
+                        updateField({ offered_price: raw ? Number(raw) : null });
+                      }}
+                    />
                   </div>
+                ) : (
+                  <p className="text-card-foreground font-medium">
+                    {(() => {
+                      const val = sub.offered_price ?? 0;
+                      const [dollars, cents] = val.toFixed(2).split(".");
+                      return <>${Number(dollars).toLocaleString()}.<span className="text-[0.7em] align-baseline">{cents}</span></>;
+                    })()}
+                  </p>
                 )}
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                  <DetailRow label="Year/Make/Model" value={`${sub.vehicle_year || ""} ${sub.vehicle_make || ""} ${sub.vehicle_model || ""}`.trim() || null} icon={<Car className="w-3.5 h-3.5" />} />
-                  <DetailRow label="VIN" value={
-                    sub.vin ? (
-                      <span className="flex items-center gap-1.5">
-                        {sub.vin}
-                        {(sub as any).vin_verified && (
-                          <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 bg-emerald-500/10 rounded-full px-1.5 py-0.5" title="VIN verified via document OCR">
-                            <CheckCircle2 className="w-3 h-3" /> Verified
-                          </span>
-                        )}
-                      </span>
-                    ) : null
-                  } icon={<Info className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Plate" value={sub.plate} icon={<FileText className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Mileage" value={sub.mileage} icon={<Gauge className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Exterior Color" value={sub.exterior_color} icon={<Palette className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Drivetrain" value={sub.drivetrain} icon={<Settings2 className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Modifications" value={sub.modifications} icon={<Settings2 className="w-3.5 h-3.5" />} />
-                </div>
               </SectionCard>
-            </div>
+            )}
 
-            {/* Condition + Loan */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <SectionCard icon={Search} title="Condition & History">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                  <DetailRow label="Overall" value={sub.overall_condition} icon={<Sparkles className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Drivable" value={sub.drivable} icon={<Car className="w-3.5 h-3.5" />} />
-                  <ArrayDetail label="Exterior Damage" value={sub.exterior_damage} icon={<Palette className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Windshield" value={sub.windshield_damage} icon={<Wind className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Moonroof" value={sub.moonroof} />
-                  <ArrayDetail label="Interior Damage" value={sub.interior_damage} icon={<CircleDot className="w-3.5 h-3.5" />} />
-                  <ArrayDetail label="Tech Issues" value={sub.tech_issues} icon={<Search className="w-3.5 h-3.5" />} />
-                  <ArrayDetail label="Engine Issues" value={sub.engine_issues} icon={<Settings2 className="w-3.5 h-3.5" />} />
-                  <ArrayDetail label="Mechanical Issues" value={sub.mechanical_issues} icon={<Wrench className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Accidents" value={sub.accidents} icon={<Car className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Smoked In" value={sub.smoked_in} icon={<Cigarette className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Tires Replaced" value={sub.tires_replaced} icon={<CircleDot className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Keys" value={sub.num_keys} icon={<Key className="w-3.5 h-3.5" />} />
-                </div>
+            {/* ACV Value */}
+            {sub.acv_value && (
+              <SectionCard icon={DollarSign} title="Appraisal Value (ACV)">
+                <p className="text-card-foreground font-bold text-lg">${Number(sub.acv_value).toLocaleString()}</p>
+                {sub.appraised_by && <p className="text-xs text-muted-foreground">Appraised by: {sub.appraised_by}</p>}
+                <Button variant="outline" size="sm" className="mt-2 text-xs" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
+                  <Gauge className="w-3.5 h-3.5 mr-1" /> Open Appraisal Tool
+                </Button>
               </SectionCard>
+            )}
+            {!sub.acv_value && canSetPrice && (
+              <div className="rounded-xl border border-border bg-card shadow-sm p-4">
+                <Button variant="outline" size="sm" className="text-xs" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
+                  <Gauge className="w-3.5 h-3.5 mr-1" /> Open Appraisal Tool to set ACV
+                </Button>
+              </div>
+            )}
 
-              <SectionCard icon={DollarSign} title="Loan & Info">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                  <DetailRow label="Loan Status" value={sub.loan_status} icon={<Info className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Loan Company" value={sub.loan_company} icon={<FileText className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Loan Balance" value={sub.loan_balance} icon={<DollarSign className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Loan Payment" value={sub.loan_payment} icon={<DollarSign className="w-3.5 h-3.5" />} />
-                  <DetailRow label="Next Step" value={sub.next_step} icon={<TrendingUp className="w-3.5 h-3.5" />} />
-                  <div className="flex items-center justify-between col-span-2 mt-1">
-                    <span className="text-xs text-muted-foreground">Lead Source</span>
-                    <Select value={sub.lead_source} onValueChange={async (val) => {
-                      await supabase.from("submissions").update({ lead_source: val }).eq("id", sub.id);
-                      updateField({ lead_source: val });
-                      toast({ title: "Lead source updated" });
-                    }}>
-                      <SelectTrigger className="h-7 text-xs w-40"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="inventory">Off Street Purchase</SelectItem>
-                        <SelectItem value="service">Service Drive</SelectItem>
-                        <SelectItem value="trade">Trade-In</SelectItem>
-                        <SelectItem value="in_store_trade">In-Store Trade</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </SectionCard>
-            </div>
-
-            {/* Acquisition Tracker */}
+            {/* Acquisition Tracker (Status + Pipeline) */}
             <SectionCard icon={TrendingUp} title="Acquisition Tracker" headerRight={
               sub.progress_status !== "new" && sub.progress_status !== "dead_lead" ? (
                 <span className="text-[10px] text-muted-foreground italic">Customer view synced</span>
@@ -601,82 +553,40 @@ const SubmissionDetailSheet = ({
                   </SelectContent>
                 </Select>
               </div>
+            </SectionCard>
 
-              {sub.acv_value && (
-                <div className="mt-3">
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Appraisal Value (ACV)</label>
-                  <p className="text-card-foreground font-bold text-lg">${Number(sub.acv_value).toLocaleString()}</p>
-                  {sub.appraised_by && <p className="text-xs text-muted-foreground">Appraised by: {sub.appraised_by}</p>}
-                  <Button variant="outline" size="sm" className="mt-2 text-xs" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
-                    <Gauge className="w-3.5 h-3.5 mr-1" /> Open Appraisal Tool
+            {/* Assigned Store */}
+            <SectionCard icon={MapPin} title="Assigned Store">
+              <Select value={sub.store_location_id || "unassigned"} onValueChange={(v) => updateField({ store_location_id: v === "unassigned" ? null : v })}>
+                <SelectTrigger><SelectValue placeholder="Select store" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">— Not Assigned —</SelectItem>
+                  {dealerLocations.map(loc => <SelectItem key={loc.id} value={loc.id}>{loc.name} — {loc.city}, {loc.state}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </SectionCard>
+
+            {/* Appointment */}
+            <SectionCard icon={CalendarDays} title="Appointment">
+              {sub.appointment_set && sub.appointment_date ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-card-foreground font-medium">
+                    {new Date(sub.appointment_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                    {selectedApptTime && <span className="ml-1">at {selectedApptTime}</span>}
+                  </p>
+                  {selectedApptLocation && <p className="text-sm text-muted-foreground">📍 {getLocationLabel(selectedApptLocation)}</p>}
+                  <Button variant="outline" size="sm" onClick={() => onScheduleAppointment(sub)}>
+                    <CalendarDays className="w-4 h-4 mr-1" /> Reschedule Appointment
                   </Button>
                 </div>
-              )}
-              {!sub.acv_value && canSetPrice && (
-                <div className="mt-3">
-                  <Button variant="outline" size="sm" className="text-xs" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
-                    <Gauge className="w-3.5 h-3.5 mr-1" /> Open Appraisal Tool to set ACV
-                  </Button>
-                </div>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => onScheduleAppointment(sub)}>
+                  <CalendarDays className="w-4 h-4 mr-1" /> Schedule Appointment
+                </Button>
               )}
             </SectionCard>
 
-            {/* Offered Price */}
-            {(canSetPrice || sub.offered_price) && (
-              <SectionCard icon={DollarSign} title="Offered Price" headerRight={
-                sub.offered_price != null ? (
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full cursor-help ${isAutoPopulated ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"}`}>
-                          {isAutoPopulated ? "Auto · Customer Accepted" : "Staff Set"}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[240px] text-xs">
-                        {isAutoPopulated ? "Automatically set when the customer accepted." : "Manually entered by a manager or admin."}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : undefined
-              }>
-                {canSetPrice ? (
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="0.00"
-                      className="pl-7"
-                      value={sub.offered_price != null ? Number(sub.offered_price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
-                      onChange={(e) => {
-                        const raw = e.target.value.replace(/[^0-9.]/g, "");
-                        updateField({ offered_price: raw ? Number(raw) : null });
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <p className="text-card-foreground font-medium">
-                    {(() => {
-                      const val = sub.offered_price ?? 0;
-                      const [dollars, cents] = val.toFixed(2).split(".");
-                      return <>${Number(dollars).toLocaleString()}.<span className="text-[0.7em] align-baseline">{cents}</span></>;
-                    })()}
-                  </p>
-                )}
-              </SectionCard>
-            )}
-
-            {/* Retail Market Context */}
-            {(sub.vin || sub.vehicle_year) && (
-              <SectionCard icon={TrendingUp} title="Retail Market">
-                <RetailMarketPanel
-                  vin={sub.vin || undefined}
-                  zipcode={sub.zip || undefined}
-                  offerHigh={sub.offered_price ?? sub.estimated_offer_high ?? 0}
-                />
-              </SectionCard>
-            )}
-
+            {/* Check Request */}
             <SectionCard icon={ClipboardCheck} title="Check Request">
               <div className="flex items-center gap-3 mb-3">
                 <Checkbox id="check-request-done" checked={sub.check_request_done} disabled={!isPriceAgreedOrBeyond || !(sub as any).appraisal_finalized} onCheckedChange={(checked) => updateField({ check_request_done: !!checked })} />
@@ -732,16 +642,160 @@ const SubmissionDetailSheet = ({
               </div>
             )}
 
-            {/* Assigned Store */}
-            <SectionCard icon={MapPin} title="Assigned Store">
-              <Select value={sub.store_location_id || "unassigned"} onValueChange={(v) => updateField({ store_location_id: v === "unassigned" ? null : v })}>
-                <SelectTrigger><SelectValue placeholder="Select store" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unassigned">— Not Assigned —</SelectItem>
-                  {dealerLocations.map(loc => <SelectItem key={loc.id} value={loc.id}>{loc.name} — {loc.city}, {loc.state}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </SectionCard>
+            {/* Save + Delete (sticky at bottom of left column) */}
+            <div className="sticky bottom-0 bg-card pt-3 pb-1 border-t border-border flex gap-2 shadow-[0_-4px_12px_rgba(0,0,0,0.08)] rounded-t-lg px-4 -mx-4">
+              <Button className="flex-1" disabled={sub.progress_status === "inspection_completed" && !sub.acv_value} onClick={handleSave}>
+                <Save className="w-4 h-4 mr-2" /> Update Record
+              </Button>
+              {canDelete && (
+                <Button variant="destructive" onClick={() => onDelete(sub.id)}>
+                  <Trash2 className="w-4 h-4 mr-2" /> Delete
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* ────────────────────────────────────────────────────────────── */}
+          {/* RIGHT COLUMN — scrollable details (~60%)                      */}
+          {/* ────────────────────────────────────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto p-4 lg:p-5 space-y-5 min-h-0">
+
+            {/* Contact + Vehicle */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <SectionCard icon={Users} title="Contact Information">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Name</Label>
+                    <Input value={sub.name || ""} onChange={(e) => updateField({ name: e.target.value || null })} placeholder="Full name" className="h-8 text-sm" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Phone</Label>
+                    <Input value={sub.phone || ""} onChange={(e) => updateField({ phone: e.target.value || null })} placeholder="(555) 123-4567" className="h-8 text-sm" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Email</Label>
+                    <Input type="email" value={sub.email || ""} onChange={(e) => updateField({ email: e.target.value || null })} placeholder="email@example.com" className="h-8 text-sm" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">ZIP</Label>
+                    <Input value={sub.zip || ""} onChange={(e) => updateField({ zip: e.target.value || null })} placeholder="ZIP code" className="h-8 text-sm" />
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-border">
+                  <Label className="text-xs text-muted-foreground font-semibold block mb-2">Address</Label>
+                  <div className="space-y-2">
+                    <Input value={sub.address_street || ""} onChange={(e) => updateField({ address_street: e.target.value || null })} placeholder="Street address" className="h-8 text-sm" />
+                    <div className="grid grid-cols-3 gap-2">
+                      <Input value={sub.address_city || ""} onChange={(e) => updateField({ address_city: e.target.value || null })} placeholder="City" className="h-8 text-sm" />
+                      <Input value={sub.address_state || ""} onChange={(e) => updateField({ address_state: e.target.value || null })} placeholder="State" className="h-8 text-sm" />
+                      <Input value={sub.zip || ""} placeholder="ZIP" className="h-8 text-sm" disabled />
+                    </div>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard
+                icon={Car}
+                title="Vehicle Details"
+                headerRight={(() => {
+                  const INSPECTED_STATUSES = ['inspection_completed','appraisal_completed','manager_approval','price_agreed','title_verified','ownership_verified','purchase_complete'];
+                  const isInspected = INSPECTED_STATUSES.includes(sub.progress_status);
+                  const inspClass = isInspected
+                    ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 border-0"
+                    : "bg-gradient-to-r from-orange-400 to-amber-500 text-white hover:from-orange-500 hover:to-amber-600 border-0";
+                  const inspLabel = isInspected ? "Inspection Completed" : "Inspection Needed";
+                  return (
+                    <Button size="sm" className={`h-7 text-xs gap-1 ${inspClass}`} onClick={() => window.open(`${window.location.origin}/inspection/${sub.id}`, "_blank")}>
+                      <ClipboardList className="w-3.5 h-3.5" /> {inspLabel}
+                    </Button>
+                  );
+                })()}
+              >
+                {sub.vehicle_year && sub.vehicle_make && sub.vehicle_model && (
+                  <div className="mb-4 rounded-lg overflow-hidden bg-gradient-to-b from-muted/30 to-transparent" style={{ aspectRatio: "16/7" }}>
+                    <VehicleImage year={sub.vehicle_year} make={sub.vehicle_make} model={sub.vehicle_model} selectedColor={sub.exterior_color || ""} compact />
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                  <DetailRow label="Year/Make/Model" value={`${sub.vehicle_year || ""} ${sub.vehicle_make || ""} ${sub.vehicle_model || ""}`.trim() || null} icon={<Car className="w-3.5 h-3.5" />} />
+                  <DetailRow label="VIN" value={
+                    sub.vin ? (
+                      <span className="flex items-center gap-1.5">
+                        {sub.vin}
+                        {(sub as any).vin_verified && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 bg-emerald-500/10 rounded-full px-1.5 py-0.5" title="VIN verified via document OCR">
+                            <CheckCircle2 className="w-3 h-3" /> Verified
+                          </span>
+                        )}
+                      </span>
+                    ) : null
+                  } icon={<Info className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Plate" value={sub.plate} icon={<FileText className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Mileage" value={sub.mileage} icon={<Gauge className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Exterior Color" value={sub.exterior_color} icon={<Palette className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Drivetrain" value={sub.drivetrain} icon={<Settings2 className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Modifications" value={sub.modifications} icon={<Settings2 className="w-3.5 h-3.5" />} />
+                </div>
+              </SectionCard>
+            </div>
+
+            {/* Condition + Loan */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <SectionCard icon={Search} title="Condition & History">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                  <DetailRow label="Overall" value={sub.overall_condition} icon={<Sparkles className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Drivable" value={sub.drivable} icon={<Car className="w-3.5 h-3.5" />} />
+                  <ArrayDetail label="Exterior Damage" value={sub.exterior_damage} icon={<Palette className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Windshield" value={sub.windshield_damage} icon={<Wind className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Moonroof" value={sub.moonroof} />
+                  <ArrayDetail label="Interior Damage" value={sub.interior_damage} icon={<CircleDot className="w-3.5 h-3.5" />} />
+                  <ArrayDetail label="Tech Issues" value={sub.tech_issues} icon={<Search className="w-3.5 h-3.5" />} />
+                  <ArrayDetail label="Engine Issues" value={sub.engine_issues} icon={<Settings2 className="w-3.5 h-3.5" />} />
+                  <ArrayDetail label="Mechanical Issues" value={sub.mechanical_issues} icon={<Wrench className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Accidents" value={sub.accidents} icon={<Car className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Smoked In" value={sub.smoked_in} icon={<Cigarette className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Tires Replaced" value={sub.tires_replaced} icon={<CircleDot className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Keys" value={sub.num_keys} icon={<Key className="w-3.5 h-3.5" />} />
+                </div>
+              </SectionCard>
+
+              <SectionCard icon={DollarSign} title="Loan & Info">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                  <DetailRow label="Loan Status" value={sub.loan_status} icon={<Info className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Loan Company" value={sub.loan_company} icon={<FileText className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Loan Balance" value={sub.loan_balance} icon={<DollarSign className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Loan Payment" value={sub.loan_payment} icon={<DollarSign className="w-3.5 h-3.5" />} />
+                  <DetailRow label="Next Step" value={sub.next_step} icon={<TrendingUp className="w-3.5 h-3.5" />} />
+                  <div className="flex items-center justify-between col-span-2 mt-1">
+                    <span className="text-xs text-muted-foreground">Lead Source</span>
+                    <Select value={sub.lead_source} onValueChange={async (val) => {
+                      await supabase.from("submissions").update({ lead_source: val }).eq("id", sub.id);
+                      updateField({ lead_source: val });
+                      toast({ title: "Lead source updated" });
+                    }}>
+                      <SelectTrigger className="h-7 text-xs w-40"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="inventory">Off Street Purchase</SelectItem>
+                        <SelectItem value="service">Service Drive</SelectItem>
+                        <SelectItem value="trade">Trade-In</SelectItem>
+                        <SelectItem value="in_store_trade">In-Store Trade</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </SectionCard>
+            </div>
+
+            {/* Retail Market Context */}
+            {(sub.vin || sub.vehicle_year) && (
+              <SectionCard icon={TrendingUp} title="Retail Market">
+                <RetailMarketPanel
+                  vin={sub.vin || undefined}
+                  zipcode={sub.zip || undefined}
+                  offerHigh={sub.offered_price ?? sub.estimated_offer_high ?? 0}
+                />
+              </SectionCard>
+            )}
 
             {/* Internal Notes */}
             <SectionCard icon={StickyNote} title="Internal Notes">
@@ -749,7 +803,7 @@ const SubmissionDetailSheet = ({
             </SectionCard>
 
             {/* Photos + Documents */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <SectionCard icon={Camera} title={`Photos ${photos.length > 0 ? `(${photos.length})` : ""}`}>
                 {photos.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2">
@@ -806,26 +860,6 @@ const SubmissionDetailSheet = ({
               </SectionCard>
             </div>
 
-            {/* Appointment */}
-            <SectionCard icon={CalendarDays} title="Appointment">
-              {sub.appointment_set && sub.appointment_date ? (
-                <div className="space-y-2">
-                  <p className="text-sm text-card-foreground font-medium">
-                    {new Date(sub.appointment_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-                    {selectedApptTime && <span className="ml-1">at {selectedApptTime}</span>}
-                  </p>
-                  {selectedApptLocation && <p className="text-sm text-muted-foreground">📍 {getLocationLabel(selectedApptLocation)}</p>}
-                  <Button variant="outline" size="sm" onClick={() => onScheduleAppointment(sub)}>
-                    <CalendarDays className="w-4 h-4 mr-1" /> Reschedule Appointment
-                  </Button>
-                </div>
-              ) : (
-                <Button variant="outline" size="sm" onClick={() => onScheduleAppointment(sub)}>
-                  <CalendarDays className="w-4 h-4 mr-1" /> Schedule Appointment
-                </Button>
-              )}
-            </SectionCard>
-
             {/* Customer Documents QR */}
             <SectionCard icon={FileText} title="Customer Documents">
               <p className="text-sm text-muted-foreground mb-3">Send this link to upload Driver's License, Registration, Title Inquiry, or Title.</p>
@@ -869,20 +903,9 @@ const SubmissionDetailSheet = ({
                 </div>
               ) : <p className="text-sm text-muted-foreground">No activity recorded yet.</p>}
             </SectionCard>
-
-            {/* Sticky Save Bar */}
-            <div className="sticky bottom-0 bg-card pt-3 pb-1 border-t border-border flex gap-2 shadow-[0_-4px_12px_rgba(0,0,0,0.08)] rounded-t-lg px-4 -mx-4">
-              <Button className="flex-1" disabled={sub.progress_status === "inspection_completed" && !sub.acv_value} onClick={handleSave}>
-                <Save className="w-4 h-4 mr-2" /> Update Record
-              </Button>
-              {canDelete && (
-                <Button variant="destructive" onClick={() => onDelete(sub.id)}>
-                  <Trash2 className="w-4 h-4 mr-2" /> Delete
-                </Button>
-              )}
-            </div>
           </div>
-        </ScrollArea>
+          {/* ── END RIGHT COLUMN ── */}
+        </div>
       </SheetContent>
     </Sheet>
   );

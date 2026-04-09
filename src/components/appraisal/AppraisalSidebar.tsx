@@ -39,8 +39,10 @@ interface Props {
   profitMargin: number;
   activeSettings: any;
   dealerZip?: string;
+  closestCompPrice?: number | null;
   onRefreshInspection?: () => Promise<void>;
   onRetailStatsLoaded?: (stats: RetailStats | null) => void;
+  onClosestCompPrice?: (price: number | null) => void;
 }
 
 export default function AppraisalSidebar({

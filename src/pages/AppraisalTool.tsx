@@ -975,6 +975,7 @@ export default function AppraisalTool() {
           vehicleModel={sub?.vehicle_model}
           condition={condition}
           mileage={sub?.mileage}
+          currentAcv={finalValue}
         />
 
         {/* ═══════════════════════════════════════ */}

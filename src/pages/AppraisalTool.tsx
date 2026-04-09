@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Car, DollarSign, TrendingUp, TrendingDown, Minus,
   Gauge, ChevronDown, Save, AlertTriangle, CheckCircle, XCircle, Shield,
-  Pencil, ArrowDown, Loader2, SlidersHorizontal, CheckSquare, Lock, Unlock, Printer, BarChart3,
+  Pencil, ArrowDown, Loader2, SlidersHorizontal, CheckSquare, Lock, Unlock, Printer,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import CustomerVsInspectorComparison from "@/components/appraisal/CustomerVsInspectorComparison";

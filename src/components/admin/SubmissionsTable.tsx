@@ -389,12 +389,12 @@ const SubmissionsTable = ({
                       </td>
                       <td className={`px-2 ${isCompact ? "py-1.5" : "py-3"} text-center`}>
                         <div className="flex flex-col items-center gap-0.5">
-                          <span className={`text-xs font-bold ${sla.color}`} title={`${Math.round(hours)}h since last update`}>
+                          <span className={`text-xs font-bold ${age.color}`} title={`${Math.round(hours)}h since last update`}>
                             {formatAge(hours)}
                           </span>
-                          {sla.label && (
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${sla.color}`}>
-                              {sla.label}
+                          {age.label && (
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${age.color}`}>
+                              {age.label}
                             </span>
                           )}
                         </div>

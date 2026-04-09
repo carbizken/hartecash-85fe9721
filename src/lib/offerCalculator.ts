@@ -35,6 +35,27 @@ export interface StrategyModePreset {
   market_adjustment_enabled: boolean;
 }
 
+// Strategy presets: condition_multipliers + global_adjustment_pct overrides per mode
+export const STRATEGY_PRESETS: Record<string, Partial<OfferSettings>> = {
+  conservative: {
+    global_adjustment_pct: -8,
+    condition_multipliers: { excellent: 1.05, very_good: 0.95, good: 0.88, fair: 0.78 },
+  },
+  standard: {
+    global_adjustment_pct: 0,
+    condition_multipliers: { excellent: 1.10, very_good: 1.00, good: 0.92, fair: 0.82 },
+  },
+  aggressive: {
+    global_adjustment_pct: 5,
+    condition_multipliers: { excellent: 1.15, very_good: 1.05, good: 0.97, fair: 0.87 },
+  },
+  predator: {
+    global_adjustment_pct: 10,
+    condition_multipliers: { excellent: 1.20, very_good: 1.10, good: 1.02, fair: 0.93 },
+  },
+  custom: {},
+};
+
 export const STRATEGY_MODE_PRESETS: Record<StrategyMode, StrategyModePreset> = {
   conservative: {
     label: "Conservative",

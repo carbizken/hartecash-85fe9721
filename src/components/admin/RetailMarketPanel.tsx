@@ -59,6 +59,8 @@ interface Props {
   dealerZip?: string;
   radiusMiles?: number;
   offerHigh: number;
+  vehicleMileage?: string | number | null;
+  currentAcv?: number;
   onStatsLoaded?: (stats: RetailStats | null) => void;
 }
 

@@ -185,6 +185,7 @@ export default function AppraisalSidebar({
             vehicleMileage={sub.mileage}
             currentAcv={finalValue}
             onStatsLoaded={onRetailStatsLoaded}
+            onClosestCompPrice={onClosestCompPrice}
           />
         </div>
       )}

@@ -1281,6 +1281,8 @@ export default function AppraisalTool() {
               activeSettings={activeSettings}
               dealerZip={dealerZip}
               closestCompPrice={closestCompPrice}
+              wholesaleRough={Number(liveBbVehicle?.wholesale?.rough || 0)}
+              soldAvg={retailMarketStats?.sold?.mean_price ?? null}
               onRefreshInspection={handleRefreshInspection}
               onRetailStatsLoaded={setRetailMarketStats}
               onClosestCompPrice={setClosestCompPrice}

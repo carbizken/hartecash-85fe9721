@@ -123,6 +123,8 @@ export default function AppraisalSidebar({
             retailAvg={retailAvg}
             msrp={Number(bbVehicle.msrp || 0)}
             retailClean={Number(bbVehicle.retail?.clean || 0)}
+            wholesaleRough={Number(bbVehicle.wholesale?.rough || 0)}
+            soldAvg={soldAvg}
             closestCompPrice={closestCompPrice}
           />
         </div>

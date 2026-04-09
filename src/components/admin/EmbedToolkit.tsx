@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, Check, Code2, ExternalLink, Monitor, MapPin, PanelRightOpen, LayoutList, Lightbulb, MousePointerClick, Award, Info } from "lucide-react";
+import { Copy, Check, Code2, ExternalLink, Monitor, MapPin, PanelRightOpen, LayoutList, Lightbulb, MousePointerClick, Award, Info, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
@@ -245,6 +245,10 @@ window.addEventListener("message", function(e) {
 });
 </script>`;
 
+  // Preview state
+  const [previewOpen, setPreviewOpen] = useState<string | null>(null);
+  const togglePreview = (id: string) => setPreviewOpen(previewOpen === id ? null : id);
+
   const CodeBlock = ({ code, id }: { code: string; id: string }) => (
     <div className="relative">
       <pre className="bg-muted/50 border border-border rounded-lg p-4 text-xs overflow-x-auto whitespace-pre-wrap font-mono text-foreground/80 max-h-64">
@@ -260,6 +264,40 @@ window.addEventListener("message", function(e) {
         {copied === id ? "Copied" : "Copy"}
       </Button>
     </div>
+  );
+
+  const PreviewToggle = ({ id, label }: { id: string; label: string }) => (
+    <Button
+      size="sm"
+      variant={previewOpen === id ? "default" : "outline"}
+      className="gap-1.5 text-xs"
+      onClick={() => togglePreview(id)}
+    >
+      {previewOpen === id ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+      {previewOpen === id ? "Hide Preview" : label}
+    </Button>
+  );
+
+  const IframePreview = ({ src, id, height = "500px" }: { src: string; id: string; height?: string }) => (
+    previewOpen === id ? (
+      <div className="rounded-xl border-2 border-primary/30 overflow-hidden bg-white dark:bg-background shadow-lg">
+        <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-b border-border">
+          <div className="flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+            <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+          </div>
+          <span className="text-[10px] text-muted-foreground font-mono truncate flex-1">{src}</span>
+        </div>
+        <iframe
+          src={src}
+          style={{ width: "100%", height, border: "none" }}
+          title="Preview"
+          loading="lazy"
+          allow="camera"
+        />
+      </div>
+    ) : null
   );
 
   return (
@@ -544,6 +582,8 @@ window.addEventListener("message", function(e) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <PreviewToggle id="iframe-preview" label="Preview Trade iFrame" />
+              <IframePreview src={buildUrl("/trade-in", ["mode=trade"])} id="iframe-preview" height="600px" />
               <CodeBlock code={iframeSnippet} id="iframe" />
               <div className="bg-muted/30 rounded-lg border border-border p-3 space-y-2">
                 <p className="text-xs font-semibold text-card-foreground">How to install:</p>
@@ -571,6 +611,21 @@ window.addEventListener("message", function(e) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Floating widget visual mockup */}
+              <div className="rounded-xl border border-border overflow-hidden">
+                <Label className="text-xs text-muted-foreground px-3 pt-2 block">Preview — how it appears on the dealer's site</Label>
+                <div className="relative bg-gradient-to-b from-muted/30 to-muted/60 p-8 min-h-[140px]">
+                  <div className="text-center text-xs text-muted-foreground/40 mb-4">[ Dealer website content ]</div>
+                  {/* Simulated floating button */}
+                  <div
+                    className={`absolute bottom-4 ${widgetPosition === "bottom-right" ? "right-4" : "left-4"} flex items-center gap-2 px-5 py-3 text-white text-sm font-bold rounded-full shadow-lg cursor-default`}
+                    style={{ background: buttonColor }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg>
+                    {buttonText}
+                  </div>
+                </div>
+              </div>
               <CodeBlock code={widgetSnippet} id="widget" />
               <div className="bg-muted/30 rounded-lg border border-border p-3">
                 <p className="text-xs font-semibold text-card-foreground mb-1">How to install:</p>
@@ -629,17 +684,34 @@ window.addEventListener("message", function(e) {
                 </div>
               </div>
 
-              {/* Sticky Preview */}
-              <div className="rounded-lg border border-border overflow-hidden">
-                <Label className="text-xs text-muted-foreground px-3 pt-2 block">Preview</Label>
-                <div className="p-3">
+              {/* Sticky Preview — shown in context of a fake dealer VDP */}
+              <div className="rounded-xl border border-border overflow-hidden">
+                <Label className="text-xs text-muted-foreground px-3 pt-2 block">Preview — how it appears on a vehicle detail page</Label>
+                <div className="relative bg-gradient-to-b from-muted/20 to-muted/50 min-h-[200px]">
+                  {/* Fake VDP content */}
+                  <div className="p-4 space-y-2">
+                    <div className="h-24 bg-muted/40 rounded-lg flex items-center justify-center text-xs text-muted-foreground/30">[ Vehicle Photo Gallery ]</div>
+                    <div className="flex gap-3">
+                      <div className="flex-1 space-y-1.5">
+                        <div className="h-3 w-3/4 bg-muted/40 rounded" />
+                        <div className="h-2 w-1/2 bg-muted/30 rounded" />
+                        <div className="h-2 w-2/3 bg-muted/30 rounded" />
+                      </div>
+                      <div className="w-24 h-12 bg-muted/40 rounded flex items-center justify-center text-[9px] text-muted-foreground/30">Price</div>
+                    </div>
+                  </div>
+                  {/* Ghost link bar */}
                   <div
-                    className="flex items-center justify-center gap-2.5 py-2.5 px-4 text-white rounded-lg"
-                    style={{ background: `${buttonColor}f0` }}
+                    className={`${stickyPosition === "bottom" ? "absolute bottom-0 left-0 right-0" : "absolute top-0 left-0 right-0"}`}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg>
-                    <span className="text-sm font-semibold">{stickyText}</span>
-                    <span className="bg-white/20 border border-white/30 text-white text-xs font-bold px-3 py-1 rounded-full">{stickyCtaText}</span>
+                    <div
+                      className="flex items-center justify-center gap-2.5 py-2.5 px-4 text-white"
+                      style={{ background: `${buttonColor}f0`, backdropFilter: "blur(8px)" }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg>
+                      <span className="text-sm font-semibold">{stickyText}</span>
+                      <span className="bg-white/20 border border-white/30 text-white text-xs font-bold px-3 py-1 rounded-full">{stickyCtaText}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -783,6 +855,10 @@ window.addEventListener("message", function(e) {
                     </div>
                   </div>
                 </div>
+
+                {/* Preview */}
+                <PreviewToggle id="ppt-preview" label="Preview Push/Pull/Tow Page" />
+                <IframePreview src={buildUrl("/push-pull-tow", [`amount=${pptAmount}`])} id="ppt-preview" height="550px" />
 
                 {/* Two options: iframe or widget */}
                 <div className="space-y-3">

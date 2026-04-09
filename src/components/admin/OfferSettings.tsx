@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
 import type { OfferSettings as OfferSettingsType, StrategyMode, MarketAdjustmentConfig } from "@/lib/offerCalculator";
-import { STRATEGY_MODE_PRESETS, DEFAULT_MARKET_ADJUSTMENT } from "@/lib/offerCalculator";
+import { STRATEGY_MODE_PRESETS, STRATEGY_PRESETS, DEFAULT_MARKET_ADJUSTMENT } from "@/lib/offerCalculator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

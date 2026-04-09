@@ -90,6 +90,18 @@ const SubmissionsTable = ({
     return (Date.now() - new Date(refDate).getTime()) / (1000 * 60 * 60);
   };
 
+  const getAgeBadge = (sub: Submission): { color: string; borderClass: string; label: string; bgClass: string } => {
+    const status = sub.progress_status;
+    if (["purchase_complete", "dead_lead"].includes(status))
+      return { color: "text-muted-foreground", borderClass: "border-l-border", label: "", bgClass: "" };
+    const days = (Date.now() - new Date(sub.created_at).getTime()) / (1000 * 60 * 60 * 24);
+    if (days < 3)
+      return { color: "text-muted-foreground", borderClass: "border-l-border", label: "", bgClass: "" };
+    if (days < 6)
+      return { color: "text-amber-500", borderClass: "border-l-amber-500", label: "Follow Up", bgClass: "bg-amber-500/5" };
+    return { color: "text-destructive", borderClass: "border-l-destructive", label: "Critical", bgClass: "bg-destructive/5" };
+  };
+
   const getSlaLevel = (hours: number, status: string): { color: string; borderClass: string; label: string; bgClass: string } => {
     if (["purchase_complete", "dead_lead"].includes(status))
       return { color: "text-muted-foreground", borderClass: "border-l-border", label: "", bgClass: "" };
@@ -98,10 +110,10 @@ const SubmissionsTable = ({
     if (hours < 12)
       return { color: "text-emerald-500", borderClass: "border-l-emerald-500", label: "", bgClass: "" };
     if (hours < 24)
-      return { color: "text-amber-500", borderClass: "border-l-amber-500", label: "Aging", bgClass: "bg-amber-500/5" };
+      return { color: "text-amber-500", borderClass: "border-l-amber-500", label: "", bgClass: "" };
     if (hours < 48)
-      return { color: "text-orange-500", borderClass: "border-l-orange-500", label: "Overdue", bgClass: "bg-orange-500/5" };
-    return { color: "text-destructive", borderClass: "border-l-destructive", label: "Critical", bgClass: "bg-destructive/5" };
+      return { color: "text-orange-500", borderClass: "border-l-orange-500", label: "", bgClass: "" };
+    return { color: "text-destructive", borderClass: "border-l-destructive", label: "", bgClass: "" };
   };
 
   const formatAge = (hours: number) => {
@@ -285,15 +297,14 @@ const SubmissionsTable = ({
         <>
           <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden backdrop-blur-sm">
             <div className="overflow-x-auto">
-              <table className={`min-w-[1100px] ${fontSize}`}>
+              <table className={`min-w-[1000px] ${fontSize}`}>
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
                     <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Date</th>
                     <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Name</th>
                     <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Vehicle</th>
-                    {!isCompact && <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>VIN</th>}
                     <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Contact</th>
-                    <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Source</th>
+                    <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Location</th>
                     <th className={`text-right ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Offer</th>
                     <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap min-w-[160px]`}>Status</th>
                     <th className={`text-center px-2 ${isCompact ? "py-1.5" : "py-3"} font-semibold text-muted-foreground whitespace-nowrap`}>Age</th>
@@ -304,8 +315,9 @@ const SubmissionsTable = ({
                   {filtered.map((sub, idx) => {
                     const hours = getHoursSinceUpdate(sub);
                     const sla = getSlaLevel(hours, sub.progress_status);
+                    const age = getAgeBadge(sub);
                     return (
-                    <tr key={sub.id} className={`border-b border-border last:border-0 hover:bg-primary/5 transition-colors border-l-3 ${sla.borderClass} ${sla.bgClass} ${idx % 2 === 1 ? "bg-muted/20" : ""} admin-row`}>
+                    <tr key={sub.id} className={`border-b border-border last:border-0 hover:bg-primary/5 transition-colors border-l-3 ${sla.borderClass} ${age.bgClass} ${idx % 2 === 1 ? "bg-muted/20" : ""} admin-row`}>
                       <td className={`${cellPad} whitespace-nowrap`}>{new Date(sub.created_at).toLocaleDateString()}</td>
                       <td className={`${cellPad} font-medium text-card-foreground whitespace-nowrap`}>{sub.name || "—"}</td>
                       <td className={`${cellPad} whitespace-nowrap`}>
@@ -316,50 +328,40 @@ const SubmissionsTable = ({
                           {sub.docs_uploaded && <span title="Docs uploaded"><FileText className="w-3 h-3 text-primary ml-0.5 shrink-0" /></span>}
                         </span>
                       </td>
-                      {!isCompact && <td className={`${cellPad} text-xs font-mono text-muted-foreground whitespace-nowrap`}>{sub.vin || "—"}</td>}
                       <td className={`${cellPad} whitespace-nowrap`}>
                         <div>{sub.email || "—"}</div>
                         <div className="text-muted-foreground text-xs">{formatPhone(sub.phone) || ""}</div>
                       </td>
-                      <td className={cellPad}>
-                        <Badge variant={sub.lead_source === "service" ? "secondary" : sub.lead_source === "in_store_trade" || sub.lead_source === "trade" ? "default" : "outline"} className="text-xs">
-                          {sub.lead_source === "service" ? "Service" : sub.lead_source === "in_store_trade" ? "In-Store" : sub.lead_source === "trade" ? "Trade-In" : "Off Street"}
-                        </Badge>
-                        {sub.store_location_id && (
-                          <p className="text-[10px] text-muted-foreground mt-0.5 truncate max-w-[120px]">
-                            {dealerLocations.find(l => l.id === sub.store_location_id)?.name || "—"}
-                          </p>
-                        )}
+                      <td className={`${cellPad} whitespace-nowrap`}>
+                        {(() => {
+                          const loc = sub.store_location_id ? dealerLocations.find(l => l.id === sub.store_location_id) : null;
+                          return loc ? (
+                            <Badge variant="outline" className="text-[10px] font-medium truncate max-w-[120px]">{loc.name}</Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          );
+                        })()}
                       </td>
                       <td className={`${cellPad} text-right whitespace-nowrap`}>
                         {(() => {
-                          const isAcceptedAppt = isAcceptedWithAppointment(sub);
-                          const isAcceptedNoAppt = isAcceptedWithoutAppointment(sub);
-                          const isPending = isOfferPendingSubmission(sub);
-                          const isUpdated = isOfferUpdatedByStaff(sub);
-
-                          const bubbleClass = isAcceptedAppt
-                            ? "bg-primary/15 text-primary border-primary/30"
-                            : isAcceptedNoAppt && isUpdated
-                            ? "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30"
-                            : isAcceptedNoAppt
-                            ? "bg-success/15 text-success border-success/30"
-                            : isPending
-                            ? "bg-warning/15 text-warning-foreground border-warning/30"
-                            : "";
-
+                          const isAccepted = isAcceptedWithAppointment(sub) || isAcceptedWithoutAppointment(sub);
                           const offerValue = sub.offered_price || sub.estimated_offer_high;
-                          if (!offerValue) return <span className="text-xs text-muted-foreground">—</span>;
+
+                          if (!offerValue || offerValue <= 0) return <span className="text-xs text-muted-foreground">—</span>;
 
                           const displayVal = sub.offered_price
                             ? `$${Math.floor(sub.offered_price).toLocaleString()}`
                             : `~$${Math.floor(sub.estimated_offer_high!).toLocaleString()}`;
 
-                          return (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${bubbleClass || "bg-muted/50 text-muted-foreground border-border"}`}>
-                              {displayVal}
-                            </span>
-                          );
+                          if (isAccepted) {
+                            return (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border bg-success/15 text-success border-success/30">
+                                {displayVal}
+                              </span>
+                            );
+                          }
+
+                          return <span className="text-xs font-medium text-card-foreground">{displayVal}</span>;
                         })()}
                       </td>
                       <td className={cellPad}>
@@ -391,12 +393,12 @@ const SubmissionsTable = ({
                       </td>
                       <td className={`px-2 ${isCompact ? "py-1.5" : "py-3"} text-center`}>
                         <div className="flex flex-col items-center gap-0.5">
-                          <span className={`text-xs font-bold ${sla.color}`} title={`${Math.round(hours)}h since last update`}>
+                          <span className={`text-xs font-bold ${age.color}`} title={`${Math.round(hours)}h since last update`}>
                             {formatAge(hours)}
                           </span>
-                          {sla.label && (
-                            <span className={`text-[9px] font-bold uppercase tracking-wider ${sla.color}`}>
-                              {sla.label}
+                          {age.label && (
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${age.color}`}>
+                              {age.label}
                             </span>
                           )}
                         </div>

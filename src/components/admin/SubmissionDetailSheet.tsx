@@ -65,41 +65,63 @@ interface SubmissionDetailSheetProps {
   fetchSubmissions: () => void;
 }
 
-// ── Section Card wrapper with gradient header ──
+// ── Section Card wrapper — premium glass design ──
 const SectionCard = ({
   icon: Icon,
   title,
   children,
   headerRight,
   className = "",
+  accent,
 }: {
   icon?: React.ElementType;
   title: string;
   children: React.ReactNode;
   headerRight?: React.ReactNode;
   className?: string;
-}) => (
-  <div data-print-section className={`rounded-xl border border-border bg-card shadow-sm overflow-hidden ${className}`}>
-    <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-2.5 border-b border-border flex items-center justify-between">
-      <h3 className="text-xs font-bold text-foreground uppercase tracking-widest flex items-center gap-1.5">
-        {Icon && <Icon className="w-3.5 h-3.5 text-primary" />}
-        {title}
-      </h3>
-      {headerRight}
+  accent?: "success" | "warning" | "destructive";
+}) => {
+  const accentBorder = accent === "success" ? "border-l-success" : accent === "warning" ? "border-l-amber-500" : accent === "destructive" ? "border-l-destructive" : "border-l-primary/40";
+  return (
+    <div data-print-section className={`group/card rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06),0_12px_32px_rgba(0,0,0,0.05)] transition-all duration-300 overflow-hidden border-l-[3px] ${accentBorder} ${className}`}>
+      <div className="bg-gradient-to-r from-muted/60 via-muted/30 to-transparent px-5 py-3 border-b border-border/40 flex items-center justify-between">
+        <h3 className="text-[11px] font-bold text-foreground/80 uppercase tracking-[0.12em] flex items-center gap-2">
+          {Icon && (
+            <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-primary/10 group-hover/card:bg-primary/15 transition-colors">
+              <Icon className="w-3.5 h-3.5 text-primary" />
+            </span>
+          )}
+          {title}
+        </h3>
+        {headerRight}
+      </div>
+      <div className="p-5">{children}</div>
     </div>
-    <div className="p-4">{children}</div>
-  </div>
-);
+  );
+};
+
+// ── Customer initials avatar ──
+const CustomerAvatar = ({ name }: { name: string | null }) => {
+  const initials = (name || "?").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+  return (
+    <div className="relative">
+      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-foreground/20 to-primary-foreground/5 border border-primary-foreground/20 flex items-center justify-center shadow-lg backdrop-blur-sm">
+        <span className="text-lg font-bold text-primary-foreground tracking-wide">{initials}</span>
+      </div>
+      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-success border-2 border-primary shadow-sm" />
+    </div>
+  );
+};
 
 const DetailRow = ({ label, value, icon }: { label: string; value: React.ReactNode | string | null | undefined; icon?: React.ReactNode }) => {
   if (!value) return null;
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-border last:border-0">
-      <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-        {icon && <span className="text-muted-foreground/70">{icon}</span>}
+    <div className="flex items-center justify-between py-2 border-b border-border/40 last:border-0 group/row hover:bg-muted/30 -mx-1 px-1 rounded-md transition-colors">
+      <span className="text-sm text-muted-foreground flex items-center gap-2">
+        {icon && <span className="text-muted-foreground/50 group-hover/row:text-primary/60 transition-colors">{icon}</span>}
         {label}
       </span>
-      <span className="text-sm font-medium text-card-foreground text-right max-w-[60%]">{value}</span>
+      <span className="text-sm font-semibold text-card-foreground text-right max-w-[60%]">{value}</span>
     </div>
   );
 };
@@ -332,65 +354,107 @@ const SubmissionDetailSheet = ({
   return (
     <Sheet open={!!selected} onOpenChange={() => { setEditState(null); onClose(); }}>
       <SheetContent side="right" className="w-full sm:max-w-5xl lg:max-w-6xl p-0 flex flex-col overflow-hidden [&>button]:hidden">
-        {/* ── Sticky Header ── */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-4 shrink-0">
-          <SheetHeader>
-            <div className="flex items-center justify-between">
-              <SheetTitle className="text-xl font-bold text-primary-foreground font-display tracking-wide">
-                {sub.vehicle_year} {sub.vehicle_make} {sub.vehicle_model || "Submission Details"}
-              </SheetTitle>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")} className="text-primary-foreground hover:bg-primary-foreground/20 print:hidden">
-                  <Gauge className="w-4 h-4 mr-1" /> Appraisal
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => window.open(`${window.location.origin}/inspection/${sub.id}`, "_blank")} className="text-primary-foreground hover:bg-primary-foreground/20 print:hidden">
-                  <ClipboardList className="w-4 h-4 mr-1" /> Inspection
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handlePrint} className="text-primary-foreground hover:bg-primary-foreground/20 print:hidden">
-                  <Printer className="w-4 h-4 mr-1" /> Print
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => { setEditState(null); onClose(); }} className="text-primary-foreground hover:bg-primary-foreground/20 h-8 w-8">
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
+        {/* ── Premium Sticky Header ── */}
+        <div className="sticky top-0 z-10 shrink-0">
+          {/* Gradient mesh background */}
+          <div className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/80 text-primary-foreground overflow-hidden">
+            {/* Decorative mesh pattern */}
+            <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px), radial-gradient(circle at 60% 80%, white 1px, transparent 1px)", backgroundSize: "60px 60px, 80px 80px, 40px 40px" }} />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-primary-foreground/5 to-transparent rounded-full -translate-y-1/2 translate-x-1/4" />
+
+            <div className="relative px-6 py-5">
+              <SheetHeader>
+                {/* Top bar: quick actions + close */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-1.5">
+                    {[
+                      { label: "Appraisal", icon: Gauge, onClick: () => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank") },
+                      { label: "Inspection", icon: ClipboardList, onClick: () => window.open(`${window.location.origin}/inspection/${sub.id}`, "_blank") },
+                      { label: "Print", icon: Printer, onClick: handlePrint },
+                    ].map(action => (
+                      <Button key={action.label} variant="ghost" size="sm" onClick={action.onClick} className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 rounded-xl text-xs h-8 print:hidden transition-all">
+                        <action.icon className="w-3.5 h-3.5 mr-1.5" /> {action.label}
+                      </Button>
+                    ))}
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => { setEditState(null); onClose(); }} className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 rounded-xl transition-all">
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* Hero: Avatar + Vehicle + Status */}
+                <div className="flex items-start gap-4">
+                  <CustomerAvatar name={sub.name} />
+                  <div className="flex-1 min-w-0">
+                    <SheetTitle className="text-2xl font-extrabold text-primary-foreground font-display tracking-wide leading-tight">
+                      {sub.vehicle_year} {sub.vehicle_make} {sub.vehicle_model || "Submission Details"}
+                    </SheetTitle>
+                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+                      <span className="text-primary-foreground/60 text-sm font-medium">
+                        {sub.name || "Unknown Customer"}
+                      </span>
+                      <span className="text-primary-foreground/30">|</span>
+                      <span className="text-primary-foreground/50 text-xs">
+                        {new Date(sub.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </span>
+                      <Badge className={`text-[10px] font-bold tracking-wider rounded-lg px-2.5 py-0.5 ${
+                        sub.progress_status === "purchase_complete" ? "bg-success/20 text-success border-success/30 shadow-[0_0_8px_rgba(34,197,94,0.15)]" :
+                        sub.progress_status === "dead_lead" ? "bg-destructive/25 text-destructive-foreground border-destructive/30" :
+                        "bg-primary-foreground/15 text-primary-foreground border-primary-foreground/20"
+                      }`}>
+                        {getStatusLabel(sub.progress_status)}
+                      </Badge>
+                      {sub.is_hot_lead && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-orange-500/20 text-orange-200 border border-orange-400/30 rounded-lg px-2 py-0.5 animate-pulse">
+                          🔥 Hot Lead
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Quick deal value in header */}
+                  {(sub.offered_price || sub.estimated_offer_high) && (
+                    <div className="text-right shrink-0 hidden sm:block">
+                      <p className="text-primary-foreground/50 text-[10px] uppercase tracking-widest font-semibold mb-0.5">
+                        {sub.offered_price ? "Offered" : "Estimated"}
+                      </p>
+                      <p className="text-2xl font-black text-primary-foreground tracking-tight font-display">
+                        ${Math.floor(sub.offered_price || sub.estimated_offer_high || 0).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </SheetHeader>
             </div>
-            <div className="flex items-center gap-3 mt-1">
-              <p className="text-primary-foreground/80 text-sm">
-                Submitted {new Date(sub.created_at).toLocaleDateString()} • {sub.name || "Unknown"}
-              </p>
-              <Badge className={`text-[10px] ${
-                sub.progress_status === "purchase_complete" ? "bg-success/20 text-success border-success/30" :
-                sub.progress_status === "dead_lead" ? "bg-destructive/20 text-destructive-foreground border-destructive/30" :
-                "bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30"
-              }`}>
-                {getStatusLabel(sub.progress_status)}
-              </Badge>
-            </div>
-          </SheetHeader>
+          </div>
         </div>
 
-        {/* ── Alerts (full width) ── */}
+        {/* ── Alerts (full width) — premium banner style ── */}
         {(duplicateWarnings[sub.id]?.length > 0 || optOutStatus.email || optOutStatus.sms) && (
-          <div className="px-6 pt-4 space-y-2 shrink-0">
+          <div className="px-6 pt-4 space-y-2.5 shrink-0">
             {duplicateWarnings[sub.id]?.length > 0 && (
-              <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 flex items-start gap-2">
-                <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="bg-destructive/8 border border-destructive/20 rounded-2xl p-4 flex items-start gap-3 backdrop-blur-sm shadow-[0_0_16px_rgba(239,68,68,0.06)]">
+                <div className="w-9 h-9 rounded-xl bg-destructive/15 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-destructive" />
+                </div>
                 <div>
-                  <p className="text-sm font-bold text-destructive">Possible Duplicate</p>
-                  {duplicateWarnings[sub.id].map((w, i) => <p key={i} className="text-xs text-destructive/80">{w}</p>)}
+                  <p className="text-sm font-bold text-destructive">Possible Duplicate Detected</p>
+                  {duplicateWarnings[sub.id].map((w, i) => <p key={i} className="text-xs text-destructive/70 mt-0.5">{w}</p>)}
                 </div>
               </div>
             )}
             {(optOutStatus.email || optOutStatus.sms) && (
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 flex items-start gap-2">
-                <Bell className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <div className="bg-amber-500/8 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3 backdrop-blur-sm">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0">
+                  <Bell className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
                 <div>
                   <p className="text-sm font-bold text-amber-700 dark:text-amber-300">Customer Unsubscribed</p>
-                  <div className="flex gap-2 mt-1">
-                    {optOutStatus.email && <Badge variant="outline" className="text-xs border-amber-500/40 text-amber-700 dark:text-amber-300"><Mail className="w-3 h-3 mr-1" /> Email opted out</Badge>}
-                    {optOutStatus.sms && <Badge variant="outline" className="text-xs border-amber-500/40 text-amber-700 dark:text-amber-300"><Phone className="w-3 h-3 mr-1" /> SMS opted out</Badge>}
+                  <div className="flex gap-2 mt-1.5">
+                    {optOutStatus.email && <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-700 dark:text-amber-300 rounded-lg"><Mail className="w-3 h-3 mr-1" /> Email opted out</Badge>}
+                    {optOutStatus.sms && <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-700 dark:text-amber-300 rounded-lg"><Phone className="w-3 h-3 mr-1" /> SMS opted out</Badge>}
                   </div>
-                  <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-1">Follow-up messages to opted-out channels will be skipped automatically.</p>
+                  <p className="text-[11px] text-amber-600/70 dark:text-amber-400/70 mt-1.5">Follow-up messages to opted-out channels will be skipped automatically.</p>
                 </div>
               </div>
             )}
@@ -405,67 +469,101 @@ const SubmissionDetailSheet = ({
           {/* ────────────────────────────────────────────────────────────── */}
           {/* LEFT COLUMN — sticky deal summary (~40%)                      */}
           {/* ────────────────────────────────────────────────────────────── */}
-          <div className="lg:w-[40%] lg:border-r border-border overflow-y-auto p-4 lg:p-5 space-y-4 shrink-0">
+          <div className="lg:w-[40%] lg:border-r border-border/30 overflow-y-auto p-5 lg:p-6 space-y-5 shrink-0 bg-gradient-to-b from-muted/10 to-transparent">
 
-            {/* Offered Price */}
+            {/* Offered Price — Hero Deal Card */}
             {(canSetPrice || sub.offered_price) && (
-              <SectionCard icon={DollarSign} title="Offered Price" headerRight={
-                sub.offered_price != null ? (
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full cursor-help ${isAutoPopulated ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"}`}>
-                          {isAutoPopulated ? "Auto · Customer Accepted" : "Staff Set"}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[240px] text-xs">
-                        {isAutoPopulated ? "Automatically set when the customer accepted." : "Manually entered by a manager or admin."}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : undefined
-              }>
-                {canSetPrice ? (
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="0.00"
-                      className="pl-7"
-                      value={sub.offered_price != null ? Number(sub.offered_price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
-                      onChange={(e) => {
-                        const raw = e.target.value.replace(/[^0-9.]/g, "");
-                        updateField({ offered_price: raw ? Number(raw) : null });
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <p className="text-card-foreground font-medium">
-                    {(() => {
-                      const val = sub.offered_price ?? 0;
-                      const [dollars, cents] = val.toFixed(2).split(".");
-                      return <>${Number(dollars).toLocaleString()}.<span className="text-[0.7em] align-baseline">{cents}</span></>;
-                    })()}
-                  </p>
-                )}
-              </SectionCard>
+              <div data-print-section className="relative rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.03] shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden">
+                {/* Subtle accent glow */}
+                {sub.offered_price && <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-success/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none" />}
+                <div className="bg-gradient-to-r from-muted/60 via-muted/30 to-transparent px-5 py-3 border-b border-border/40 flex items-center justify-between">
+                  <h3 className="text-[11px] font-bold text-foreground/80 uppercase tracking-[0.12em] flex items-center gap-2">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-primary/10">
+                      <DollarSign className="w-3.5 h-3.5 text-primary" />
+                    </span>
+                    Deal Value
+                  </h3>
+                  {sub.offered_price != null && (
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-lg cursor-help transition-colors ${isAutoPopulated ? "bg-accent/10 text-accent border border-accent/20" : "bg-primary/10 text-primary border border-primary/20"}`}>
+                            {isAutoPopulated ? <><CheckCircle2 className="w-3 h-3" /> Auto · Accepted</> : <><Users className="w-3 h-3" /> Staff Set</>}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[240px] text-xs">
+                          {isAutoPopulated ? "Automatically set when the customer accepted." : "Manually entered by a manager or admin."}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+                <div className="relative p-5">
+                  {canSetPrice ? (
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-muted-foreground/60">$</span>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0.00"
+                        className="pl-10 h-14 text-2xl font-black tracking-tight border-2 focus:border-primary/50 rounded-xl"
+                        value={sub.offered_price != null ? Number(sub.offered_price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^0-9.]/g, "");
+                          updateField({ offered_price: raw ? Number(raw) : null });
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-4xl font-black text-card-foreground tracking-tight font-display">
+                      {(() => {
+                        const val = sub.offered_price ?? 0;
+                        const [dollars, cents] = val.toFixed(2).split(".");
+                        return <>${Number(dollars).toLocaleString()}<span className="text-lg text-muted-foreground font-semibold">.{cents}</span></>;
+                      })()}
+                    </p>
+                  )}
+                  {/* Estimated range context */}
+                  {sub.estimated_offer_high && sub.offered_price !== sub.estimated_offer_high && (
+                    <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5">
+                      <TrendingUp className="w-3 h-3" />
+                      Estimated range: ${Math.floor(sub.estimated_offer_high * 0.9).toLocaleString()} — ${Math.floor(sub.estimated_offer_high).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              </div>
             )}
 
-            {/* ACV Value */}
+            {/* ACV Value — Premium */}
             {sub.acv_value && (
-              <SectionCard icon={DollarSign} title="Appraisal Value (ACV)">
-                <p className="text-card-foreground font-bold text-lg">${Number(sub.acv_value).toLocaleString()}</p>
-                {sub.appraised_by && <p className="text-xs text-muted-foreground">Appraised by: {sub.appraised_by}</p>}
-                <Button variant="outline" size="sm" className="mt-2 text-xs" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
-                  <Gauge className="w-3.5 h-3.5 mr-1" /> Open Appraisal Tool
+              <SectionCard icon={Gauge} title="Appraisal Value (ACV)" accent="success">
+                <div className="flex items-end justify-between mb-3">
+                  <p className="text-2xl font-black text-card-foreground tracking-tight font-display">${Number(sub.acv_value).toLocaleString()}</p>
+                  {sub.offered_price && sub.acv_value && (
+                    <div className="text-right">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Spread</p>
+                      <p className={`text-sm font-bold ${(sub.acv_value - sub.offered_price) > 0 ? "text-success" : "text-destructive"}`}>
+                        {(sub.acv_value - sub.offered_price) > 0 ? "+" : ""}${Math.floor(sub.acv_value - sub.offered_price).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {sub.appraised_by && (
+                  <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 mb-3">
+                    <Users className="w-3 h-3" /> Appraised by: <span className="font-semibold text-card-foreground/70">{sub.appraised_by}</span>
+                  </p>
+                )}
+                <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
+                  <Gauge className="w-3.5 h-3.5 mr-1.5" /> Open Appraisal Tool
                 </Button>
               </SectionCard>
             )}
             {!sub.acv_value && canSetPrice && (
-              <div className="rounded-xl border border-border bg-card shadow-sm p-4">
-                <Button variant="outline" size="sm" className="text-xs" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
-                  <Gauge className="w-3.5 h-3.5 mr-1" /> Open Appraisal Tool to set ACV
+              <div className="rounded-2xl border-2 border-dashed border-border/40 bg-muted/10 p-5 text-center">
+                <Gauge className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground mb-3">No ACV set yet</p>
+                <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
+                  <Gauge className="w-3.5 h-3.5 mr-1.5" /> Open Appraisal Tool
                 </Button>
               </div>
             )}
@@ -473,25 +571,36 @@ const SubmissionDetailSheet = ({
             {/* Acquisition Tracker (Status + Pipeline) */}
             <SectionCard icon={TrendingUp} title="Acquisition Tracker" headerRight={
               sub.progress_status !== "new" && sub.progress_status !== "dead_lead" ? (
-                <span className="text-[10px] text-muted-foreground italic">Customer view synced</span>
+                <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/50 rounded-lg px-2 py-0.5"><Check className="w-3 h-3 text-success" /> Synced</span>
               ) : undefined
             }>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${sub.appointment_set ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
-                  <CalendarDays className="w-3 h-3" /> Inspection {sub.appointment_set ? "Scheduled" : "Not Set"}
-                </div>
-                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${sub.docs_uploaded ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
-                  <FileText className="w-3 h-3" /> Docs {sub.docs_uploaded ? "Uploaded" : "Pending"}
-                </div>
-                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${sub.photos_uploaded ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
-                  <Camera className="w-3 h-3" /> Photos {sub.photos_uploaded ? "Uploaded" : "Pending"}
-                </div>
+              {/* Status chips with premium styling */}
+              <div className="flex flex-wrap gap-2 mb-5">
+                {[
+                  { check: sub.appointment_set, label: "Inspection", activeLabel: "Scheduled", pendingLabel: "Not Set", icon: CalendarDays },
+                  { check: sub.docs_uploaded, label: "Docs", activeLabel: "Uploaded", pendingLabel: "Pending", icon: FileText },
+                  { check: sub.photos_uploaded, label: "Photos", activeLabel: "Uploaded", pendingLabel: "Pending", icon: Camera },
+                ].map(chip => (
+                  <div key={chip.label} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
+                    chip.check
+                      ? "bg-success/10 text-success border-success/20 shadow-[0_0_8px_rgba(34,197,94,0.08)]"
+                      : "bg-muted/40 text-muted-foreground border-border/40"
+                  }`}>
+                    {chip.check ? <CheckCircle2 className="w-3.5 h-3.5" /> : <chip.icon className="w-3.5 h-3.5" />}
+                    {chip.label} {chip.check ? chip.activeLabel : chip.pendingLabel}
+                  </div>
+                ))}
               </div>
 
               {sub.progress_status === "dead_lead" ? (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-destructive/15">
-                  <XCircle className="w-5 h-5 text-destructive" />
-                  <span className="font-bold text-destructive text-sm">Dead Lead</span>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20">
+                  <div className="w-8 h-8 rounded-xl bg-destructive/15 flex items-center justify-center">
+                    <XCircle className="w-5 h-5 text-destructive" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-destructive text-sm block">Dead Lead</span>
+                    <span className="text-xs text-destructive/70">This opportunity has been closed</span>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-0 w-full">
@@ -501,22 +610,26 @@ const SubmissionDetailSheet = ({
                     return (
                       <div key={stage.key} className="flex items-center flex-1 min-w-0">
                         <div className="flex flex-col items-center w-full">
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold transition-all ${
-                            isComplete ? "bg-success text-success-foreground shadow-sm" :
-                            isCurrent ? "bg-primary text-primary-foreground shadow-md ring-2 ring-primary/30" :
-                            "bg-muted text-muted-foreground"
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold transition-all duration-300 ${
+                            isComplete ? "bg-gradient-to-br from-success to-success/80 text-success-foreground shadow-[0_2px_8px_rgba(34,197,94,0.25)]" :
+                            isCurrent ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-[0_2px_12px_rgba(var(--primary),0.3)] ring-[3px] ring-primary/20 animate-[pulse_3s_ease-in-out_infinite]" :
+                            "bg-muted/60 text-muted-foreground/60 border border-border/40"
                           }`}>
-                            {isComplete ? <Check className="w-3.5 h-3.5" /> : <stage.icon className="w-3.5 h-3.5" />}
+                            {isComplete ? <Check className="w-4 h-4" /> : <stage.icon className="w-3.5 h-3.5" />}
                           </div>
-                          <span className={`text-[10px] mt-1.5 text-center leading-tight max-w-[70px] ${
-                            isCurrent ? "font-bold text-card-foreground" :
-                            isComplete ? "font-medium text-card-foreground" :
-                            "text-muted-foreground"
+                          <span className={`text-[10px] mt-2 text-center leading-tight max-w-[70px] transition-colors ${
+                            isCurrent ? "font-extrabold text-primary" :
+                            isComplete ? "font-semibold text-card-foreground" :
+                            "text-muted-foreground/60"
                           }`}>
                             {stage.label}
                           </span>
                         </div>
-                        {i < arr.length - 1 && <div className={`h-[2px] flex-1 min-w-[8px] -mt-4 ${isComplete ? "bg-success" : "bg-border"}`} />}
+                        {i < arr.length - 1 && (
+                          <div className={`h-[2px] flex-1 min-w-[8px] -mt-5 rounded-full transition-all ${
+                            isComplete ? "bg-gradient-to-r from-success to-success/60" : "bg-border/40"
+                          }`} />
+                        )}
                       </div>
                     );
                   })}
@@ -566,89 +679,117 @@ const SubmissionDetailSheet = ({
               </Select>
             </SectionCard>
 
-            {/* Appointment */}
-            <SectionCard icon={CalendarDays} title="Appointment">
+            {/* Appointment — Premium */}
+            <SectionCard icon={CalendarDays} title="Appointment" accent={sub.appointment_set ? "success" : undefined}>
               {sub.appointment_set && sub.appointment_date ? (
-                <div className="space-y-2">
-                  <p className="text-sm text-card-foreground font-medium">
-                    {new Date(sub.appointment_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-                    {selectedApptTime && <span className="ml-1">at {selectedApptTime}</span>}
-                  </p>
-                  {selectedApptLocation && <p className="text-sm text-muted-foreground">📍 {getLocationLabel(selectedApptLocation)}</p>}
-                  <Button variant="outline" size="sm" onClick={() => onScheduleAppointment(sub)}>
-                    <CalendarDays className="w-4 h-4 mr-1" /> Reschedule Appointment
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 bg-success/5 border border-success/15 rounded-xl p-3">
+                    <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
+                      <CalendarDays className="w-5 h-5 text-success" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-card-foreground font-bold">
+                        {new Date(sub.appointment_date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                        {selectedApptTime && <span className="text-success font-semibold ml-1.5">at {selectedApptTime}</span>}
+                      </p>
+                      {selectedApptLocation && <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1"><MapPin className="w-3 h-3" /> {getLocationLabel(selectedApptLocation)}</p>}
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={() => onScheduleAppointment(sub)}>
+                    <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> Reschedule
                   </Button>
                 </div>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => onScheduleAppointment(sub)}>
-                  <CalendarDays className="w-4 h-4 mr-1" /> Schedule Appointment
-                </Button>
+                <div className="text-center py-2">
+                  <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={() => onScheduleAppointment(sub)}>
+                    <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> Schedule Appointment
+                  </Button>
+                </div>
               )}
             </SectionCard>
 
-            {/* Check Request */}
-            <SectionCard icon={ClipboardCheck} title="Check Request">
-              <div className="flex items-center gap-3 mb-3">
-                <Checkbox id="check-request-done" checked={sub.check_request_done} disabled={!isPriceAgreedOrBeyond || !(sub as any).appraisal_finalized} onCheckedChange={(checked) => updateField({ check_request_done: !!checked })} />
-                <label htmlFor="check-request-done" className={`text-sm font-medium ${isPriceAgreedOrBeyond ? "text-card-foreground" : "text-muted-foreground"}`}>Check Request Done</label>
+            {/* Check Request — Premium */}
+            <SectionCard icon={ClipboardCheck} title="Check Request" accent={sub.check_request_done ? "success" : undefined}>
+              <div className="flex items-center gap-3 mb-4 bg-muted/20 rounded-xl p-3 border border-border/20">
+                <Checkbox id="check-request-done" checked={sub.check_request_done} disabled={!isPriceAgreedOrBeyond || !(sub as any).appraisal_finalized} onCheckedChange={(checked) => updateField({ check_request_done: !!checked })} className="rounded-md" />
+                <label htmlFor="check-request-done" className={`text-sm font-semibold ${isPriceAgreedOrBeyond ? "text-card-foreground" : "text-muted-foreground"}`}>Check Request Completed</label>
               </div>
               {!(sub as any).appraisal_finalized ? (
-                <p className="text-xs text-amber-600 font-medium">⚠️ Appraisal must be finalized before generating a check request.</p>
+                <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-500/8 border border-amber-500/15 rounded-xl p-3">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  <span className="font-medium">Appraisal must be finalized before generating a check request.</span>
+                </div>
               ) : isPriceAgreedOrBeyond ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" onClick={handleGenerateCheckRequest}><Printer className="w-4 h-4 mr-1" /> Generate Check Request</Button>
-                    <Button variant="outline" size="sm" onClick={handlePrintAllDocs}><FileText className="w-4 h-4 mr-1" /> Print All Docs</Button>
+                    <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={handleGenerateCheckRequest}>
+                      <Printer className="w-3.5 h-3.5 mr-1.5" /> Generate Check Request
+                    </Button>
+                    <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={handlePrintAllDocs}>
+                      <FileText className="w-3.5 h-3.5 mr-1.5" /> Print All Docs
+                    </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">Check request includes all docs. "Print All Docs" reprints supporting documents only.</p>
+                  <p className="text-[11px] text-muted-foreground/70">Check request includes all docs. "Print All Docs" reprints supporting documents only.</p>
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground">Available once price is agreed and entered.</p>
+                <p className="text-xs text-muted-foreground italic">Available once price is agreed and entered.</p>
               )}
             </SectionCard>
 
-            {/* Review Request */}
+            {/* Review Request — Premium celebration card */}
             {sub.progress_status === "purchase_complete" && sub.email && (
-              <div className="bg-success/5 border border-success/20 rounded-xl p-4">
-                <div className="bg-gradient-to-r from-success/10 to-success/5 -mx-4 -mt-4 px-4 py-2.5 border-b border-success/20 mb-4 rounded-t-xl">
-                  <h3 className="text-xs font-bold text-foreground uppercase tracking-widest flex items-center gap-1.5">
-                    <Star className="w-3.5 h-3.5 text-success" /> Request Customer Review
+              <div className="relative rounded-2xl border border-success/20 bg-gradient-to-br from-success/5 via-card to-success/[0.03] overflow-hidden shadow-[0_2px_12px_rgba(34,197,94,0.06)]">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-success/8 to-transparent rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+                <div className="bg-gradient-to-r from-success/12 to-success/5 px-5 py-3 border-b border-success/15">
+                  <h3 className="text-[11px] font-bold text-foreground/80 uppercase tracking-[0.12em] flex items-center gap-2">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-success/15">
+                      <Star className="w-3.5 h-3.5 text-success" />
+                    </span>
+                    Request Customer Review
                   </h3>
                 </div>
-                {sub.review_requested ? (
-                  <div className="flex items-center gap-2 text-sm text-success">
-                    <Check className="w-4 h-4" />
-                    <span className="font-medium">Review request sent{sub.review_requested_at ? ` on ${new Date(sub.review_requested_at).toLocaleDateString()}` : ""}</span>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Send an email asking the customer to leave a review.</p>
-                    <Button variant="outline" size="sm" className="border-success/40 text-success hover:bg-success/10" onClick={async () => {
-                      toast({ title: "Sending...", description: "Sending review request email..." });
-                      try {
-                        const res = await supabase.functions.invoke("send-review-request", { body: { submission_id: sub.id, submission_token: sub.token } });
-                        if (res.error || res.data?.error) { toast({ title: "Failed", description: res.data?.error || "Could not send.", variant: "destructive" }); }
-                        else {
-                          toast({ title: "Sent! ⭐", description: "Review request sent." });
-                          updateField({ review_requested: true, review_requested_at: new Date().toISOString() });
-                          fetchSubmissions();
-                        }
-                      } catch { toast({ title: "Error", description: "Something went wrong.", variant: "destructive" }); }
-                    }}>
-                      <Mail className="w-4 h-4 mr-1" /> Send Review Request
-                    </Button>
-                  </div>
-                )}
+                <div className="relative p-5">
+                  {sub.review_requested ? (
+                    <div className="flex items-center gap-3 text-sm text-success bg-success/8 rounded-xl p-3 border border-success/15">
+                      <div className="w-8 h-8 rounded-xl bg-success/15 flex items-center justify-center">
+                        <Check className="w-4 h-4" />
+                      </div>
+                      <span className="font-semibold">Review request sent{sub.review_requested_at ? ` on ${new Date(sub.review_requested_at).toLocaleDateString()}` : ""}</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground">Send an email asking the customer to leave a review for this completed purchase.</p>
+                      <Button variant="outline" size="sm" className="border-success/30 text-success hover:bg-success/10 rounded-xl h-9 font-semibold" onClick={async () => {
+                        toast({ title: "Sending...", description: "Sending review request email..." });
+                        try {
+                          const res = await supabase.functions.invoke("send-review-request", { body: { submission_id: sub.id, submission_token: sub.token } });
+                          if (res.error || res.data?.error) { toast({ title: "Failed", description: res.data?.error || "Could not send.", variant: "destructive" }); }
+                          else {
+                            toast({ title: "Review request sent!", description: "The customer will receive the email shortly." });
+                            updateField({ review_requested: true, review_requested_at: new Date().toISOString() });
+                            fetchSubmissions();
+                          }
+                        } catch { toast({ title: "Error", description: "Something went wrong.", variant: "destructive" }); }
+                      }}>
+                        <Mail className="w-4 h-4 mr-1.5" /> Send Review Request
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* Save + Delete (sticky at bottom of left column) */}
-            <div className="sticky bottom-0 bg-card pt-3 pb-1 border-t border-border flex gap-2 shadow-[0_-4px_12px_rgba(0,0,0,0.08)] rounded-t-lg px-4 -mx-4">
-              <Button className="flex-1" disabled={sub.progress_status === "inspection_completed" && !sub.acv_value} onClick={handleSave}>
+            {/* Save + Delete — Premium floating action bar */}
+            <div className="sticky bottom-0 bg-gradient-to-t from-card via-card/98 to-card/90 backdrop-blur-md pt-4 pb-2 border-t border-border/30 flex gap-3 shadow-[0_-8px_32px_rgba(0,0,0,0.08)] rounded-t-2xl px-5 -mx-5 -mb-5">
+              <Button
+                className="flex-1 h-11 rounded-xl font-bold text-sm shadow-[0_2px_12px_rgba(var(--primary),0.2)] hover:shadow-[0_4px_20px_rgba(var(--primary),0.3)] transition-all"
+                disabled={sub.progress_status === "inspection_completed" && !sub.acv_value}
+                onClick={handleSave}
+              >
                 <Save className="w-4 h-4 mr-2" /> Update Record
               </Button>
               {canDelete && (
-                <Button variant="destructive" onClick={() => onDelete(sub.id)}>
+                <Button variant="destructive" className="h-11 rounded-xl font-bold text-sm px-5 shadow-sm hover:shadow-md transition-all" onClick={() => onDelete(sub.id)}>
                   <Trash2 className="w-4 h-4 mr-2" /> Delete
                 </Button>
               )}
@@ -658,37 +799,52 @@ const SubmissionDetailSheet = ({
           {/* ────────────────────────────────────────────────────────────── */}
           {/* RIGHT COLUMN — scrollable details (~60%)                      */}
           {/* ────────────────────────────────────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto p-4 lg:p-5 space-y-5 min-h-0">
+          <div className="flex-1 overflow-y-auto p-5 lg:p-6 space-y-6 min-h-0">
 
             {/* Contact + Vehicle */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-              <SectionCard icon={Users} title="Contact Information">
+              <SectionCard icon={Users} title="Contact Information" headerRight={
+                (sub.phone || sub.email) ? (
+                  <div className="flex items-center gap-1">
+                    {sub.phone && (
+                      <a href={`tel:${sub.phone}`} className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg bg-success/10 text-success border border-success/20 hover:bg-success/20 transition-colors cursor-pointer">
+                        <Phone className="w-3 h-3" /> Call
+                      </a>
+                    )}
+                    {sub.email && (
+                      <a href={`mailto:${sub.email}`} className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer">
+                        <Mail className="w-3 h-3" /> Email
+                      </a>
+                    )}
+                  </div>
+                ) : undefined
+              }>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Name</Label>
-                    <Input value={sub.name || ""} onChange={(e) => updateField({ name: e.target.value || null })} placeholder="Full name" className="h-8 text-sm" />
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Name</Label>
+                    <Input value={sub.name || ""} onChange={(e) => updateField({ name: e.target.value || null })} placeholder="Full name" className="h-9 text-sm rounded-xl border-border/60 focus:border-primary/40" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Phone</Label>
-                    <Input value={sub.phone || ""} onChange={(e) => updateField({ phone: e.target.value || null })} placeholder="(555) 123-4567" className="h-8 text-sm" />
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Phone</Label>
+                    <Input value={sub.phone || ""} onChange={(e) => updateField({ phone: e.target.value || null })} placeholder="(555) 123-4567" className="h-9 text-sm rounded-xl border-border/60 focus:border-primary/40" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Email</Label>
-                    <Input type="email" value={sub.email || ""} onChange={(e) => updateField({ email: e.target.value || null })} placeholder="email@example.com" className="h-8 text-sm" />
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Email</Label>
+                    <Input type="email" value={sub.email || ""} onChange={(e) => updateField({ email: e.target.value || null })} placeholder="email@example.com" className="h-9 text-sm rounded-xl border-border/60 focus:border-primary/40" />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">ZIP</Label>
-                    <Input value={sub.zip || ""} onChange={(e) => updateField({ zip: e.target.value || null })} placeholder="ZIP code" className="h-8 text-sm" />
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">ZIP</Label>
+                    <Input value={sub.zip || ""} onChange={(e) => updateField({ zip: e.target.value || null })} placeholder="ZIP code" className="h-9 text-sm rounded-xl border-border/60 focus:border-primary/40" />
                   </div>
                 </div>
-                <div className="mt-3 pt-3 border-t border-border">
-                  <Label className="text-xs text-muted-foreground font-semibold block mb-2">Address</Label>
-                  <div className="space-y-2">
-                    <Input value={sub.address_street || ""} onChange={(e) => updateField({ address_street: e.target.value || null })} placeholder="Street address" className="h-8 text-sm" />
+                <div className="mt-4 pt-4 border-t border-border/30">
+                  <Label className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider block mb-2.5">Address</Label>
+                  <div className="space-y-2.5">
+                    <Input value={sub.address_street || ""} onChange={(e) => updateField({ address_street: e.target.value || null })} placeholder="Street address" className="h-9 text-sm rounded-xl border-border/60 focus:border-primary/40" />
                     <div className="grid grid-cols-3 gap-2">
-                      <Input value={sub.address_city || ""} onChange={(e) => updateField({ address_city: e.target.value || null })} placeholder="City" className="h-8 text-sm" />
-                      <Input value={sub.address_state || ""} onChange={(e) => updateField({ address_state: e.target.value || null })} placeholder="State" className="h-8 text-sm" />
-                      <Input value={sub.zip || ""} placeholder="ZIP" className="h-8 text-sm" disabled />
+                      <Input value={sub.address_city || ""} onChange={(e) => updateField({ address_city: e.target.value || null })} placeholder="City" className="h-9 text-sm rounded-xl border-border/60 focus:border-primary/40" />
+                      <Input value={sub.address_state || ""} onChange={(e) => updateField({ address_state: e.target.value || null })} placeholder="State" className="h-9 text-sm rounded-xl border-border/60 focus:border-primary/40" />
+                      <Input value={sub.zip || ""} placeholder="ZIP" className="h-9 text-sm rounded-xl border-border/60 opacity-50" disabled />
                     </div>
                   </div>
                 </div>
@@ -797,54 +953,86 @@ const SubmissionDetailSheet = ({
               </SectionCard>
             )}
 
-            {/* Internal Notes */}
+            {/* Internal Notes — Premium */}
             <SectionCard icon={StickyNote} title="Internal Notes">
-              <Textarea placeholder="Add team notes here..." value={sub.internal_notes || ""} onChange={(e) => updateField({ internal_notes: e.target.value || null })} rows={3} />
+              <Textarea
+                placeholder="Add team notes, observations, or follow-up reminders..."
+                value={sub.internal_notes || ""}
+                onChange={(e) => updateField({ internal_notes: e.target.value || null })}
+                rows={4}
+                className="rounded-xl border-border/40 focus:border-primary/40 resize-none text-sm leading-relaxed"
+              />
             </SectionCard>
 
             {/* Photos + Documents */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-              <SectionCard icon={Camera} title={`Photos ${photos.length > 0 ? `(${photos.length})` : ""}`}>
+              <SectionCard icon={Camera} title="Photos" headerRight={
+                photos.length > 0 ? (
+                  <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-lg px-2 py-0.5">{photos.length}</span>
+                ) : undefined
+              }>
                 {photos.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2.5">
                     {photos.map((photo, i) => (
-                      <div key={i} className="relative group">
-                        <a href={photo.url} target="_blank" rel="noopener noreferrer">
-                          <img src={photo.url} alt={`Photo ${i + 1}`} className="rounded-lg w-full h-28 object-cover hover:opacity-80 transition-opacity" />
+                      <div key={i} className="relative group/photo rounded-xl overflow-hidden border border-border/30 shadow-sm hover:shadow-lg transition-all duration-300">
+                        <a href={photo.url} target="_blank" rel="noopener noreferrer" className="block">
+                          <img src={photo.url} alt={`Photo ${i + 1}`} className="w-full h-32 object-cover group-hover/photo:scale-105 transition-transform duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300" />
+                          <div className="absolute bottom-2 left-2 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300">
+                            <span className="text-[10px] text-white font-medium bg-black/40 backdrop-blur-sm rounded-md px-2 py-0.5">
+                              <ExternalLink className="w-2.5 h-2.5 inline mr-1" />View
+                            </span>
+                          </div>
                         </a>
                         {canDelete && (
-                          <button onClick={() => onDeletePhoto(photo.name)} className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete photo">
+                          <button onClick={() => onDeletePhoto(photo.name)} className="absolute top-2 right-2 bg-destructive/90 backdrop-blur-sm text-destructive-foreground rounded-lg p-1.5 opacity-0 group-hover/photo:opacity-100 transition-all duration-200 hover:bg-destructive shadow-lg" title="Delete photo">
                             <Trash2 className="w-3 h-3" />
                           </button>
                         )}
                       </div>
                     ))}
                   </div>
-                ) : <p className="text-sm text-muted-foreground">No photos uploaded.</p>}
-                <StaffFileUpload token={sub.token} bucket="submission-photos" onUploadComplete={() => onRefresh(sub)} />
+                ) : (
+                  <div className="text-center py-6 border-2 border-dashed border-border/40 rounded-xl">
+                    <Camera className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No photos uploaded</p>
+                  </div>
+                )}
+                <div className="mt-3">
+                  <StaffFileUpload token={sub.token} bucket="submission-photos" onUploadComplete={() => onRefresh(sub)} />
+                </div>
               </SectionCard>
 
-              <SectionCard icon={FileText} title={`Documents ${docs.length > 0 ? `(${docs.length})` : ""}`}>
+              <SectionCard icon={FileText} title="Documents" headerRight={
+                docs.length > 0 ? (
+                  <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-lg px-2 py-0.5">{docs.length}</span>
+                ) : undefined
+              }>
                 {docs.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {Object.entries(docs.reduce<Record<string, typeof docs>>((acc, doc) => { if (!acc[doc.type]) acc[doc.type] = []; acc[doc.type].push(doc); return acc; }, {})).map(([type, typeDocs]) => (
                       <div key={type}>
-                        <p className="text-xs font-semibold text-muted-foreground uppercase mb-1.5">{DOC_TYPE_LABELS[type] || type}</p>
-                        <div className="grid grid-cols-3 gap-2">
+                        <p className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-wider mb-2">{DOC_TYPE_LABELS[type] || type}</p>
+                        <div className="grid grid-cols-3 gap-2.5">
                           {typeDocs.map((doc, i) => {
                             const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.name);
                             return (
-                              <div key={i} className="relative group">
+                              <div key={i} className="relative group/doc rounded-xl overflow-hidden border border-border/30 shadow-sm hover:shadow-lg transition-all duration-300">
                                 <a href={doc.url} target="_blank" rel="noopener noreferrer" className="block">
-                                  {isImage ? <img src={doc.url} alt={doc.name} className="rounded-lg w-full h-28 object-cover hover:opacity-80 transition-opacity" /> : (
-                                    <div className="rounded-lg w-full h-28 bg-muted flex flex-col items-center justify-center hover:bg-muted/80 transition-colors border border-border">
-                                      <FileText className="w-8 h-8 text-muted-foreground mb-1" />
-                                      <span className="text-[10px] text-muted-foreground text-center px-1 truncate w-full">{doc.name}</span>
+                                  {isImage ? (
+                                    <>
+                                      <img src={doc.url} alt={doc.name} className="w-full h-32 object-cover group-hover/doc:scale-105 transition-transform duration-500" />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/doc:opacity-100 transition-opacity duration-300" />
+                                    </>
+                                  ) : (
+                                    <div className="w-full h-32 bg-gradient-to-br from-muted/60 to-muted/30 flex flex-col items-center justify-center hover:from-muted/80 transition-colors border-b border-border/20">
+                                      <FileText className="w-8 h-8 text-muted-foreground/40 mb-1.5" />
+                                      <span className="text-[10px] text-muted-foreground text-center px-2 truncate w-full font-medium">{doc.name}</span>
                                     </div>
                                   )}
                                 </a>
                                 {canDelete && (
-                                  <button onClick={() => onDeleteDoc(doc.type, doc.name)} className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete document">
+                                  <button onClick={() => onDeleteDoc(doc.type, doc.name)} className="absolute top-2 right-2 bg-destructive/90 backdrop-blur-sm text-destructive-foreground rounded-lg p-1.5 opacity-0 group-hover/doc:opacity-100 transition-all duration-200 hover:bg-destructive shadow-lg" title="Delete document">
                                     <Trash2 className="w-3 h-3" />
                                   </button>
                                 )}
@@ -855,25 +1043,36 @@ const SubmissionDetailSheet = ({
                       </div>
                     ))}
                   </div>
-                ) : <p className="text-sm text-muted-foreground">No documents uploaded.</p>}
-                <StaffFileUpload token={sub.token} bucket="customer-documents" onUploadComplete={() => onRefresh(sub)} />
+                ) : (
+                  <div className="text-center py-6 border-2 border-dashed border-border/40 rounded-xl">
+                    <FileText className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No documents uploaded</p>
+                  </div>
+                )}
+                <div className="mt-3">
+                  <StaffFileUpload token={sub.token} bucket="customer-documents" onUploadComplete={() => onRefresh(sub)} />
+                </div>
               </SectionCard>
             </div>
 
-            {/* Customer Documents QR */}
-            <SectionCard icon={FileText} title="Customer Documents">
-              <p className="text-sm text-muted-foreground mb-3">Send this link to upload Driver's License, Registration, Title Inquiry, or Title.</p>
-              <div className="flex items-start gap-4">
-                <div className="bg-white p-2 rounded-lg flex-shrink-0">
-                  <QRCodeSVG value={getDocsUrl(sub.token)} size={100} />
+            {/* Customer Documents QR — Premium sharing card */}
+            <SectionCard icon={Upload} title="Document Upload Link">
+              <p className="text-sm text-muted-foreground mb-4">Share this link with the customer to upload their documents securely.</p>
+              <div className="flex items-start gap-5">
+                <div className="bg-white p-3 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-border/20 flex-shrink-0">
+                  <QRCodeSVG value={getDocsUrl(sub.token)} size={110} />
                 </div>
-                <div className="flex-1 space-y-2">
-                  <div className="bg-background rounded-md p-2 border border-border">
-                    <p className="text-xs text-muted-foreground break-all font-mono">{getDocsUrl(sub.token)}</p>
+                <div className="flex-1 space-y-3">
+                  <div className="bg-muted/30 rounded-xl p-3 border border-border/30">
+                    <p className="text-[11px] text-muted-foreground break-all font-mono leading-relaxed">{getDocsUrl(sub.token)}</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(getDocsUrl(sub.token)); toast({ title: "Link copied!" }); }}>Copy Link</Button>
-                    <Button variant="outline" size="sm" onClick={() => window.open(getDocsUrl(sub.token), "_blank")}><ExternalLink className="w-3 h-3 mr-1" /> Open</Button>
+                    <Button variant="outline" size="sm" className="rounded-xl h-9 font-semibold text-xs" onClick={() => { navigator.clipboard.writeText(getDocsUrl(sub.token)); toast({ title: "Link copied!" }); }}>
+                      <ClipboardCheck className="w-3.5 h-3.5 mr-1.5" /> Copy Link
+                    </Button>
+                    <Button variant="outline" size="sm" className="rounded-xl h-9 font-semibold text-xs" onClick={() => window.open(getDocsUrl(sub.token), "_blank")}>
+                      <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> Open
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -882,26 +1081,60 @@ const SubmissionDetailSheet = ({
             {/* Follow-Up Sequence */}
             <FollowUpPanel submissionId={sub.id} hasOffer={!!(sub.offered_price || sub.estimated_offer_high)} progressStatus={sub.progress_status} />
 
-            {/* Activity Log */}
-            <SectionCard icon={History} title="Activity Log">
+            {/* Activity Log — Premium Timeline */}
+            <SectionCard icon={History} title="Activity Log" headerRight={
+              activityLog.length > 0 ? (
+                <span className="text-[10px] text-muted-foreground bg-muted/50 rounded-lg px-2 py-0.5 font-medium">{activityLog.length} events</span>
+              ) : undefined
+            }>
               {activityLog.length > 0 ? (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {activityLog.map((log) => (
-                    <div key={log.id} className="flex items-start gap-2 text-xs border-b border-border pb-2 last:border-0">
-                      <Clock className="w-3 h-3 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <span className="font-medium text-card-foreground">{log.action}</span>
-                        {log.old_value && log.new_value && <span className="text-muted-foreground"> — {log.old_value} → {log.new_value}</span>}
-                        <div className="text-muted-foreground mt-0.5">
-                          {log.performed_by && <span className="capitalize">{log.performed_by.replace(/_/g, " ")}</span>}
-                          {" · "}
-                          {new Date(log.created_at).toLocaleString()}
+                <div className="relative max-h-64 overflow-y-auto pr-1">
+                  {/* Timeline line */}
+                  <div className="absolute left-[11px] top-3 bottom-3 w-[2px] bg-gradient-to-b from-primary/20 via-border/40 to-transparent rounded-full" />
+                  <div className="space-y-0">
+                    {activityLog.map((log, idx) => (
+                      <div key={log.id} className="relative flex items-start gap-4 py-3 group/timeline">
+                        {/* Timeline dot */}
+                        <div className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                          idx === 0
+                            ? "bg-primary/15 border-2 border-primary shadow-[0_0_8px_rgba(var(--primary),0.15)]"
+                            : "bg-muted/60 border border-border/60 group-hover/timeline:border-primary/30 group-hover/timeline:bg-primary/5"
+                        }`}>
+                          <Clock className={`w-3 h-3 ${idx === 0 ? "text-primary" : "text-muted-foreground/60 group-hover/timeline:text-primary/60"} transition-colors`} />
+                        </div>
+                        <div className="flex-1 min-w-0 -mt-0.5">
+                          <div className="flex items-baseline gap-2 flex-wrap">
+                            <span className={`font-semibold text-sm ${idx === 0 ? "text-card-foreground" : "text-card-foreground/80"}`}>{log.action}</span>
+                            {log.old_value && log.new_value && (
+                              <span className="text-xs text-muted-foreground">
+                                <span className="line-through opacity-60">{log.old_value}</span>
+                                <span className="mx-1 text-primary">→</span>
+                                <span className="font-medium text-card-foreground/80">{log.new_value}</span>
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground/70">
+                            {log.performed_by && (
+                              <span className="inline-flex items-center gap-1 capitalize bg-muted/40 rounded-md px-1.5 py-0.5">
+                                <Users className="w-2.5 h-2.5" />
+                                {log.performed_by.replace(/_/g, " ")}
+                              </span>
+                            )}
+                            <span>{new Date(log.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              ) : <p className="text-sm text-muted-foreground">No activity recorded yet.</p>}
+              ) : (
+                <div className="text-center py-6">
+                  <div className="w-10 h-10 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-2">
+                    <History className="w-5 h-5 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">No activity recorded yet</p>
+                </div>
+              )}
             </SectionCard>
           </div>
           {/* ── END RIGHT COLUMN ── */}

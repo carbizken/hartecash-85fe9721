@@ -132,6 +132,94 @@ const ArrayDetail = ({ label, value, icon }: { label: string; value: string[] | 
   return <DetailRow label={label} value={value.join(", ")} icon={icon} />;
 };
 
+// ── Compact OBD indicator — fetches latest scan for a submission ──
+const CompactOBDIndicator = ({ submissionId, token }: { submissionId: string; token: string }) => {
+  const [scan, setScan] = useState<{ mil_on: boolean | null; dtc_codes: any; created_at: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await (supabase as any)
+          .from("vehicle_scans")
+          .select("mil_on, dtc_codes, created_at")
+          .eq("submission_id", submissionId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!cancelled) setScan(data ?? null);
+      } catch {
+        if (!cancelled) setScan(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [submissionId]);
+
+  if (loading || !scan) return null;
+
+  const dtcCount = Array.isArray(scan.dtc_codes) ? scan.dtc_codes.length : 0;
+  const milOn = scan.mil_on === true;
+  const scanDate = (() => {
+    try { return new Date(scan.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }); }
+    catch { return ""; }
+  })();
+
+  return (
+    <div
+      className={`rounded-2xl border overflow-hidden shadow-sm transition-shadow hover:shadow-md ${
+        milOn
+          ? "border-red-500/40 bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent"
+          : "border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent"
+      }`}
+    >
+      <div className="bg-gradient-to-r from-muted/60 via-muted/30 to-transparent px-5 py-3 border-b border-border/40 flex items-center justify-between">
+        <h3 className="text-[11px] font-bold text-foreground/80 uppercase tracking-[0.12em] flex items-center gap-2">
+          <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-primary/10">
+            <Activity className="w-3.5 h-3.5 text-primary" />
+          </span>
+          OBD-II Scan
+        </h3>
+        <span className="text-[10px] font-semibold text-muted-foreground">{scanDate}</span>
+      </div>
+      <div className="p-4 flex items-center gap-3">
+        <div
+          className={`flex items-center justify-center w-10 h-10 rounded-xl shrink-0 ${
+            milOn
+              ? "bg-red-500/20 border border-red-500/30"
+              : "bg-emerald-500/20 border border-emerald-500/30"
+          }`}
+        >
+          {milOn ? (
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+          ) : (
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`text-xs font-black uppercase tracking-wide ${milOn ? "text-red-600 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400"}`}>
+            {milOn ? "Check Engine On" : "No Active Faults"}
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            {dtcCount} DTC{dtcCount === 1 ? "" : "s"} reported
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="rounded-lg h-8 text-[11px] font-semibold shrink-0"
+          onClick={() => { window.location.href = `/inspection/${token}`; }}
+        >
+          Details
+          <ExternalLink className="w-3 h-3 ml-1" />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const SubmissionDetailSheet = ({
   selected,
   onClose,
@@ -623,6 +711,9 @@ const SubmissionDetailSheet = ({
                 </Button>
               </div>
             )}
+
+            {/* OBD-II Quick Indicator */}
+            {sub.id && <CompactOBDIndicator submissionId={sub.id} token={sub.token} />}
 
             {/* Black Book Market Values — Private Party reference */}
             {(() => {

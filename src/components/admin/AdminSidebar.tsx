@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Inbox, CalendarDays, Users, ShieldCheck, SlidersHorizontal,
-  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, MapPin, Car, ScrollText, Shield, Lock, Wrench, Rocket, Gauge, Network, Camera, Gift, Megaphone, ChevronDown, Link2, Code2, Paintbrush, TrendingUp, Store
+  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, MapPin, Car, ScrollText, Shield, Lock, Wrench, Rocket, Gauge, Network, Camera, Gift, Megaphone, ChevronDown, Link2, Code2, Paintbrush, TrendingUp, Store, Truck
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -167,6 +167,7 @@ const AdminSidebar = ({
   const enterpriseItems: SidebarItem[] = canManageAccess
     ? [
         { key: "api-access", label: "API Access", icon: Code2 },
+        { key: "vauto-integration", label: "vAuto Integration", icon: Truck },
         { key: "white-label", label: "White Label", icon: Paintbrush },
       ].filter((item) => isAllowed(item.key))
     : [];
@@ -188,7 +189,7 @@ const AdminSidebar = ({
     "my-lead-link", "my-referrals",
     "staff", "referrals", "compliance", "reports", "image-inventory",
     "onboarding", "system-settings",
-    "api-access", "white-label",
+    "api-access", "vauto-integration", "white-label",
     "equity-mining", "wholesale-marketplace",
   ];
   const lockedSections = showRequestAccess && allowedSections !== null

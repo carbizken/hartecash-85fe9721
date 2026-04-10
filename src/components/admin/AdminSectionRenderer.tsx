@@ -46,6 +46,7 @@ const ApiAccessPanel = React.lazy(() => import("./ApiAccessPanel"));
 const WhiteLabelSettings = React.lazy(() => import("./WhiteLabelSettings"));
 const EquityMining = React.lazy(() => import("./EquityMining"));
 const WholesaleMarketplace = React.lazy(() => import("./WholesaleMarketplace"));
+const VautoIntegration = React.lazy(() => import("./VautoIntegration"));
 
 class AdminErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -379,6 +380,11 @@ const AdminSectionRendererInner = (props: AdminSectionRendererProps) => {
       {activeSection === "api-access" && canManageAccess && (
         <React.Suspense fallback={<AdminLoadingSkeleton />}>
           <ApiAccessPanel />
+        </React.Suspense>
+      )}
+      {activeSection === "vauto-integration" && canManageAccess && (
+        <React.Suspense fallback={<AdminLoadingSkeleton />}>
+          <VautoIntegration />
         </React.Suspense>
       )}
       {activeSection === "white-label" && canManageAccess && (

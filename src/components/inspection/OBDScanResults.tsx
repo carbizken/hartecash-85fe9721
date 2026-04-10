@@ -222,7 +222,7 @@ export default function OBDScanResults({ submissionId, showHistory = false }: OB
       <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-card to-card/80 shadow-sm overflow-hidden">
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-5 py-4 border-b border-border/40 flex items-center gap-3">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/15">
-            <Activity className="w-4.5 h-4.5 text-primary animate-pulse" />
+            <Activity className="w-5 h-5 text-primary animate-pulse" />
           </div>
           <div className="flex-1">
             <Skeleton className="h-4 w-32 mb-1.5" />
@@ -298,7 +298,7 @@ export default function OBDScanResults({ submissionId, showHistory = false }: OB
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-5 py-3.5 border-b border-border/40 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/15 border border-primary/20 shrink-0">
-            <Activity className="w-4.5 h-4.5 text-primary" />
+            <Activity className="w-5 h-5 text-primary" />
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-card-foreground tracking-tight flex items-center gap-2">

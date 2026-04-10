@@ -33,6 +33,7 @@ import ACVSheet from "@/components/offer/ACVSheet";
 import OutcomeEntryPanel from "@/components/appraisal/OutcomeEntryPanel";
 import HistoricalInsightPanel from "@/components/appraisal/HistoricalInsightPanel";
 import MarketPulseCard from "@/components/appraisal/MarketPulseCard";
+import OBDScanResults from "@/components/inspection/OBDScanResults";
 
 
 // ── Types ──
@@ -1126,6 +1127,9 @@ export default function AppraisalTool() {
                 </div>
               </div>
             )}
+
+            {/* OBD-II Diagnostic findings — appraiser view */}
+            {sub?.id && <OBDScanResults submissionId={sub.id} showHistory />}
 
             {/* ② REVIEW FINDINGS — Customer vs Inspector */}
             <Collapsible defaultOpen>

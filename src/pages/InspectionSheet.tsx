@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import BrakePadDepthWidget from "@/components/inspection/BrakePadDepthWidget";
+import OBDScanResults from "@/components/inspection/OBDScanResults";
+import OBDScanButton from "@/components/inspection/OBDScanButton";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1415,6 +1417,22 @@ const InspectionSheet = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* OBD-II Diagnostic Scan — premium section */}
+        <div className="space-y-2 print:hidden">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5" />
+              Optional Premium Diagnostics
+            </p>
+            <OBDScanButton
+              submissionId={submission.id}
+              submissionToken={submission.token}
+              vehicleStr={vehicleTitle}
+            />
+          </div>
+          <OBDScanResults submissionId={submission.id} />
         </div>
 
         {/* Powertrain & Equipment Verification */}

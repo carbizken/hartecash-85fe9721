@@ -86,6 +86,8 @@ const TenantManagement = ({ onSetupDealer }: TenantManagementProps) => {
   const [editing, setEditing] = useState<Tenant | null>(null);
   const [form, setForm] = useState<TenantForm>({ ...EMPTY_FORM });
 
+  const [confirmDeleteTenant, setConfirmDeleteTenant] = useState<Tenant | null>(null);
+
   // Pricing upgrade prompt state
   const [showPricingPrompt, setShowPricingPrompt] = useState(false);
   const [pricingEffective, setPricingEffective] = useState<"next_cycle" | "custom">("next_cycle");
@@ -257,12 +259,18 @@ const TenantManagement = ({ onSetupDealer }: TenantManagementProps) => {
     }
   };
 
-  const handleDelete = async (t: Tenant) => {
+  const handleDelete = (t: Tenant) => {
     if (t.dealership_id === "default") {
       toast({ title: "Cannot delete", description: "The default tenant cannot be removed.", variant: "destructive" });
       return;
     }
-    if (!confirm(`Delete "${t.display_name}"? This won't remove their data, just the tenant mapping.`)) return;
+    setConfirmDeleteTenant(t);
+  };
+
+  const executeDeleteTenant = async () => {
+    if (!confirmDeleteTenant) return;
+    const t = confirmDeleteTenant;
+    setConfirmDeleteTenant(null);
     await supabase.from("tenants").delete().eq("id", t.id);
     toast({ title: "Deleted", description: `${t.display_name} removed.` });
     fetchTenants();
@@ -545,6 +553,21 @@ const TenantManagement = ({ onSetupDealer }: TenantManagementProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!confirmDeleteTenant} onOpenChange={(open) => { if (!open) setConfirmDeleteTenant(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete "{confirmDeleteTenant?.display_name}"? This won't remove their data, just the tenant mapping.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={executeDeleteTenant}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

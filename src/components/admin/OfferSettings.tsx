@@ -265,6 +265,7 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
   const [showRuleDialog, setShowRuleDialog] = useState(false);
   const [editingRule, setEditingRule] = useState<Partial<OfferRule> | null>(null);
   const [savingRule, setSavingRule] = useState(false);
+  const [confirmDeleteRuleId, setConfirmDeleteRuleId] = useState<string | null>(null);
   const [modelOverrideSettings, setModelOverrideSettings] = useState<OfferSettingsType | null>(null);
   const [strategyMode, setStrategyMode] = useState<StrategyMode>("standard");
   const [marketAdjustment, setMarketAdjustment] = useState<MarketAdjustmentConfig>(DEFAULT_MARKET_ADJUSTMENT);
@@ -462,8 +463,14 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
     setSavingRule(false);
   };
 
-  const handleDeleteRule = async (id: string) => {
-    if (!confirm("Delete this rule?")) return;
+  const handleDeleteRule = (id: string) => {
+    setConfirmDeleteRuleId(id);
+  };
+
+  const executeDeleteRule = async () => {
+    if (!confirmDeleteRuleId) return;
+    const id = confirmDeleteRuleId;
+    setConfirmDeleteRuleId(null);
     const { error } = await supabase.from("offer_rules" as any).delete().eq("id", id);
     if (!error) {
       setRules((prev) => prev.filter((r) => r.id !== id));
@@ -1040,6 +1047,21 @@ const OfferSettings = ({ userId, userRole }: OfferSettingsProps = {}) => {
         </DialogContent>
       </Dialog>
       </PricingAccessGate>
+
+      <AlertDialog open={!!confirmDeleteRuleId} onOpenChange={(open) => { if (!open) setConfirmDeleteRuleId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Rule</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete this rule? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={executeDeleteRule}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

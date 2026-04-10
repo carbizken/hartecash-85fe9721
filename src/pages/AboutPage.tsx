@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Fragment, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   Shield, Clock, Award, HandshakeIcon, ChevronRight, Building2,
@@ -26,6 +26,30 @@ interface DealerLocation {
 const ICON_MAP: Record<string, LucideIcon> = {
   HandshakeIcon, Shield, Clock, Award, Heart, Star, CheckCircle, Users, Zap, Target, Smile, ThumbsUp,
 };
+
+/** Sanitize HTML to only allow safe tags and strip event handlers / scripts. */
+const ALLOWED_TAGS = new Set([
+  "p", "br", "strong", "em", "b", "i", "u", "a",
+  "h1", "h2", "h3", "h4", "h5", "h6",
+  "ul", "ol", "li", "span", "div", "blockquote",
+]);
+
+function sanitizeHtml(html: string): string {
+  // Remove <script> blocks entirely
+  let cleaned = html.replace(/<script[\s\S]*?<\/script>/gi, "");
+  // Remove <style> blocks
+  cleaned = cleaned.replace(/<style[\s\S]*?<\/style>/gi, "");
+  // Remove event handlers (on*)
+  cleaned = cleaned.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+  // Remove javascript: URLs
+  cleaned = cleaned.replace(/href\s*=\s*(?:"javascript:[^"]*"|'javascript:[^']*')/gi, "");
+  // Remove disallowed tags but keep their content
+  cleaned = cleaned.replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, (match, tagName) => {
+    if (ALLOWED_TAGS.has(tagName.toLowerCase())) return match;
+    return "";
+  });
+  return cleaned;
+}
 
 const DEFAULT_MILESTONES: AboutMilestone[] = [
   { year: "Day 1", label: "Founded with a mission to make selling your car simple" },
@@ -107,7 +131,8 @@ const AboutPage = () => {
   const heroHeadline = config.about_hero_headline || "Our Story";
   const heroSubtext = config.about_hero_subtext || "We're passionate about helping drivers get the most value for their vehicles — no haggling, no stress.";
   const customStory = config.about_story || DEFAULT_STORY;
-  
+  const sanitizedStory = useMemo(() => customStory ? sanitizeHtml(customStory) : "", [customStory]);
+
   // Support both array and single image (backwards compat)
   const aboutImageUrls: string[] = (() => {
     const urls = (config as any).about_image_urls;
@@ -143,9 +168,14 @@ const AboutPage = () => {
         <section className="bg-primary text-primary-foreground py-16 md:py-24 px-5">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-sm font-semibold uppercase tracking-widest opacity-70 mb-3">About Us</p>
-            <h1 className="text-3xl md:text-5xl font-extrabold leading-tight mb-5"
-              dangerouslySetInnerHTML={{ __html: heroHeadline.replace(/\n/g, "<br />") }}
-            />
+            <h1 className="text-3xl md:text-5xl font-extrabold leading-tight mb-5">
+              {heroHeadline.split("\n").map((line, i, arr) => (
+                <Fragment key={i}>
+                  {line}
+                  {i < arr.length - 1 && <br />}
+                </Fragment>
+              ))}
+            </h1>
             <p className="text-lg md:text-xl opacity-85 max-w-2xl mx-auto leading-relaxed">
               {heroSubtext}
             </p>
@@ -189,7 +219,7 @@ const AboutPage = () => {
                 {customStory ? (
                   <div
                     className="prose prose-sm max-w-none text-foreground/85 space-y-4"
-                    dangerouslySetInnerHTML={{ __html: customStory }}
+                    dangerouslySetInnerHTML={{ __html: sanitizedStory }}
                   />
                 ) : (
                   <div className="prose prose-sm max-w-none text-foreground/85 space-y-4">

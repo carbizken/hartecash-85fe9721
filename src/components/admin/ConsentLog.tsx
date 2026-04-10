@@ -87,6 +87,7 @@ const ConsentLog = () => {
   const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [confirmWithdrawRecord, setConfirmWithdrawRecord] = useState<ConsentRecord | null>(null);
 
   /* ── auth ── */
   useEffect(() => {
@@ -143,13 +144,14 @@ const ConsentLog = () => {
   const withdrawnCount = useMemo(() => records.filter((r) => !!r.withdrawn_at).length, [records]);
 
   /* ── withdraw consent ── */
-  const handleWithdraw = async (record: ConsentRecord) => {
-    if (
-      !window.confirm(
-        `Withdraw consent for ${record.customer_name || record.customer_phone || record.customer_email || "this record"}?\n\nThis action will be logged and cannot be undone.`,
-      )
-    )
-      return;
+  const handleWithdraw = (record: ConsentRecord) => {
+    setConfirmWithdrawRecord(record);
+  };
+
+  const executeWithdraw = async () => {
+    if (!confirmWithdrawRecord) return;
+    const record = confirmWithdrawRecord;
+    setConfirmWithdrawRecord(null);
 
     setWithdrawingId(record.id);
     try {
@@ -665,6 +667,21 @@ const ConsentLog = () => {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!confirmWithdrawRecord} onOpenChange={(open) => { if (!open) setConfirmWithdrawRecord(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Withdraw Consent</AlertDialogTitle>
+            <AlertDialogDescription>
+              Withdraw consent for {confirmWithdrawRecord?.customer_name || confirmWithdrawRecord?.customer_phone || confirmWithdrawRecord?.customer_email || "this record"}? This action will be logged and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={executeWithdraw}>Withdraw</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
   );
 };

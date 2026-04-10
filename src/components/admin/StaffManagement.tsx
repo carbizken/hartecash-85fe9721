@@ -91,6 +91,7 @@ const StaffManagement = () => {
   const [editingSections, setEditingSections] = useState<StaffMember | null>(null);
   const [locations, setLocations] = useState<DealerLocation[]>([]);
   const [staffSections, setStaffSections] = useState<Record<string, string[]>>({});
+  const [confirmRemoveMember, setConfirmRemoveMember] = useState<StaffMember | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -193,8 +194,14 @@ const StaffManagement = () => {
     setChangingRole(null);
   };
 
-  const handleRemove = async (member: StaffMember) => {
-    if (!confirm(`Remove ${member.email || member.display_name || "this user"} (${ROLE_LABELS[member.role] || member.role})? They will lose all dashboard access.`)) return;
+  const handleRemove = (member: StaffMember) => {
+    setConfirmRemoveMember(member);
+  };
+
+  const executeRemoveMember = async () => {
+    if (!confirmRemoveMember) return;
+    const member = confirmRemoveMember;
+    setConfirmRemoveMember(null);
 
     const { error } = await supabase.rpc("remove_staff_role", { _role_id: member.role_id });
     if (error) {
@@ -552,6 +559,21 @@ const StaffManagement = () => {
           onSave={(sections) => handleSaveStaffSections(editingSections.user_id, sections)}
         />
       )}
+
+      <AlertDialog open={!!confirmRemoveMember} onOpenChange={(open) => { if (!open) setConfirmRemoveMember(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Staff Member</AlertDialogTitle>
+            <AlertDialogDescription>
+              Remove {confirmRemoveMember?.email || confirmRemoveMember?.display_name || "this user"} ({ROLE_LABELS[confirmRemoveMember?.role || ""] || confirmRemoveMember?.role})? They will lose all dashboard access.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={executeRemoveMember}>Remove</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

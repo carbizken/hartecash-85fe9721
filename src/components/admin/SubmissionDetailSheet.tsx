@@ -30,6 +30,7 @@ import {
   ClipboardCheck, ClipboardList, Save, Trash2, CheckCircle2, Activity,
 } from "lucide-react";
 import { calculateLeadScore, getScoreColor } from "@/lib/leadScoring";
+import { calculateEquity } from "@/lib/equityCalculator";
 import type { Submission, DealerLocation } from "@/lib/adminConstants";
 import {
   getProgressStages, getStageIndex, getStatusLabel,
@@ -380,7 +381,11 @@ const SubmissionDetailSheet = ({
       address_state: sub.address_state,
       store_location_id: sub.store_location_id || null,
       status_updated_at: new Date().toISOString(),
-    }).eq("id", sub.id);
+      loan_payoff_amount: (sub as any).loan_payoff_amount ?? null,
+      loan_payoff_verified: (sub as any).loan_payoff_verified ?? false,
+      loan_payoff_updated_at: (sub as any).loan_payoff_updated_at ?? null,
+      estimated_equity: (sub as any).estimated_equity ?? null,
+    } as any).eq("id", sub.id);
 
     if (!error) {
       if (selected && selected.progress_status !== sub.progress_status) {
@@ -1174,6 +1179,66 @@ const SubmissionDetailSheet = ({
                   <DetailRow label="Loan Company" value={sub.loan_company} icon={<FileText className="w-3.5 h-3.5" />} />
                   <DetailRow label="Loan Balance" value={sub.loan_balance} icon={<DollarSign className="w-3.5 h-3.5" />} />
                   <DetailRow label="Loan Payment" value={sub.loan_payment} icon={<DollarSign className="w-3.5 h-3.5" />} />
+                  {/* Verified Payoff Amount (drives equity calc) */}
+                  <div className="col-span-2 mt-2 p-3 rounded-xl bg-muted/30 border border-border/40 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        Verified Payoff Amount
+                      </Label>
+                      <div className="flex items-center gap-1.5">
+                        <Checkbox
+                          id="loan-payoff-verified"
+                          checked={!!(sub as any).loan_payoff_verified}
+                          onCheckedChange={(checked) => {
+                            updateField({
+                              loan_payoff_verified: !!checked,
+                              loan_payoff_updated_at: new Date().toISOString(),
+                            } as any);
+                          }}
+                          className="rounded-md h-4 w-4"
+                        />
+                        <label htmlFor="loan-payoff-verified" className="text-[11px] text-muted-foreground cursor-pointer">
+                          Verified with lender
+                        </label>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        placeholder="0"
+                        value={(sub as any).loan_payoff_amount ?? ""}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          const payoff = raw === "" ? null : Number(raw);
+                          const vehicleValue = sub.offered_price ?? sub.estimated_offer_high ?? 0;
+                          const equity = vehicleValue && vehicleValue > 0
+                            ? vehicleValue - (payoff ?? 0)
+                            : null;
+                          updateField({
+                            loan_payoff_amount: payoff,
+                            estimated_equity: equity,
+                            loan_payoff_updated_at: new Date().toISOString(),
+                          } as any);
+                        }}
+                        className="h-9 pl-7 text-sm rounded-xl border-border/60 focus:border-primary/40"
+                      />
+                    </div>
+                    {(() => {
+                      const vehicleValue = sub.offered_price ?? sub.estimated_offer_high ?? 0;
+                      const payoff = (sub as any).loan_payoff_amount ?? null;
+                      const result = calculateEquity(vehicleValue, payoff);
+                      return (
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-[11px] text-muted-foreground">Customer Equity</span>
+                          <span className={`text-sm font-bold ${result.color}`}>
+                            {result.displayText}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </div>
                   <DetailRow label="Next Step" value={sub.next_step} icon={<TrendingUp className="w-3.5 h-3.5" />} />
                   <div className="flex items-center justify-between col-span-2 mt-1">
                     <span className="text-xs text-muted-foreground">Lead Source</span>

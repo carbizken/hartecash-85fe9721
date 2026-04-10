@@ -156,6 +156,10 @@ export interface Submission {
   loan_company?: string | null;
   loan_balance?: string | null;
   loan_payment?: string | null;
+  loan_payoff_amount?: number | null;
+  loan_payoff_verified?: boolean;
+  loan_payoff_updated_at?: string | null;
+  estimated_equity?: number | null;
   review_requested?: boolean;
   review_requested_at?: string | null;
   bb_tradein_avg?: number | null;

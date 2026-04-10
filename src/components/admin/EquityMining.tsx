@@ -5,9 +5,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { calculateEquity } from "@/lib/equityCalculator";
 import {
   TrendingUp, Users, DollarSign, Send, Mail, CheckCircle, Clock,
-  Filter, Loader2, Car, Pickaxe,
+  Filter, Loader2, Car, Pickaxe, RefreshCw, Flame,
 } from "lucide-react";
 
 /* ── types ──────────────────────────────────────────── */
@@ -29,6 +31,9 @@ interface ServiceLead {
   acv_value: number | null;
   progress_status: string;
   lead_source: string;
+  loan_payoff_amount?: number | null;
+  loan_payoff_verified?: boolean;
+  estimated_equity?: number | null;
   outreach_sent?: boolean;
 }
 
@@ -42,24 +47,25 @@ const EquityMining = () => {
   const [loading, setLoading] = useState(true);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [bulkSending, setBulkSending] = useState(false);
+  const [revaluing, setRevaluing] = useState(false);
   const [outreachSentIds, setOutreachSentIds] = useState<Set<string>>(new Set());
 
   // Filters
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [minOffer, setMinOffer] = useState("");
+  const [minEquity, setMinEquity] = useState(5000);
   const [showFilters, setShowFilters] = useState(false);
 
   const fetchLeads = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("submissions")
       .select(
-        "id, token, created_at, name, email, phone, vehicle_year, vehicle_make, vehicle_model, mileage, overall_condition, offered_price, estimated_offer_high, acv_value, progress_status, lead_source"
+        "id, token, created_at, name, email, phone, vehicle_year, vehicle_make, vehicle_model, mileage, overall_condition, offered_price, estimated_offer_high, acv_value, progress_status, lead_source, loan_payoff_amount, loan_payoff_verified, estimated_equity"
       )
       .eq("lead_source", "service")
       .in("progress_status", EARLY_STATUSES)
-      .order("estimated_offer_high", { ascending: false, nullsFirst: false });
+      .order("estimated_equity", { ascending: false, nullsFirst: false });
 
     if (error) {
       toast.error("Failed to load service leads");
@@ -74,6 +80,19 @@ const EquityMining = () => {
     fetchLeads();
   }, []);
 
+  /* ── helpers for equity per lead ──────────────────── */
+
+  const getVehicleValue = (l: ServiceLead) =>
+    l.offered_price ?? l.estimated_offer_high ?? 0;
+
+  const getLeadEquity = (l: ServiceLead) => {
+    // Prefer persisted estimated_equity when present, otherwise compute on the fly
+    if (l.estimated_equity != null) return Number(l.estimated_equity);
+    const vehicleValue = getVehicleValue(l);
+    const payoff = l.loan_payoff_amount ?? 0;
+    return vehicleValue - payoff;
+  };
+
   /* ── filtered + sorted leads ──────────────────────── */
 
   const filtered = useMemo(() => {
@@ -86,34 +105,33 @@ const EquityMining = () => {
       const toEnd = dateTo + "T23:59:59";
       result = result.filter((l) => l.created_at <= toEnd);
     }
-    if (minOffer) {
-      const min = parseFloat(minOffer);
-      if (!isNaN(min)) {
-        result = result.filter(
-          (l) => (l.offered_price || l.estimated_offer_high || 0) >= min
-        );
-      }
+    if (minEquity > 0) {
+      result = result.filter((l) => getLeadEquity(l) >= minEquity);
     }
 
-    return result.sort((a, b) => {
-      const aVal = a.offered_price || a.estimated_offer_high || 0;
-      const bVal = b.offered_price || b.estimated_offer_high || 0;
-      return bVal - aVal;
-    });
-  }, [leads, dateFrom, dateTo, minOffer]);
+    return [...result].sort((a, b) => getLeadEquity(b) - getLeadEquity(a));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leads, dateFrom, dateTo, minEquity]);
 
   /* ── KPI calculations ─────────────────────────────── */
 
   const kpis = useMemo(() => {
     const total = filtered.length;
-    const highEquity = filtered.filter(
-      (l) => (l.offered_price || l.estimated_offer_high || 0) >= 15000
-    ).length;
+    let hotCount = 0;
+    let totalHotEquity = 0;
+    for (const l of filtered) {
+      const result = calculateEquity(getVehicleValue(l), l.loan_payoff_amount ?? null);
+      if (result.label === "hot") {
+        hotCount++;
+        totalHotEquity += result.equity;
+      }
+    }
     const outreachCount = outreachSentIds.size;
     const converted = filtered.filter(
       (l) => l.progress_status === "contacted"
     ).length;
-    return { total, highEquity, outreachCount, converted };
+    return { total, hotCount, totalHotEquity, outreachCount, converted };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered, outreachSentIds]);
 
   /* ── outreach helpers ─────────────────────────────── */
@@ -166,6 +184,48 @@ const EquityMining = () => {
     toast.success(`Bulk outreach sent to ${sent} lead${sent !== 1 ? "s" : ""}`);
   };
 
+  /* ── re-value all leads ───────────────────────────── */
+
+  const runRevaluation = async () => {
+    setRevaluing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "revalue-service-leads",
+        { body: { dealership_id: tenant.dealership_id } }
+      );
+      if (error) throw error;
+
+      const processed = Number(data?.processed || 0);
+      const appreciated = Number(data?.appreciated || 0);
+      const unlocked = Number(data?.total_equity_unlocked || 0);
+      const unlockedStr = unlocked.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+      });
+
+      toast.success(
+        `Revalued ${processed} lead${processed !== 1 ? "s" : ""}. ` +
+          `${appreciated} appreciated. ${unlockedStr} equity unlocked.`
+      );
+
+      if (Array.isArray(data?.errors) && data.errors.length > 0) {
+        console.warn("Revaluation errors:", data.errors);
+      }
+
+      await fetchLeads();
+    } catch (e) {
+      console.error("Revaluation failed:", e);
+      toast.error(
+        `Revaluation failed: ${
+          e instanceof Error ? e.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setRevaluing(false);
+    }
+  };
+
   /* ── helpers ──────────────────────────────────────── */
 
   const daysSince = (dateStr: string) => {
@@ -176,8 +236,8 @@ const EquityMining = () => {
   const fmtCurrency = (v: number) =>
     v >= 1000 ? `$${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : `$${v.toLocaleString()}`;
 
-  const getEquityValue = (l: ServiceLead) =>
-    l.offered_price || l.estimated_offer_high || 0;
+  const fmtUsd = (v: number) =>
+    v.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
   /* ── render ───────────────────────────────────────── */
 
@@ -215,6 +275,20 @@ const EquityMining = () => {
           >
             <Filter className="w-3.5 h-3.5" />
             Filters
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={runRevaluation}
+            disabled={revaluing}
+            className="gap-1.5"
+          >
+            {revaluing ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="w-3.5 h-3.5" />
+            )}
+            Re-value All Leads
           </Button>
           <Button
             size="sm"

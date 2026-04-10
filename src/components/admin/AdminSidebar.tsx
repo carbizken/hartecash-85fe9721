@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Inbox, CalendarDays, Users, ShieldCheck, SlidersHorizontal,
-  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, MapPin, Car, ScrollText, Shield, Lock, Wrench, Rocket, Gauge, Network, Camera, Gift, Megaphone, ChevronDown, Link2
+  Settings, Bell, ListChecks, MessageSquareQuote, BarChart3, Send, MapPin, Car, ScrollText, Shield, Lock, Wrench, Rocket, Gauge, Network, Camera, Gift, Megaphone, ChevronDown, Link2, Code2, Paintbrush
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -163,6 +163,14 @@ const AdminSidebar = ({
     ...(isPlatformAdmin ? [{ key: "tenants", label: "Dealer Tenants", icon: Network }] : []),
   ].filter((item) => isAllowed(item.key));
 
+  // ── ENTERPRISE ── (Admin-only — API & White Label features)
+  const enterpriseItems: SidebarItem[] = canManageAccess
+    ? [
+        { key: "api-access", label: "API Access", icon: Code2 },
+        { key: "white-label", label: "White Label", icon: Paintbrush },
+      ].filter((item) => isAllowed(item.key))
+    : [];
+
   // Locked sections for "Request Access"
   const allSectionKeys = [
     "submissions", "accepted-appts", "executive",
@@ -172,6 +180,7 @@ const AdminSidebar = ({
     "my-lead-link", "my-referrals",
     "staff", "referrals", "compliance", "reports", "image-inventory",
     "onboarding", "system-settings",
+    "api-access", "white-label",
   ];
   const lockedSections = showRequestAccess && allowedSections !== null
     ? allSectionKeys.filter((k) => !allowedSections.includes(k))
@@ -187,6 +196,7 @@ const AdminSidebar = ({
     ["Storefront", storefrontItems],
     ["My Tools", myToolsItems],
     ["Team & Admin", teamItems],
+    ["Enterprise", enterpriseItems],
   ];
   useEffect(() => {
     const activeGroup = groupEntries.find(([, items]) =>
@@ -270,6 +280,7 @@ const AdminSidebar = ({
         {renderGroup("Storefront", storefrontItems)}
         {renderGroup("My Tools", myToolsItems)}
         {renderGroup("Team & Admin", teamItems)}
+        {renderGroup("Enterprise", enterpriseItems)}
 
         {lockedSections.length > 0 && !collapsed && (
           <SidebarGroup>

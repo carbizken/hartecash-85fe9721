@@ -42,6 +42,9 @@ import AdminLoadingSkeleton from "./AdminLoadingSkeleton";
 import AdminEmptyState from "./AdminEmptyState";
 import { UserCheck as UserCheckIcon } from "lucide-react";
 
+const ApiAccessPanel = React.lazy(() => import("./ApiAccessPanel"));
+const WhiteLabelSettings = React.lazy(() => import("./WhiteLabelSettings"));
+
 class AdminErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean }
@@ -361,6 +364,16 @@ const AdminSectionRendererInner = (props: AdminSectionRendererProps) => {
       )}
       {activeSection === "my-lead-link" && <MyLeadLink />}
       {activeSection === "embed-toolkit" && canManageAccess && <EmbedToolkit />}
+      {activeSection === "api-access" && canManageAccess && (
+        <React.Suspense fallback={<AdminLoadingSkeleton />}>
+          <ApiAccessPanel />
+        </React.Suspense>
+      )}
+      {activeSection === "white-label" && canManageAccess && (
+        <React.Suspense fallback={<AdminLoadingSkeleton />}>
+          <WhiteLabelSettings />
+        </React.Suspense>
+      )}
     </>
   );
 

@@ -347,6 +347,53 @@ const UploadPhotos = () => {
         <MobileQRBanner url={`${window.location.origin}/upload/${token}`} />
         <PhotoGuide />
 
+        {/* Photo guidance tips — dismissible */}
+        {showPhotoTips && (
+          <div className="relative bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-2xl p-5 border border-primary/10 mb-6 shadow-sm">
+            <button
+              onClick={() => {
+                setShowPhotoTips(false);
+                localStorage.setItem("hartecash_photo_tips_dismissed", "1");
+              }}
+              className="absolute top-3 right-3 text-muted-foreground/60 hover:text-foreground transition-colors"
+              aria-label="Dismiss tips"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <h3 className="font-bold text-card-foreground text-sm">Better Photos = Better Offer</h3>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+              Adding a complete set of clear photos helps our team and AI accurately assess your vehicle's condition — which often means a higher offer for you.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { icon: Sun, tip: "Take photos in daylight" },
+                { icon: Camera, tip: "Include all angles" },
+                { icon: Gauge, tip: "Show the odometer" },
+                { icon: AlertTriangle, tip: "Capture any damage" },
+              ].map((item) => (
+                <div key={item.tip} className="flex items-center gap-2 bg-card/80 rounded-xl px-3 py-2.5 border border-border/30">
+                  <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
+                    <item.icon className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  <span className="text-[11px] font-medium text-card-foreground leading-tight">{item.tip}</span>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                setShowPhotoTips(false);
+                localStorage.setItem("hartecash_photo_tips_dismissed", "1");
+              }}
+              className="mt-3 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        )}
+
         {/* Progress indicator */}
         <div className="bg-card rounded-xl p-5 shadow-sm border border-border mb-6">
           <div className="flex items-center justify-between mb-3">

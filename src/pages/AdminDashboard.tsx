@@ -8,11 +8,17 @@ import AdminSectionRenderer from "@/components/admin/AdminSectionRenderer";
 import RequestAccessDialog from "@/components/admin/RequestAccessDialog";
 import SubmissionDetailSheet from "@/components/admin/SubmissionDetailSheet";
 import { useAdminDashboard } from "@/hooks/useAdminDashboard";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const AdminDashboard = () => {
   const db = useAdminDashboard();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [pendingPhotoDelete, setPendingPhotoDelete] = useState<string | null>(null);
+  const [pendingDocDelete, setPendingDocDelete] = useState<{ docType: string; fileName: string } | null>(null);
   // Strip ":fieldHint" for sidebar/breadcrumb matching
   const baseSectionId = db.activeSection.includes(":") ? db.activeSection.split(":")[0] : db.activeSection;
 
@@ -160,31 +166,86 @@ const AdminDashboard = () => {
           onDelete={db.handleDelete}
           onRefresh={db.handleView}
           onScheduleAppointment={db.handleScheduleAppt}
-          onDeletePhoto={async (fileName) => {
+          onDeletePhoto={(fileName) => {
             if (!db.selected || !db.canDelete) return;
-            if (!confirm(`Delete photo "${fileName}"?`)) return;
-            const { error } = await supabase.storage
-              .from("submission-photos")
-              .remove([`${db.selected.token}/${fileName}`]);
-            if (!error) {
-              db.setPhotos((prev) => prev.filter((p) => p.name !== fileName));
-              db.toast({ title: "Deleted" });
-            }
+            setPendingPhotoDelete(fileName);
           }}
-          onDeleteDoc={async (docType, fileName) => {
+          onDeleteDoc={(docType, fileName) => {
             if (!db.selected || !db.canDelete) return;
-            if (!confirm(`Delete document "${fileName}"?`)) return;
-            const { error } = await supabase.storage
-              .from("customer-documents")
-              .remove([`${db.selected.token}/${docType}/${fileName}`]);
-            if (!error) {
-              db.setDocs((prev) => prev.filter((d) => !(d.type === docType && d.name === fileName)));
-              db.toast({ title: "Deleted" });
-            }
+            setPendingDocDelete({ docType, fileName });
           }}
           fetchActivityLog={db.fetchActivityLog}
           fetchSubmissions={db.fetchSubmissions}
         />
+        {/* Delete submission confirmation */}
+        <AlertDialog open={!!db.pendingDeleteId} onOpenChange={(open) => { if (!open) db.cancelDelete(); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Submission</AlertDialogTitle>
+              <AlertDialogDescription>
+                Delete this submission? This cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={db.confirmDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete photo confirmation */}
+        <AlertDialog open={!!pendingPhotoDelete} onOpenChange={(open) => { if (!open) setPendingPhotoDelete(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Photo</AlertDialogTitle>
+              <AlertDialogDescription>
+                Delete photo "{pendingPhotoDelete}"?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={async () => {
+                if (!db.selected || !pendingPhotoDelete) return;
+                const fileName = pendingPhotoDelete;
+                setPendingPhotoDelete(null);
+                const { error } = await supabase.storage
+                  .from("submission-photos")
+                  .remove([`${db.selected.token}/${fileName}`]);
+                if (!error) {
+                  db.setPhotos((prev) => prev.filter((p) => p.name !== fileName));
+                  db.toast({ title: "Deleted" });
+                }
+              }}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete document confirmation */}
+        <AlertDialog open={!!pendingDocDelete} onOpenChange={(open) => { if (!open) setPendingDocDelete(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Document</AlertDialogTitle>
+              <AlertDialogDescription>
+                Delete document "{pendingDocDelete?.fileName}"?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={async () => {
+                if (!db.selected || !pendingDocDelete) return;
+                const { docType, fileName } = pendingDocDelete;
+                setPendingDocDelete(null);
+                const { error } = await supabase.storage
+                  .from("customer-documents")
+                  .remove([`${db.selected.token}/${docType}/${fileName}`]);
+                if (!error) {
+                  db.setDocs((prev) => prev.filter((d) => !(d.type === docType && d.name === fileName)));
+                  db.toast({ title: "Deleted" });
+                }
+              }}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </SidebarProvider>
   );

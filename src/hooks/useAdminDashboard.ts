@@ -61,6 +61,7 @@ export function useAdminDashboard() {
   const [showRequestAccessDialog, setShowRequestAccessDialog] = useState(false);
   const [showRequestAccessToggle, setShowRequestAccessToggle] = useState(true);
   const [approveRole, setApproveRole] = useState("sales_bdc");
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -293,8 +294,17 @@ export function useAdminDashboard() {
   );
 
   const handleDelete = useCallback(
-    async (id: string) => {
-      if (!confirm("Delete this submission? This cannot be undone.")) return;
+    (id: string) => {
+      setPendingDeleteId(id);
+    },
+    []
+  );
+
+  const confirmDelete = useCallback(
+    async () => {
+      if (!pendingDeleteId) return;
+      const id = pendingDeleteId;
+      setPendingDeleteId(null);
       const { error } = await supabase.from("submissions").delete().eq("id", id);
       if (!error) {
         toast({ title: "Deleted" });
@@ -302,8 +312,12 @@ export function useAdminDashboard() {
         setSelected(null);
       } else toast({ title: "Error", description: "Failed to delete.", variant: "destructive" });
     },
-    [toast]
+    [pendingDeleteId, toast]
   );
+
+  const cancelDelete = useCallback(() => {
+    setPendingDeleteId(null);
+  }, []);
 
   const handleInlineStatusChange = useCallback(
     async (sub: Submission, newStatus: string) => {
@@ -416,6 +430,7 @@ export function useAdminDashboard() {
 
     // Handlers
     handleView, handleDelete, handleInlineStatusChange,
+    pendingDeleteId, confirmDelete, cancelDelete,
     handleApprove, handleReject, handleScheduleAppt,
     fetchSubmissions, fetchAppointments, fetchActivityLog,
 

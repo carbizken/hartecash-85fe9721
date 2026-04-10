@@ -143,9 +143,9 @@ const CheckItem = ({
       <span className={`text-sm flex-1 ${state ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
       {state && (
         <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium capitalize ${
-          state === "pass" ? "bg-emerald-500/10 text-emerald-600 border-emerald-300" :
-          state === "caution" ? "bg-amber-500/10 text-amber-600 border-amber-300" :
-          "bg-red-500/10 text-red-600 border-red-300"
+          state === "pass" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" :
+          state === "caution" ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30" :
+          "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30"
         }`}>
           {state === "pass" ? "Pass" : state === "caution" ? "Caution" : "Fail"}
         </span>
@@ -606,7 +606,7 @@ const MobileInspection = () => {
         <Card>
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" /> Final Assessment
+              <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> Final Assessment
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">

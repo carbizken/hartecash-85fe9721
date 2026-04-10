@@ -809,7 +809,7 @@ const InspectionSheet = () => {
       if (result && result.adjustment !== undefined && result.adjustment !== 0) {
         toast({ title: "Inspection saved", description: `Tire adjustment: ${result.adjustment >= 0 ? "+" : ""}$${Math.abs(result.adjustment).toLocaleString()}` });
       }
-      confetti({ particleCount: 80, spread: 60, origin: { y: 0.95 }, colors: ["#10b981", "#3b82f6", "#f59e0b"] });
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.95 }, colors: ["#22c55e", "#3b82f6", "#f59e0b"] }); // green/blue/amber — bright for both light & dark
       setTimeout(() => setSaveSuccess(false), 2500);
     }
   };
@@ -1228,7 +1228,7 @@ const InspectionSheet = () => {
             <ProgressRing progress={progressPct} size={42} strokeWidth={4} />
             <div className="hidden md:block text-xs text-right">
               <p className="font-semibold">{totalChecked}/{ACTIVE_ALL_ITEMS.length}</p>
-              {totalIssues > 0 && <p className="text-red-300">{totalIssues} issues</p>}
+              {totalIssues > 0 && <p className="text-red-300 dark:text-red-400">{totalIssues} issues</p>}
             </div>
             <div className="relative">
               <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/20 gap-1"

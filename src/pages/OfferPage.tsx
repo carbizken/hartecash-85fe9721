@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, DollarSign, ArrowDown, TrendingUp, ShieldCheck, Info, Printer, CheckCircle, ArrowRight, Car, Gauge, Palette, Settings2, Pencil, User, Clock, Star, Zap, Shield, BadgeCheck, Handshake } from "lucide-react";
+import { ArrowLeft, DollarSign, ArrowDown, TrendingUp, ShieldCheck, Info, Printer, CheckCircle, ArrowRight, Car, Gauge, Palette, Settings2, Pencil, User, Clock, Star, Zap, Shield, BadgeCheck, Handshake, Camera } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -708,8 +708,34 @@ const OfferPage = () => {
     </motion.div>
   );
 
-
-
+  /* ─── Photo Upload Callout — shown when photos haven't been uploaded ─── */
+  const PhotoUploadCallout = !s.photos_uploaded && (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.15 }}
+      className="bg-gradient-to-br from-primary/5 via-primary/3 to-transparent rounded-2xl p-5 border border-primary/10 shadow-sm"
+    >
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+          <Camera className="w-5 h-5 text-primary" />
+        </div>
+        <div className="flex-1">
+          <h4 className="font-bold text-card-foreground text-sm">Upload photos to help increase your offer</h4>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+            A complete set of vehicle photos allows our AI and inventory team to better assess your vehicle's real condition — which often results in a higher final offer.
+          </p>
+          <Link to={`/upload/${token}`}>
+            <Button size="sm" className="mt-3 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-xs font-semibold">
+              <Camera className="w-3.5 h-3.5" />
+              Upload Photos
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
 
   const conditionItems = buildConditionItems(condition);
 

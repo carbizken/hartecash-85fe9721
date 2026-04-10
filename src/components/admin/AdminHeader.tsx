@@ -29,7 +29,7 @@ const AdminHeader = ({ darkMode, setDarkMode, userRole, onLogout, userName, isPl
   return (
     <header className="sticky top-0 z-50 shadow-lg overflow-hidden">
       {/* Premium gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary)/0.8)] to-[hsl(220,80%,12%)]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--primary)/0.8)] to-[hsl(var(--primary)/0.6)]" />
       <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_40%,hsl(var(--primary-foreground)/0.1)_50%,transparent_60%)] animate-[shimmer_8s_ease-in-out_infinite]" />
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-foreground/20 to-transparent" />
 

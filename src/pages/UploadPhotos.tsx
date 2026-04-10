@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Camera, CheckCircle, X, Plus, ArrowLeft, Upload, CircleDot, Loader2,
-  Sun, Gauge, AlertTriangle,
+  Sun, Gauge, AlertTriangle, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UploadSkeleton from "@/components/UploadSkeleton";
@@ -43,6 +43,9 @@ const UploadPhotos = () => {
   const [done, setDone] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [cameraCategory, setCameraCategory] = useState<string | null>(null);
+  const [showPhotoTips, setShowPhotoTips] = useState(
+    () => !localStorage.getItem("hartecash_photo_tips_dismissed")
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const extraInputRef = useRef<HTMLInputElement>(null);
 

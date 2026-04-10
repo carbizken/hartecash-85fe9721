@@ -23,9 +23,9 @@ interface DamageItem {
 }
 
 const severityColor = (s: string) => {
-  if (s === "severe") return "bg-red-100 text-red-800 border-red-300";
-  if (s === "moderate") return "bg-amber-100 text-amber-800 border-amber-300";
-  return "bg-green-100 text-green-800 border-green-300";
+  if (s === "severe") return "bg-destructive/10 text-destructive border-destructive/30";
+  if (s === "moderate") return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30";
+  return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
 };
 
 const MobileField = ({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) => (
@@ -475,11 +475,11 @@ const MobileInspection = () => {
 
         {/* Tire Adjustment Result */}
         {lastAdjustment && lastAdjustment.adjustment !== 0 && (
-          <Card className={lastAdjustment.adjustment > 0 ? "border-green-300 bg-green-50" : "border-red-300 bg-red-50"}>
+          <Card className={lastAdjustment.adjustment > 0 ? "border-emerald-500/30 bg-emerald-500/10" : "border-destructive/30 bg-destructive/10"}>
             <CardContent className="py-3 px-4 flex items-center gap-3">
-              <DollarSign className={`h-5 w-5 ${lastAdjustment.adjustment > 0 ? "text-green-600" : "text-red-600"}`} />
+              <DollarSign className={`h-5 w-5 ${lastAdjustment.adjustment > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`} />
               <div>
-                <p className={`text-sm font-bold ${lastAdjustment.adjustment > 0 ? "text-green-800" : "text-red-800"}`}>
+                <p className={`text-sm font-bold ${lastAdjustment.adjustment > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`}>
                   Tire {lastAdjustment.adjustment > 0 ? "Credit" : "Deduction"}: {lastAdjustment.adjustment > 0 ? "+" : ""}${Math.abs(lastAdjustment.adjustment).toFixed(0)}
                 </p>
                 <p className="text-[10px] text-muted-foreground">Avg depth: {lastAdjustment.avg_depth.toFixed(1)}/32 · Applied to customer file</p>

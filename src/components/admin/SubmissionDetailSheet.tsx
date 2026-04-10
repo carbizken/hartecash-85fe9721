@@ -368,13 +368,18 @@ const SubmissionDetailSheet = ({
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-1.5">
                     {[
-                      { label: "Appraisal", icon: Gauge, onClick: () => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank") },
-                      { label: "Inspection", icon: ClipboardList, onClick: () => window.open(`${window.location.origin}/inspection/${sub.id}`, "_blank") },
+                      { label: "Appraisal", icon: Gauge, onClick: () => { window.location.href = `/appraisal/${sub.token}`; } },
+                      { label: "Inspection", icon: ClipboardList, onClick: () => { window.location.href = `/inspection/${sub.id}`; } },
                       { label: "Print", icon: Printer, onClick: handlePrint },
                     ].map(action => (
-                      <Button key={action.label} variant="ghost" size="sm" onClick={action.onClick} className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 rounded-xl text-xs h-8 print:hidden transition-all">
-                        <action.icon className="w-3.5 h-3.5 mr-1.5" /> {action.label}
-                      </Button>
+                      <div key={action.label} className="flex flex-col items-center">
+                        <Button variant="ghost" size="sm" onClick={action.onClick} className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 rounded-xl text-xs h-8 print:hidden transition-all">
+                          <action.icon className="w-3.5 h-3.5 mr-1.5" /> {action.label}
+                        </Button>
+                        {(action.label === "Appraisal" || action.label === "Inspection") && (
+                          <span className="text-[9px] text-primary-foreground/40 mt-0.5 print:hidden">Opens in this tab</span>
+                        )}
+                      </div>
                     ))}
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => { setEditState(null); onClose(); }} className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 rounded-xl transition-all">
@@ -553,7 +558,7 @@ const SubmissionDetailSheet = ({
                     <Users className="w-3 h-3" /> Appraised by: <span className="font-semibold text-card-foreground/70">{sub.appraised_by}</span>
                   </p>
                 )}
-                <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
+                <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={() => { window.location.href = `/appraisal/${sub.token}`; }}>
                   <Gauge className="w-3.5 h-3.5 mr-1.5" /> Open Appraisal Tool
                 </Button>
               </SectionCard>
@@ -562,7 +567,7 @@ const SubmissionDetailSheet = ({
               <div className="rounded-2xl border-2 border-dashed border-border/40 bg-muted/10 p-5 text-center">
                 <Gauge className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground mb-3">No ACV set yet</p>
-                <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={() => window.open(`${window.location.origin}/appraisal/${sub.token}`, "_blank")}>
+                <Button variant="outline" size="sm" className="rounded-xl h-9 text-xs font-semibold" onClick={() => { window.location.href = `/appraisal/${sub.token}`; }}>
                   <Gauge className="w-3.5 h-3.5 mr-1.5" /> Open Appraisal Tool
                 </Button>
               </div>
@@ -911,7 +916,7 @@ const SubmissionDetailSheet = ({
                     : "bg-gradient-to-r from-orange-400 to-amber-500 text-white hover:from-orange-500 hover:to-amber-600 border-0";
                   const inspLabel = isInspected ? "Inspection Completed" : "Inspection Needed";
                   return (
-                    <Button size="sm" className={`h-7 text-xs gap-1 ${inspClass}`} onClick={() => window.open(`${window.location.origin}/inspection/${sub.id}`, "_blank")}>
+                    <Button size="sm" className={`h-7 text-xs gap-1 ${inspClass}`} onClick={() => { window.location.href = `/inspection/${sub.id}`; }}>
                       <ClipboardList className="w-3.5 h-3.5" /> {inspLabel}
                     </Button>
                   );

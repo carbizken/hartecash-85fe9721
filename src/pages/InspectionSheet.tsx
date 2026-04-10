@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useInspectionConfig } from "@/hooks/useInspectionConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/contexts/TenantContext";
@@ -447,7 +447,9 @@ const InspectionSheet = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [hasSavedOnce, setHasSavedOnce] = useState(false);
   const [showMobileQR, setShowMobileQR] = useState(false);
+  const navigate = useNavigate();
   const [inspectionMode, setInspectionMode] = useState<InspectionMode>(
     inspConfig.default_inspection_mode === "full" ? "full" : "ucm"
   );
@@ -802,6 +804,7 @@ const InspectionSheet = () => {
       toast({ title: "Error saving", description: error.message, variant: "destructive" });
     } else {
       setSaveSuccess(true);
+      setHasSavedOnce(true);
       const result = data as any;
       if (result && result.adjustment !== undefined && result.adjustment !== 0) {
         toast({ title: "Inspection saved", description: `Tire adjustment: ${result.adjustment >= 0 ? "+" : ""}$${Math.abs(result.adjustment).toLocaleString()}` });
@@ -1207,11 +1210,10 @@ const InspectionSheet = () => {
       <div className="print:hidden sticky top-0 z-50 bg-primary text-primary-foreground shadow-lg">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/admin">
-              <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/20">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/20"
+              onClick={() => navigate("/admin")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <div>
               <h1 className="text-lg font-bold font-display">Vehicle Inspection</h1>
               <p className="text-xs opacity-80">{vehicleTitle} • VIN: {submission.vin || "N/A"}</p>
@@ -1279,6 +1281,37 @@ const InspectionSheet = () => {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* ── Breadcrumb Trail ── */}
+      <div className="print:hidden bg-muted/50 border-b">
+        <div className="max-w-5xl mx-auto px-4 py-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Link to="/admin" className="hover:text-foreground transition-colors">Dashboard</Link>
+          <ChevronRight className="h-3 w-3" />
+          <span>Customer File</span>
+          <ChevronRight className="h-3 w-3" />
+          <span className="text-foreground font-medium">Inspection</span>
+        </div>
+      </div>
+
+      {/* ── Step Indicator ── */}
+      <div className="print:hidden bg-muted/30 border-b">
+        <div className="max-w-5xl mx-auto px-4 py-2 flex items-center gap-3 text-xs">
+          <span className="flex items-center gap-1.5 text-primary font-semibold">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">1</span>
+            Inspection
+          </span>
+          <span className="text-muted-foreground/50">→</span>
+          <span className="flex items-center gap-1.5 text-muted-foreground/60">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">2</span>
+            Appraisal
+          </span>
+          <span className="text-muted-foreground/50">→</span>
+          <span className="flex items-center gap-1.5 text-muted-foreground/60">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">3</span>
+            Check Request
+          </span>
         </div>
       </div>
 
@@ -1795,33 +1828,44 @@ const InspectionSheet = () => {
               {totalIssues > 0 && <span className="ml-2 text-destructive font-medium">• {totalIssues} issue{totalIssues > 1 ? "s" : ""}</span>}
             </div>
           </div>
-          <AnimatePresence mode="wait">
-            {saveSuccess ? (
-              <motion.div
-                key="success"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold"
-              >
+          <div className="flex items-center gap-3">
+            <AnimatePresence mode="wait">
+              {saveSuccess ? (
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  key="success"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold"
                 >
-                  <CheckCircle className="h-6 w-6" />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  >
+                    <CheckCircle className="h-6 w-6" />
+                  </motion.div>
+                  Inspection Saved!
                 </motion.div>
-                Inspection Saved!
-              </motion.div>
-            ) : (
-              <motion.div key="save" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <Button onClick={handleSave} disabled={saving} className="gap-2 px-6">
-                  {saving ? <span className="animate-spin">⏳</span> : <Save className="h-4 w-4" />}
-                  {saving ? "Saving..." : "Save Inspection"}
-                </Button>
-              </motion.div>
+              ) : (
+                <motion.div key="save" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <Button onClick={handleSave} disabled={saving} className="gap-2 px-6">
+                    {saving ? <span className="animate-spin">⏳</span> : <Save className="h-4 w-4" />}
+                    {saving ? "Saving..." : "Save Inspection"}
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {hasSavedOnce && submission?.token && (
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/appraisal/${submission.token}`)}
+                className="gap-2 px-4 border-primary/30 text-primary hover:bg-primary/10"
+              >
+                Next: Open Appraisal <ChevronRight className="h-4 w-4" />
+              </Button>
             )}
-          </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>

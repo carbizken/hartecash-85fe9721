@@ -16,7 +16,9 @@ import {
   ArrowLeft, Car, DollarSign, TrendingUp, TrendingDown, Minus,
   Gauge, ChevronDown, Save, AlertTriangle, CheckCircle, XCircle, Shield,
   Pencil, ArrowDown, Loader2, SlidersHorizontal, CheckSquare, Lock, Unlock, Printer,
+  ChevronRight,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import CustomerVsInspectorComparison from "@/components/appraisal/CustomerVsInspectorComparison";
 import AppraisalTireBrakeHealth from "@/components/appraisal/AppraisalTireBrakeHealth";
@@ -221,6 +223,7 @@ export default function AppraisalTool() {
   const [depthPolicies, setDepthPolicies] = useState<{ id: string; name: string; policy_type: string; oem_brands: string[]; all_brands: boolean; max_vehicle_age_years: number | null; max_mileage: number | null; min_tire_depth: number; min_brake_depth: number }[]>([]);
   const [dealerZip, setDealerZip] = useState<string>("");
   const [showACVSheet, setShowACVSheet] = useState(false);
+  const [showFinalizeSuccess, setShowFinalizeSuccess] = useState(false);
   const [retailMarketStats, setRetailMarketStats] = useState<RetailStats | null>(null);
   const [closestCompPrice, setClosestCompPrice] = useState<number | null>(null);
   const acvSheetRef = useRef<HTMLDivElement>(null);
@@ -692,6 +695,7 @@ export default function AppraisalTool() {
       setSub(prev => prev ? { ...prev, acv_value: saveVal, appraisal_finalized: true, appraisal_finalized_at: new Date().toISOString(), appraisal_finalized_by: sub.appraised_by || "Staff" } : prev);
       setAcvOverride(saveVal);
       toast({ title: "Appraisal Finalized", description: `Locked at $${saveVal.toLocaleString()}. Check request can now be generated.` });
+      setShowFinalizeSuccess(true);
 
       // Auto-save ACV sheet to customer documents
       setShowACVSheet(true);
@@ -873,7 +877,7 @@ export default function AppraisalTool() {
       <div className="sticky top-0 z-20 bg-gradient-to-br from-primary via-[hsl(210,100%,28%)] to-[hsl(215,90%,22%)] text-primary-foreground px-6 py-4 shadow-xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-primary-foreground hover:bg-primary-foreground/10 rounded-xl">
+            <Button variant="ghost" size="icon" onClick={() => navigate(`/inspection/${sub.id}`)} className="text-primary-foreground hover:bg-primary-foreground/10 rounded-xl">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="border-l border-primary-foreground/15 pl-4">
@@ -893,6 +897,47 @@ export default function AppraisalTool() {
               </Button>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Breadcrumb */}
+      <div className="max-w-7xl mx-auto px-6 pt-3 pb-0">
+        <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <button onClick={() => navigate("/admin")} className="hover:text-primary transition-colors font-medium">
+            Dashboard
+          </button>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <button onClick={() => navigate(`/inspection/${sub.id}`)} className="hover:text-primary transition-colors font-medium">
+            Inspection
+          </button>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span className="font-bold text-card-foreground">Appraisal</span>
+        </nav>
+      </div>
+
+      {/* Step Indicator */}
+      <div className="max-w-7xl mx-auto px-6 pt-2 pb-0">
+        <div className="flex items-center gap-1 text-xs font-semibold">
+          <button onClick={() => navigate(`/inspection/${sub.id}`)} className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 transition-colors">
+            <span className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-black flex items-center justify-center shrink-0">1</span>
+            <span>Inspection</span>
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+          </button>
+          <span className="text-muted-foreground mx-1">
+            <ChevronRight className="w-3.5 h-3.5 inline" />
+          </span>
+          <span className="flex items-center gap-1 text-primary">
+            <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-black flex items-center justify-center shrink-0">2</span>
+            <span className="font-bold">Appraisal</span>
+            <span className="text-[10px] text-muted-foreground font-medium">(current)</span>
+          </span>
+          <span className="text-muted-foreground mx-1">
+            <ChevronRight className="w-3.5 h-3.5 inline" />
+          </span>
+          <span className="flex items-center gap-1 text-muted-foreground">
+            <span className="w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-black flex items-center justify-center border border-border shrink-0">3</span>
+            <span>Check Request</span>
+          </span>
         </div>
       </div>
 
@@ -1417,6 +1462,46 @@ export default function AppraisalTool() {
           )}
         </div>
       </div>
+
+      {/* Finalize Success Modal */}
+      <Dialog open={showFinalizeSuccess} onOpenChange={setShowFinalizeSuccess}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+              <CheckCircle className="w-6 h-6 text-emerald-500" />
+              Appraisal Finalized
+            </DialogTitle>
+            <DialogDescription>
+              The appraisal has been locked and the ACV worksheet has been saved.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="rounded-xl bg-emerald-500/10 border-2 border-emerald-500/30 p-5 text-center mb-4">
+              <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-1">Finalized ACV</div>
+              <div className="text-4xl font-black text-emerald-700 dark:text-emerald-400 tracking-tight">
+                ${(acvOverride != null && acvOverride > 0 ? acvOverride : finalValue).toLocaleString()}
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => { setShowFinalizeSuccess(false); navigate("/admin"); }}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Customer File
+              </Button>
+              <Button
+                onClick={() => { setShowFinalizeSuccess(false); handlePrintACVSheet(); }}
+                variant="outline"
+                className="w-full font-bold"
+              >
+                <Printer className="w-4 h-4 mr-2" />
+                Print ACV Sheet
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Hidden ACV Sheet for printing */}
       {showACVSheet && (

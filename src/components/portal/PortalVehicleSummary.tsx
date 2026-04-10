@@ -1,4 +1,4 @@
-import { Car, Gauge, Palette, Settings2, CheckCircle, Pencil, Disc3, Shield } from "lucide-react";
+import { Car, Gauge, Palette, Settings2, CheckCircle, Pencil, Disc3, Shield, Loader2 } from "lucide-react";
 import { formatGrade } from "@/lib/formatGrade";
 import { motion } from "framer-motion";
 import { InlineEdit } from "@/components/offer/InlineEdit";
@@ -18,6 +18,7 @@ interface PortalVehicleSummaryProps {
   overallCondition: string | null;
   drivetrain: string | null;
   canEdit: boolean;
+  mileageUpdating?: boolean;
   inspectorGrade?: string | null;
   brakeDepths?: DepthFindings | null;
   tireDepths?: DepthFindings | null;
@@ -77,6 +78,7 @@ const PortalVehicleSummary = ({
   overallCondition,
   drivetrain,
   canEdit,
+  mileageUpdating,
   inspectorGrade,
   brakeDepths,
   tireDepths,
@@ -132,12 +134,20 @@ const PortalVehicleSummary = ({
               <div>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Mileage</p>
                 {canEdit && onFieldUpdate ? (
-                  <InlineEdit
-                    value={mileage ? Number(mileage).toLocaleString() : "—"}
-                    onSave={(val) => onFieldUpdate("mileage", val.replace(/[^0-9]/g, ""))}
-                    label="mileage"
-                    className="text-sm font-medium"
-                  />
+                  <>
+                    <InlineEdit
+                      value={mileage ? Number(mileage).toLocaleString() : "—"}
+                      onSave={(val) => onFieldUpdate("mileage", val.replace(/[^0-9]/g, ""))}
+                      label="mileage"
+                      className="text-sm font-medium"
+                    />
+                    {mileageUpdating && (
+                      <span className="flex items-center gap-1.5 text-[11px] text-primary mt-0.5">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Recalculating offer...
+                      </span>
+                    )}
+                  </>
                 ) : (
                   <p className="text-sm font-medium">{mileage ? `${Number(mileage).toLocaleString()} mi` : "—"}</p>
                 )}

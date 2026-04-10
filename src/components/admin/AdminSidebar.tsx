@@ -77,9 +77,19 @@ const AdminSidebar = ({
   userRole = "",
   dealershipId = "default",
 }: AdminSidebarProps) => {
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  // On mobile the sidebar renders inside a Sheet drawer, so it should
+  // always show the expanded (full-label) layout regardless of the
+  // desktop collapsed/expanded state.
+  const collapsed = isMobile ? false : state === "collapsed";
   const navigate = useNavigate();
+
+  const handleItemClick = (key: string) => {
+    onSectionChange(key);
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   // Persisted collapsed groups
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(() => {
@@ -223,7 +233,7 @@ const AdminSidebar = ({
                   return (
                     <SidebarMenuItem key={item.key}>
                       <SidebarMenuButton
-                        onClick={() => onSectionChange(item.key)}
+                        onClick={() => handleItemClick(item.key)}
                         isActive={isActive}
                         tooltip={collapsed ? item.label : undefined}
                         className="transition-all duration-200 dark:hover:bg-white/8 dark:hover:shadow-[0_0_12px_rgba(255,255,255,0.06)] dark:data-[active=true]:shadow-[0_0_16px_rgba(100,160,255,0.12)]"
@@ -286,7 +296,10 @@ const AdminSidebar = ({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={() => navigate("/updates")}
+              onClick={() => {
+                navigate("/updates");
+                if (isMobile) setOpenMobile(false);
+              }}
               tooltip={collapsed ? "Platform Updates" : undefined}
               className="transition-all duration-200 dark:hover:bg-white/8"
             >
@@ -297,7 +310,10 @@ const AdminSidebar = ({
           {isPlatformAdmin && (
             <SidebarMenuItem>
               <SidebarMenuButton
-                onClick={() => navigate("/super-admin")}
+                onClick={() => {
+                  navigate("/super-admin");
+                  if (isMobile) setOpenMobile(false);
+                }}
                 tooltip={collapsed ? "Command Center" : undefined}
                 className="transition-all duration-200 text-amber-500 dark:text-amber-400 hover:bg-amber-500/10"
               >

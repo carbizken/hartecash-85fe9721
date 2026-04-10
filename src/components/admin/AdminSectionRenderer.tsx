@@ -1,7 +1,8 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NotificationLog from "./NotificationLog";
-import { Store, UserCheck, UserX } from "lucide-react";
+import { Store, UserCheck, UserX, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { TenantOverrideProvider } from "@/contexts/TenantContext";
@@ -40,6 +41,44 @@ import PromotionManagement from "./PromotionManagement";
 import AdminLoadingSkeleton from "./AdminLoadingSkeleton";
 import AdminEmptyState from "./AdminEmptyState";
 import { UserCheck as UserCheckIcon } from "lucide-react";
+
+class AdminErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+          <AlertTriangle className="w-10 h-10 text-destructive" />
+          <h2 className="text-lg font-semibold text-card-foreground">
+            Something went wrong
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-md">
+            An unexpected error occurred while loading this section. Please try
+            again.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => this.setState({ hasError: false })}
+          >
+            Try Again
+          </Button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 interface AdminSectionRendererProps {
   activeSection: string;
@@ -122,7 +161,7 @@ const submissionsTableProps = (
   onInlineStatusChange: props.handleInlineStatusChange,
 });
 
-const AdminSectionRenderer = (props: AdminSectionRendererProps) => {
+const AdminSectionRendererInner = (props: AdminSectionRendererProps) => {
   const {
     activeSection: rawActiveSection, setActiveSection, submissions, appointments, setAppointments,
     canManageAccess, userRole, userId, pendingRequests, approveRole, setApproveRole,
@@ -349,5 +388,11 @@ const AdminSectionRenderer = (props: AdminSectionRendererProps) => {
 
   return configSections;
 };
+
+const AdminSectionRenderer = (props: AdminSectionRendererProps) => (
+  <AdminErrorBoundary>
+    <AdminSectionRendererInner {...props} />
+  </AdminErrorBoundary>
+);
 
 export default AdminSectionRenderer;

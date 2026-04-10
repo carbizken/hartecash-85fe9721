@@ -6,6 +6,7 @@ import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { logConsent } from "@/lib/consent";
 import { calculateOffer, type OfferEstimate, type OfferSettings, type OfferRule } from "@/lib/offerCalculator";
 import { resolveEffectiveSettings } from "@/lib/resolvePricingModel";
@@ -233,7 +234,26 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
 
       if (error || data?.error) {
         console.error("BB lookup failed:", error || data?.error);
-        toast({ title: "Vehicle lookup unavailable", description: "We'll continue with manual entry.", variant: "default" });
+        toast({
+          title: "Vehicle lookup unavailable",
+          description: "We couldn't reach the vehicle database. You can retry or continue with manual entry.",
+          variant: "destructive",
+          action: (
+            <ToastAction
+              altText="Retry vehicle lookup"
+              onClick={() => {
+                lookupBlackBook().then((ok) => {
+                  if (ok && bbVehicles.length > 0) {
+                    setDirection(1);
+                    setStep(step + 1);
+                  }
+                });
+              }}
+            >
+              Retry
+            </ToastAction>
+          ),
+        });
         setBbLoading(false);
         return true;
       }
@@ -267,6 +287,26 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
       return true;
     } catch (err) {
       console.error("BB lookup error:", err);
+      toast({
+        title: "Connection issue",
+        description: "We couldn't reach the vehicle lookup service. You can retry or continue manually.",
+        variant: "destructive",
+        action: (
+          <ToastAction
+            altText="Retry vehicle lookup"
+            onClick={() => {
+              lookupBlackBook().then((ok) => {
+                if (ok && bbVehicles.length > 0) {
+                  setDirection(1);
+                  setStep(step + 1);
+                }
+              });
+            }}
+          >
+            Retry
+          </ToastAction>
+        ),
+      });
       setBbLoading(false);
       return true;
     }

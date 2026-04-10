@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { formatPhone } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Search, Eye, Trash2, ChevronLeft, ChevronRight, CheckCircle,
   AlertTriangle, TrendingUp, UserCheck, XCircle, Camera, FileText,
-  Rows3, Rows2,
+  Rows3, Rows2, X,
 } from "lucide-react";
 import type { Submission, DealerLocation } from "@/lib/adminConstants";
 import { ALL_STATUS_OPTIONS, getStatusLabel, isAcceptedWithAppointment, isAcceptedWithoutAppointment, isOfferPendingSubmission, isOfferUpdatedByStaff } from "@/lib/adminConstants";
@@ -82,6 +83,19 @@ const SubmissionsTable = ({
     localStorage.setItem("admin-table-density", next);
   };
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelectOne = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+
   const cellPad = isCompact ? "px-2 py-1.5" : "px-3 py-3";
   const fontSize = isCompact ? "text-xs" : "text-sm";
 
@@ -149,6 +163,43 @@ const SubmissionsTable = ({
     }
     return true;
   });
+
+  const filteredIds = useMemo(() => new Set(filtered.map(s => s.id)), [filtered]);
+  const activeSelectedIds = useMemo(() => {
+    const ids = new Set<string>();
+    selectedIds.forEach(id => { if (filteredIds.has(id)) ids.add(id); });
+    return ids;
+  }, [selectedIds, filteredIds]);
+
+  const allVisibleSelected = filtered.length > 0 && filtered.every(s => selectedIds.has(s.id));
+  const someVisibleSelected = filtered.some(s => selectedIds.has(s.id));
+
+  const toggleSelectAll = useCallback(() => {
+    if (allVisibleSelected) {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        filtered.forEach(s => next.delete(s.id));
+        return next;
+      });
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        filtered.forEach(s => next.add(s.id));
+        return next;
+      });
+    }
+  }, [allVisibleSelected, filtered]);
+
+  const handleBulkStatusChange = useCallback((newStatus: string) => {
+    const selected = submissions.filter(s => activeSelectedIds.has(s.id));
+    selected.forEach(sub => onInlineStatusChange(sub, newStatus));
+    clearSelection();
+  }, [activeSelectedIds, submissions, onInlineStatusChange, clearSelection]);
+
+  const handleBulkDelete = useCallback(() => {
+    activeSelectedIds.forEach(id => onDelete(id));
+    clearSelection();
+  }, [activeSelectedIds, onDelete, clearSelection]);
 
   const totalPages = Math.ceil(total / pageSize);
 
@@ -300,6 +351,13 @@ const SubmissionsTable = ({
               <table className={`min-w-[1000px] ${fontSize}`}>
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
+                    <th className={`${cellPad} w-10 text-center`}>
+                      <Checkbox
+                        checked={allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false}
+                        onCheckedChange={toggleSelectAll}
+                        aria-label="Select all visible rows"
+                      />
+                    </th>
                     <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Date</th>
                     <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Name</th>
                     <th className={`text-left ${cellPad} font-semibold text-muted-foreground whitespace-nowrap`}>Vehicle</th>
@@ -317,7 +375,14 @@ const SubmissionsTable = ({
                     const sla = getSlaLevel(hours, sub.progress_status);
                     const age = getAgeBadge(sub);
                     return (
-                    <tr key={sub.id} className={`border-b border-border last:border-0 hover:bg-primary/5 transition-colors border-l-3 ${sla.borderClass} ${age.bgClass} ${idx % 2 === 1 ? "bg-muted/20" : ""} admin-row`}>
+                    <tr key={sub.id} className={`border-b border-border last:border-0 hover:bg-primary/5 transition-colors border-l-3 ${sla.borderClass} ${age.bgClass} ${idx % 2 === 1 ? "bg-muted/20" : ""} ${selectedIds.has(sub.id) ? "bg-primary/10" : ""} admin-row`}>
+                      <td className={`${cellPad} text-center w-10`}>
+                        <Checkbox
+                          checked={selectedIds.has(sub.id)}
+                          onCheckedChange={() => toggleSelectOne(sub.id)}
+                          aria-label={`Select ${sub.name || "submission"}`}
+                        />
+                      </td>
                       <td className={`${cellPad} whitespace-nowrap`}>{new Date(sub.created_at).toLocaleDateString()}</td>
                       <td className={`${cellPad} font-medium text-card-foreground whitespace-nowrap`}>{sub.name || "—"}</td>
                       <td className={`${cellPad} whitespace-nowrap`}>
@@ -416,6 +481,35 @@ const SubmissionsTable = ({
               </table>
             </div>
           </div>
+          {activeSelectedIds.size > 0 && (
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-card/95 backdrop-blur-xl shadow-2xl border border-border/60 ring-1 ring-primary/10 animate-in slide-in-from-bottom-4 fade-in duration-200">
+              <span className="text-sm font-semibold text-card-foreground whitespace-nowrap">
+                {activeSelectedIds.size} {activeSelectedIds.size === 1 ? "lead" : "leads"} selected
+              </span>
+              <div className="w-px h-6 bg-border" />
+              <Select onValueChange={handleBulkStatusChange}>
+                <SelectTrigger className="h-8 w-44 text-xs font-medium">
+                  <SelectValue placeholder="Change Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ALL_STATUS_OPTIONS.filter(s => s.key !== "partial").map(s => {
+                    const locked = ["deal_finalized", "check_request_submitted", "purchase_complete"].includes(s.key) && !canApprove;
+                    return <SelectItem key={s.key} value={s.key} disabled={locked}>{s.label}{locked ? " \uD83D\uDD12" : ""}</SelectItem>;
+                  })}
+                </SelectContent>
+              </Select>
+              {canDelete && (
+                <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="h-8 text-xs font-semibold gap-1.5">
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete Selected
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={clearSelection} className="h-8 text-xs text-muted-foreground hover:text-foreground gap-1">
+                <X className="w-3.5 h-3.5" />
+                Clear
+              </Button>
+            </div>
+          )}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
               <span className="text-xs text-muted-foreground">

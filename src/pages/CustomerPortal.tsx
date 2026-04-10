@@ -116,6 +116,7 @@ const CustomerPortal = () => {
   const [offerSettings, setOfferSettings] = useState<OfferSettings | null>(null);
   const [offerRules, setOfferRules] = useState<OfferRule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mileageUpdating, setMileageUpdating] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -149,6 +150,7 @@ const CustomerPortal = () => {
   /* ─── Mileage update handler ─── */
   const handleMileageUpdate = async (newMileage: string) => {
     if (!submission || !condition) return;
+    setMileageUpdating(true);
 
     const newSubmission = { ...submission, mileage: newMileage };
     let bbPayload: ReturnType<typeof buildSubmissionBBPayload> | null = null;
@@ -205,6 +207,8 @@ const CustomerPortal = () => {
       toast({ title: "Mileage updated", description: "Your offer has been recalculated." });
     } catch {
       toast({ title: "Update failed", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setMileageUpdating(false);
     }
   };
 
@@ -290,6 +294,7 @@ const CustomerPortal = () => {
     overallCondition: s.overall_condition,
     drivetrain: condition?.drivetrain || null,
     canEdit: canEditMileage,
+    mileageUpdating,
     inspectorGrade: s.inspector_grade,
     brakeDepths: (s.brake_lf != null || s.brake_rf != null || s.brake_lr != null || s.brake_rr != null)
       ? { lf: s.brake_lf, rf: s.brake_rf, lr: s.brake_lr, rr: s.brake_rr }

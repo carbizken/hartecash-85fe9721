@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { LogOut, Moon, Sun, Crown } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { LogOut, Moon, Sun, Crown, Menu, PanelLeft } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
 import { ROLE_LABELS } from "@/lib/adminConstants";
 
@@ -15,6 +15,7 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ darkMode, setDarkMode, userRole, onLogout, userName, isPlatformAdmin }: AdminHeaderProps) => {
   const { config } = useSiteConfig();
+  const { toggleSidebar, isMobile } = useSidebar();
 
   const greeting = (() => {
     const h = new Date().getHours();
@@ -31,10 +32,18 @@ const AdminHeader = ({ darkMode, setDarkMode, userRole, onLogout, userName, isPl
       <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(210,90%,18%)] to-[hsl(220,80%,12%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_40%,hsl(210,100%,30%,0.1)_50%,transparent_60%)] animate-[shimmer_8s_ease-in-out_infinite]" />
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-      
+
       <div className="relative px-3 md:px-5 py-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 md:gap-4 min-w-0">
-          <SidebarTrigger className="text-white/70 hover:text-white hover:bg-white/10 -ml-1 shrink-0 transition-colors" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="text-white/70 hover:text-white hover:bg-white/10 -ml-1 shrink-0 transition-colors h-7 w-7"
+            aria-label="Toggle Sidebar"
+          >
+            {isMobile ? <Menu className="h-5 w-5" /> : <PanelLeft className="h-4 w-4" />}
+          </Button>
           
           {config.logo_white_url ? (
             <img src={config.logo_white_url} alt="Dashboard" className="h-10 md:h-16 w-auto shrink-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]" />

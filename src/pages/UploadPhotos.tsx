@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Camera, CheckCircle, X, Plus, ArrowLeft, Upload, CircleDot,
+  Camera, CheckCircle, X, Plus, ArrowLeft, Upload, CircleDot, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UploadSkeleton from "@/components/UploadSkeleton";
@@ -424,8 +424,17 @@ const UploadPhotos = () => {
 
         <Button onClick={handleUpload} disabled={!hasNewUploads || uploading} size="lg"
           className="w-full py-5 bg-accent hover:bg-accent/90 text-accent-foreground text-[17px] font-bold shadow-lg shadow-accent/20 rounded-xl gap-2">
-          <Upload className="w-5 h-5" />
-          {uploading ? "Uploading..." : "Upload Photos"}
+          {uploading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Upload className="w-5 h-5" />
+              Upload Photos
+            </>
+          )}
         </Button>
 
         <p className="text-center mt-5 text-xs text-muted-foreground flex items-center justify-center gap-1.5">
@@ -435,6 +444,17 @@ const UploadPhotos = () => {
           Your photos are securely uploaded and only used for your vehicle appraisal.
         </p>
       </div>
+
+      {/* Upload progress overlay */}
+      {uploading && (
+        <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
+            <p className="text-lg font-semibold text-foreground">Uploading your photos...</p>
+            <p className="text-sm text-muted-foreground">Please don't close this page.</p>
+          </div>
+        </div>
+      )}
 
       {/* Guided camera capture overlay — iframe-based GhostCar */}
       {cameraCategory && (

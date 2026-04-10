@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { TenantProvider } from "@/contexts/TenantContext";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,7 +6,8 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 const Index = lazy(() => import("./pages/Index"));
 
 const UploadPhotos = lazy(() => import("./pages/UploadPhotos"));
@@ -46,6 +47,36 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient();
 
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  const [session, setSession] = useState<null | "loading" | "authenticated">("loading");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s ? "authenticated" : null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s ? "authenticated" : null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (session === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 const AnimatedRoutes = () => {
   return (
     <Suspense fallback={null}>
@@ -57,7 +88,7 @@ const AnimatedRoutes = () => {
         <Route path="/my-submission/:token" element={<CustomerPortal />} />
         <Route path="/schedule" element={<ScheduleVisit />} />
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         <Route path="/service" element={<ServiceLanding />} />
         <Route path="/pitch" element={<PitchDeck />} />
         <Route path="/ken" element={<KenPage />} />
@@ -75,11 +106,11 @@ const AnimatedRoutes = () => {
         <Route path="/disclosure" element={<OfferDisclosure />} />
         <Route path="/updates" element={<Updates />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/executive" element={<ExecutiveDashboard />} />
+        <Route path="/executive" element={<ProtectedRoute><ExecutiveDashboard /></ProtectedRoute>} />
         <Route path="/inspection/:id" element={<InspectionSheet />} />
         <Route path="/inspect/:id" element={<MobileInspection />} />
         <Route path="/appraisal/:token" element={<AppraisalTool />} />
-        <Route path="/super-admin" element={<SuperAdminDashboard />} />
+        <Route path="/super-admin" element={<ProtectedRoute><SuperAdminDashboard /></ProtectedRoute>} />
         <Route path="/onboard/:dealershipId" element={<OnboardingMobile />} />
         <Route path="/email-unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="/referral" element={<ReferralPage />} />

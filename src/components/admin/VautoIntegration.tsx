@@ -19,8 +19,9 @@ import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Send, Truck, Key, Building2, Zap, Loader2, CheckCircle2, AlertCircle,
-  Clock, RefreshCw, PlayCircle, ShieldCheck,
+  Clock, RefreshCw, PlayCircle, ShieldCheck, HardHat,
 } from "lucide-react";
+import { InDevelopmentBadge } from "./InDevelopmentBadge";
 
 /* ── Premium card shell ─────────────────────────────────────── */
 
@@ -302,17 +303,24 @@ const VautoIntegration = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg">
             <Truck className="w-6 h-6" />
           </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-black tracking-tight">vAuto (Cox Automotive)</h2>
-            <p className="text-sm text-muted-foreground">
+          <div className="flex-1 min-w-[220px]">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-xl font-black tracking-tight">vAuto (Cox Automotive)</h2>
+              <InDevelopmentBadge
+                label="In Development"
+                reason="Requires Cox Automotive API credentials from vAuto"
+                size="md"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground mt-0.5">
               Push finalized appraisals into your Cox Automotive inventory system.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {enabledBadge}
             {envBadge}
             {cfg.vauto_auto_push && (
@@ -321,6 +329,23 @@ const VautoIntegration = () => {
               </Badge>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* In-development banner */}
+      <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-4 flex items-start gap-3">
+        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 shrink-0">
+          <HardHat className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+        </div>
+        <div className="text-xs leading-relaxed text-amber-900 dark:text-amber-100">
+          <p className="font-bold text-amber-700 dark:text-amber-300 text-[11px] uppercase tracking-wider mb-0.5">
+            Integration in development
+          </p>
+          <p>
+            This integration is in development. <strong>Sandbox mode</strong> logs what
+            would be pushed. <strong>Production mode</strong> requires valid Cox
+            Automotive API credentials.
+          </p>
         </div>
       </div>
 

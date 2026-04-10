@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  Key, Copy, RefreshCw, Check, Globe, Webhook, Send, Loader2, Shield, Code2, Zap,
+  Key, Copy, RefreshCw, Check, Globe, Webhook, Send, Loader2, Shield, Code2, Zap, HardHat,
 } from "lucide-react";
+import { InDevelopmentBadge } from "./InDevelopmentBadge";
 
 /* ── Premium card shell ────────────────────────────────── */
 
@@ -183,13 +184,36 @@ const ApiAccessPanel = () => {
     <div className="space-y-6">
       {/* ── Page header ── */}
       <div>
-        <h2 className="text-xl font-bold text-card-foreground tracking-tight flex items-center gap-2">
-          <Code2 className="w-5 h-5 text-primary" />
-          API Access
-        </h2>
+        <div className="flex items-center gap-2 flex-wrap">
+          <h2 className="text-xl font-bold text-card-foreground tracking-tight flex items-center gap-2">
+            <Code2 className="w-5 h-5 text-primary" />
+            API Access
+          </h2>
+          <InDevelopmentBadge
+            label="In Development"
+            reason="API endpoints require backend deployment and rate limiting infrastructure"
+            size="md"
+          />
+        </div>
         <p className="text-sm text-muted-foreground mt-1">
           Manage your API key and webhook integrations for enterprise DMS/CRM connectivity.
         </p>
+      </div>
+
+      {/* ── In-development banner ── */}
+      <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-4 flex items-start gap-3">
+        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 shrink-0">
+          <HardHat className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+        </div>
+        <div className="text-xs leading-relaxed text-amber-900 dark:text-amber-100">
+          <p className="font-bold text-amber-700 dark:text-amber-300 text-[11px] uppercase tracking-wider mb-0.5">
+            API Access in development
+          </p>
+          <p>
+            API access is in development. Keys can be generated but endpoints are
+            not yet live.
+          </p>
+        </div>
       </div>
 
       {/* ── API Key card ── */}

@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
-  Save, Loader2, Paintbrush, Eye, Globe, Mail, FileText, Image, Tag, EyeOff,
+  Save, Loader2, Paintbrush, Eye, Globe, Mail, FileText, Image, Tag, EyeOff, HardHat,
 } from "lucide-react";
+import { InDevelopmentBadge } from "./InDevelopmentBadge";
 
 /* ── Premium card shell ────────────────────────────────── */
 
@@ -157,23 +158,39 @@ const WhiteLabelSettings = () => {
       {/* ── Custom email domain ── */}
       <PremiumCard icon={Mail} title="Email Sending Domain" description="Customise the From address on outbound emails">
         <div className="space-y-3">
-          <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <Label className="text-xs font-medium">Custom Domain</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground whitespace-nowrap">noreply@</span>
-              <Input
-                placeholder="yourdealership.com"
-                value={state.custom_email_domain}
-                onChange={(e) => update("custom_email_domain", e.target.value)}
-                className="flex-1"
-              />
-            </div>
+            <InDevelopmentBadge
+              label="In Development"
+              reason="Custom domain verification requires DNS setup and SSL provisioning"
+              size="sm"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">noreply@</span>
+            <Input
+              placeholder="yourdealership.com"
+              value={state.custom_email_domain}
+              onChange={(e) => update("custom_email_domain", e.target.value)}
+              className="flex-1"
+            />
           </div>
           {state.custom_email_domain && (
             <p className="text-[11px] text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
               Emails will be sent from: <span className="font-mono font-medium text-foreground/80">noreply@{state.custom_email_domain}</span>
             </p>
           )}
+          {/* In-development note for DNS/SSL */}
+          <div className="rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 flex items-start gap-2.5">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/30 shrink-0">
+              <HardHat className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <p className="text-[11px] leading-snug text-amber-900 dark:text-amber-100">
+              <span className="font-bold text-amber-700 dark:text-amber-300">In development:</span>{" "}
+              Custom domain verification requires DNS setup and SSL provisioning —
+              currently configuration is saved but not activated.
+            </p>
+          </div>
         </div>
       </PremiumCard>
 

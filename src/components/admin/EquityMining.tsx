@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { calculateEquity } from "@/lib/equityCalculator";
 import {
-  TrendingUp, Users, DollarSign, Send, Mail, CheckCircle, Clock,
+  Users, DollarSign, Send, Mail, CheckCircle, Clock,
   Filter, Loader2, Car, Pickaxe, RefreshCw, Flame,
 } from "lucide-react";
 
@@ -233,9 +233,6 @@ const EquityMining = () => {
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
-  const fmtCurrency = (v: number) =>
-    v >= 1000 ? `$${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : `$${v.toLocaleString()}`;
-
   const fmtUsd = (v: number) =>
     v.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
@@ -333,15 +330,21 @@ const EquityMining = () => {
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
-                Min Offer ($)
-              </label>
-              <Input
-                type="number"
-                placeholder="e.g. 10000"
-                value={minOffer}
-                onChange={(e) => setMinOffer(e.target.value)}
-                className="h-9"
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Minimum Equity
+                </label>
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                  {fmtUsd(minEquity)}
+                </span>
+              </div>
+              <Slider
+                min={0}
+                max={25000}
+                step={500}
+                value={[minEquity]}
+                onValueChange={(v) => setMinEquity(v[0] ?? 0)}
+                className="mt-3"
               />
             </div>
           </div>
@@ -349,7 +352,7 @@ const EquityMining = () => {
       )}
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <KpiCard
           label="Service Leads"
           value={kpis.total}
@@ -358,9 +361,16 @@ const EquityMining = () => {
           bg="from-blue-500/15 to-blue-600/5"
         />
         <KpiCard
-          label="High Equity"
-          value={kpis.highEquity}
-          icon={TrendingUp}
+          label="Hot Leads"
+          value={kpis.hotCount}
+          icon={Flame}
+          color="text-emerald-500"
+          bg="from-emerald-500/15 to-emerald-600/5"
+        />
+        <KpiCard
+          label="Total Hot Equity"
+          value={fmtUsd(kpis.totalHotEquity)}
+          icon={DollarSign}
           color="text-emerald-500"
           bg="from-emerald-500/15 to-emerald-600/5"
         />
@@ -408,7 +418,7 @@ const EquityMining = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[800px]">
+            <table className="w-full text-sm min-w-[900px]">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
                   <th className="text-left px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -418,10 +428,16 @@ const EquityMining = () => {
                     Vehicle
                   </th>
                   <th className="text-right px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Est. Offer
+                    Vehicle Value
                   </th>
                   <th className="text-right px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Days Since Visit
+                    Loan Payoff
+                  </th>
+                  <th className="text-right px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    Equity
+                  </th>
+                  <th className="text-right px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    Days
                   </th>
                   <th className="text-center px-4 py-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                     Status
@@ -433,15 +449,26 @@ const EquityMining = () => {
               </thead>
               <tbody>
                 {filtered.map((lead) => {
-                  const equity = getEquityValue(lead);
+                  const vehicleValue = getVehicleValue(lead);
+                  const payoff = lead.loan_payoff_amount ?? null;
+                  const equityResult = calculateEquity(vehicleValue, payoff);
                   const days = daysSince(lead.created_at);
                   const wasSent = outreachSentIds.has(lead.id);
                   const isSending = sendingId === lead.id;
 
+                  const rowBg =
+                    equityResult.label === "hot"
+                      ? "hover:bg-emerald-500/5"
+                      : equityResult.label === "warm"
+                      ? "hover:bg-amber-500/5"
+                      : equityResult.label === "negative"
+                      ? "hover:bg-destructive/5"
+                      : "hover:bg-muted/20";
+
                   return (
                     <tr
                       key={lead.id}
-                      className="border-b border-border/50 last:border-0 hover:bg-muted/20 transition-colors"
+                      className={`border-b border-border/50 last:border-0 transition-colors ${rowBg}`}
                     >
                       <td className="px-4 py-3">
                         <div>
@@ -469,13 +496,34 @@ const EquityMining = () => {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        {equity > 0 ? (
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                            ${equity.toLocaleString()}
+                        {vehicleValue > 0 ? (
+                          <span className="font-semibold text-card-foreground">
+                            ${vehicleValue.toLocaleString()}
                           </span>
                         ) : (
                           <span className="text-muted-foreground">--</span>
                         )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        {payoff != null ? (
+                          <div className="flex items-center justify-end gap-1">
+                            <span className="font-medium text-card-foreground">
+                              ${Number(payoff).toLocaleString()}
+                            </span>
+                            {lead.loan_payoff_verified && (
+                              <CheckCircle className="w-3 h-3 text-emerald-500" />
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground italic">
+                            unknown
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className={`font-bold ${equityResult.color}`}>
+                          {equityResult.displayText}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">

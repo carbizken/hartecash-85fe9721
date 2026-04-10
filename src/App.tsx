@@ -6,8 +6,9 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { pageView } from "@/lib/analytics";
 const Index = lazy(() => import("./pages/Index"));
 
 const UploadPhotos = lazy(() => import("./pages/UploadPhotos"));
@@ -77,6 +78,14 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   return <>{children}</>;
 };
 
+const RouteTracker = () => {
+  const location = useLocation();
+  useEffect(() => {
+    pageView(location.pathname);
+  }, [location.pathname]);
+  return null;
+};
+
 const AnimatedRoutes = () => {
   return (
     <Suspense fallback={null}>
@@ -131,6 +140,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <RouteTracker />
             <AnimatedRoutes />
           </BrowserRouter>
         </TooltipProvider>

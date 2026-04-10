@@ -3,6 +3,7 @@ import { Shield, Loader2 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import CalculatingOffer from "@/components/CalculatingOffer";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
+import { track } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -84,6 +85,11 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
   const [offerSettingsEarly, setOfferSettingsEarly] = useState<OfferSettings | null>(null);
   const [offerRulesEarly, setOfferRulesEarly] = useState<OfferRule[]>([]);
   const [promoBonus, setPromoBonus] = useState(0);
+
+  // Track form start on mount
+  useEffect(() => {
+    track('form_started');
+  }, []);
 
   // Pre-set store from embed param
   useEffect(() => {
@@ -388,6 +394,7 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
     }
 
     if (step < totalSteps - 1) {
+      track('form_step_completed', { step, stepName: displaySteps[step] });
       setDirection(1);
       setStep(step + 1);
     }
@@ -537,6 +544,8 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
       }
 
       localStorage.setItem("lastSubmissionTime", Date.now().toString());
+
+      track('form_submitted', { hasVin: !!formData.vin, hasPlate: !!formData.plate });
 
       logConsent({
         customerName: formData.name,

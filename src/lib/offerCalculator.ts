@@ -19,6 +19,8 @@ export interface OfferEstimate {
   strategyMode: StrategyMode;      // which mode was active
   isCapped: boolean;               // true if offer was reduced by safety cap
   projectedGross: number;          // retail_clean - offer - recon (informational)
+  // AI condition adjustment
+  aiConditionAdjustment: number;   // dollar amount added/removed by AI damage analysis
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -601,6 +603,63 @@ function calcMarketAdjustment(
 }
 
 // ─────────────────────────────────────────────────────────────
+// AI CONDITION ADJUSTMENT
+// Compares AI-detected condition against customer/inspector
+// reported condition and applies a subtle adjustment.
+// Positive = more deduction, negative = less deduction (reward).
+// Capped at ±$1500 to keep AI informing, not overriding.
+// ─────────────────────────────────────────────────────────────
+
+const CONDITION_RANK: Record<string, number> = {
+  excellent: 4,
+  very_good: 3,
+  good: 2,
+  fair: 1,
+  poor: 0,
+};
+
+/**
+ * Calculate the AI condition confidence adjustment.
+ * Returns a dollar adjustment: positive = more deduction, negative = less deduction.
+ */
+export function calcAIConditionAdjustment(
+  baseValue: number,
+  reportedCondition: string,
+  aiConditionScore: string | null | undefined,
+  aiDamageSummary: string | null | undefined,
+  aiConfidence?: number,
+): number {
+  // Skip if no AI data or confidence too low
+  if (!aiConditionScore || (aiConfidence != null && aiConfidence < 60)) return 0;
+
+  const reportedRank = CONDITION_RANK[reportedCondition.toLowerCase()] ?? 2;
+  const aiRank = CONDITION_RANK[aiConditionScore.toLowerCase()] ?? 2;
+
+  if (reportedRank === aiRank) return 0;
+
+  let adjustmentPct = 0;
+
+  if (aiRank < reportedRank) {
+    // AI detected worse condition than reported — apply penalty
+    const gap = reportedRank - aiRank;
+    if (gap >= 3) adjustmentPct = 15;       // e.g. AI says "poor", customer says "excellent"
+    else if (gap === 2) adjustmentPct = 8;   // e.g. AI says "fair", customer says "excellent"
+    else if (gap === 1) adjustmentPct = 3;   // e.g. AI says "good", customer says "excellent"
+  } else {
+    // AI detected better condition than reported — reward / reduce deductions
+    const gap = aiRank - reportedRank;
+    if (gap >= 2) adjustmentPct = -5;
+    else if (gap === 1) adjustmentPct = -3;
+  }
+
+  if (adjustmentPct === 0) return 0;
+
+  const raw = Math.round(baseValue * (adjustmentPct / 100));
+  // Cap at ±$1500
+  return Math.max(-1500, Math.min(1500, raw));
+}
+
+// ─────────────────────────────────────────────────────────────
 // MAIN FUNCTION — calculateOffer
 // Extended with 3 new optional market params — all call sites
 // that don't pass them continue to work exactly as before.
@@ -616,7 +675,11 @@ export function calculateOffer(
   // NEW — live market data from Black Book ListingsStatistics API
   marketDaysSupply?: number,
   marketSoldAvg?: number,
-  marketAskingAvg?: number
+  marketAskingAvg?: number,
+  // AI damage analysis data
+  aiConditionScore?: string | null,
+  aiDamageSummary?: string | null,
+  aiConfidence?: number,
 ): OfferEstimate | null {
   if (!bbVehicle) return null;
 
@@ -817,6 +880,18 @@ export function calculateOffer(
     else if (formData.numKeys === "0") deductions += amt.missing_keys_0;
   }
 
+  // ── STEP 5b: AI Condition Adjustment ──
+  // Compares AI-detected condition to customer/inspector-reported condition.
+  // Positive adjustment = additional deduction; negative = reduced deduction (reward).
+  const aiAdj = calcAIConditionAdjustment(
+    baseValue,
+    formData.overallCondition,
+    aiConditionScore,
+    aiDamageSummary,
+    aiConfidence,
+  );
+  deductions += aiAdj;
+
   // ── STEP 6: Subtract deductions ──
   const reconCost = cfg.recon_cost || 0;
   let high = Math.round(adjusted - deductions);
@@ -891,5 +966,6 @@ export function calculateOffer(
     strategyMode,
     isCapped,
     projectedGross,
+    aiConditionAdjustment: aiAdj,
   };
 }

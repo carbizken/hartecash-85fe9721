@@ -23,6 +23,7 @@ import { resolveEffectiveSettings } from "@/lib/resolvePricingModel";
 import { useToast } from "@/hooks/use-toast";
 import SlideToAccept from "@/components/SlideToAccept";
 import SaveOfferButton from "@/components/offer/SaveOfferButton";
+import { track } from "@/lib/analytics";
 
 
 interface OfferSubmission {

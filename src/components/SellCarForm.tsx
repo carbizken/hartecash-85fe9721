@@ -554,6 +554,11 @@ const SellCarForm = ({ leadSource = "inventory", variant = "default" }: SellCarF
         formSource: "sell_form",
         submissionToken: generatedToken,
         dealershipName: config.dealership_name,
+        // Pass the self-reported loan status so the consent text
+        // includes the payoff verification authorization ONLY when
+        // the customer has indicated there's an outstanding loan.
+        // Customers who own outright get the v1 TCPA-only consent.
+        loanStatus: formData.loanStatus || null,
       });
 
       // Show calculating animation if enabled, otherwise navigate directly

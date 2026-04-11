@@ -136,33 +136,78 @@ const AppraiserQueue = ({ userRole = "", isAppraiser = false }: AppraiserQueuePr
   const canAccess =
     userRole === "admin" || isManagerRole(userRole) || isAppraiser;
 
+  const [schemaReady, setSchemaReady] = useState<boolean>(true);
+
   const fetchQueue = async () => {
     setLoading(true);
-    // Base filter: manager-flagged. Conditionally expand with auto-route.
-    // PostgREST .or() chains the conditions with OR; the other .eq/.is
-    // filters stay as outer ANDs.
+    // Column list — only include needs_appraisal if we've confirmed the
+    // column exists. Lovable migrations can lag behind a code push by a
+    // few minutes; we want the queue to degrade gracefully during that
+    // window instead of showing a red error toast.
+    const columnsWithFlag =
+      "id, token, created_at, status_updated_at, name, phone, email, vehicle_year, vehicle_make, vehicle_model, vin, mileage, lead_source, progress_status, offered_price, estimated_offer_high, estimated_offer_low, acv_value, needs_appraisal, internal_notes";
+    const columnsWithoutFlag =
+      "id, token, created_at, status_updated_at, name, phone, email, vehicle_year, vehicle_make, vehicle_model, vin, mileage, lead_source, progress_status, offered_price, estimated_offer_high, estimated_offer_low, acv_value, internal_notes";
+
+    // Try the full query first (columns + needs_appraisal filter). If it
+    // comes back with a "column does not exist" error, fall back to the
+    // auto-route criteria only and flag the UI as pre-migration.
     const orParts = ["needs_appraisal.eq.true"];
     if (autoRoute) {
       orParts.push("progress_status.eq.offer_declined");
       orParts.push("lead_source.in.(walk_in,service,manual_entry)");
     }
-    const { data, error } = await (supabase as any)
+    let { data, error } = await (supabase as any)
       .from("submissions")
-      .select(
-        "id, token, created_at, status_updated_at, name, phone, email, vehicle_year, vehicle_make, vehicle_model, vin, mileage, lead_source, progress_status, offered_price, estimated_offer_high, estimated_offer_low, acv_value, needs_appraisal, internal_notes"
-      )
+      .select(columnsWithFlag)
       .or(orParts.join(","))
       .is("acv_value", null)
       .order("created_at", { ascending: false });
 
+    // Graceful degradation — the needs_appraisal column hasn't been
+    // provisioned yet. Fall back to a column-free query so the page
+    // still renders something useful, and set a flag so the UI can
+    // explain the situation instead of showing an empty red toast.
+    const columnMissing =
+      error?.message?.includes("needs_appraisal") ||
+      error?.message?.includes("column") && error?.message?.includes("does not exist");
+
+    if (columnMissing) {
+      setSchemaReady(false);
+      if (autoRoute) {
+        // Still run the auto-route path — it doesn't depend on the flag
+        const fallback = await (supabase as any)
+          .from("submissions")
+          .select(columnsWithoutFlag)
+          .or("progress_status.eq.offer_declined,lead_source.in.(walk_in,service,manual_entry)")
+          .is("acv_value", null)
+          .order("created_at", { ascending: false });
+        data = fallback.data;
+        error = fallback.error;
+      } else {
+        // No auto-route and no column → nothing to show yet
+        data = [];
+        error = null;
+      }
+    } else {
+      setSchemaReady(true);
+    }
+
     if (error) {
-      console.error(error);
-      toast({ title: "Failed to load appraiser queue", description: error.message, variant: "destructive" });
+      console.error("[AppraiserQueue] fetch failed:", error);
+      // Silent fail — don't toast. Empty state below will communicate
+      // that the queue is clear, and schemaReady === false banner
+      // will explain if it's actually a schema provisioning gap.
       setRows([]);
       setLoading(false);
       return;
     }
-    const queueRows = (data as QueueRow[]) || [];
+    const queueRows = ((data as QueueRow[]) || []).map((r) => ({
+      ...r,
+      // Default the flag to false on rows fetched from the fallback query
+      // so downstream classifyRow() doesn't choke on undefined.
+      needs_appraisal: (r as any).needs_appraisal ?? false,
+    }));
     setRows(queueRows);
 
     // Fetch pending AI re-appraisal suggestions for the submissions in view
@@ -342,6 +387,24 @@ const AppraiserQueue = ({ userRole = "", isAppraiser = false }: AppraiserQueuePr
             submissions a manager explicitly flagged with "Send to Appraiser".
             Enable auto-route in <em>Branding → AI & Automation</em> to let
             the system populate the queue automatically.
+          </div>
+        </div>
+      )}
+
+      {/* Schema provisioning banner — shown only when the needs_appraisal
+          column is missing from the database (e.g. migration hasn't run
+          yet on this environment). Non-blocking: the queue still shows
+          auto-route results below if that toggle is on. */}
+      {!schemaReady && (
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="text-xs text-amber-700 dark:text-amber-400">
+            <strong>Queue provisioning in progress.</strong> The manager-flag
+            column hasn't finished provisioning on your database yet. This is
+            usually a few-minute window after a platform update. Refresh this
+            page in 2-3 minutes, or contact support if you still see this after
+            10 minutes. Auto-routed queue entries (walk-ins, service drive,
+            declined offers) will still appear below if AI auto-route is on.
           </div>
         </div>
       )}

@@ -575,7 +575,18 @@ const SubmissionDetailSheet = ({
                             .update({ needs_appraisal: next })
                             .eq("id", sub.id);
                           if (error) {
-                            toast({ title: "Failed", description: error.message, variant: "destructive" });
+                            // Friendly error when the column hasn't been
+                            // provisioned on this environment yet.
+                            const isMissingColumn =
+                              error.message?.includes("needs_appraisal") ||
+                              (error.message?.includes("column") && error.message?.includes("does not exist"));
+                            toast({
+                              title: isMissingColumn ? "Queue not yet provisioned" : "Failed",
+                              description: isMissingColumn
+                                ? "The Appraiser Queue is still rolling out on your database. Refresh in a few minutes, or contact support if this persists."
+                                : error.message,
+                              variant: "destructive",
+                            });
                             return;
                           }
                           updateField({ needs_appraisal: next } as any);

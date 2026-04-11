@@ -75,6 +75,12 @@ const InspectionCheckIn = () => {
   // scannerMode: "native" = Chromium BarcodeDetector; "zxing" = JS fallback
   // used for every other browser (Safari desktop + iOS, Firefox, etc.)
   const [scannerMode, setScannerMode] = useState<"native" | "zxing" | null>(null);
+  // Landscape nudge — VIN barcodes are long and horizontal; scans are
+  // 3-5x faster when the phone is turned sideways. We soft-prompt users
+  // in portrait mode and auto-dismiss the overlay once they rotate.
+  const [isPortrait, setIsPortrait] = useState<boolean>(
+    typeof window !== "undefined" ? window.innerHeight > window.innerWidth : false,
+  );
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const detectLoopRef = useRef<number | null>(null);
@@ -123,6 +129,56 @@ const InspectionCheckIn = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Orientation tracking ──
+  // VIN barcodes are long and horizontal — scans are dramatically faster
+  // in landscape because the viewfinder width aligns with the barcode's
+  // long axis. We watch window resize + screen.orientation.change events
+  // and update isPortrait so the scanner overlay can show a soft prompt
+  // until the user rotates.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const checkOrientation = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth);
+    };
+    checkOrientation();
+    window.addEventListener("resize", checkOrientation);
+    // screen.orientation.change is cleaner than resize on modern phones
+    // because it fires exactly once per rotation, not on every keyboard
+    // reflow. Not all browsers expose it (looking at you, older iOS), so
+    // we addEventListener guardedly and silently skip if it's missing.
+    const orient = (screen as any).orientation;
+    if (orient && typeof orient.addEventListener === "function") {
+      orient.addEventListener("change", checkOrientation);
+    }
+    return () => {
+      window.removeEventListener("resize", checkOrientation);
+      if (orient && typeof orient.removeEventListener === "function") {
+        orient.removeEventListener("change", checkOrientation);
+      }
+    };
+  }, []);
+
+  // ── Best-effort landscape lock when the scanner opens ──
+  // screen.orientation.lock() works on Chrome Android; Safari iOS only
+  // honors it inside a fullscreen element. We try it after scannerOpen
+  // flips true and silently fail if the user's browser doesn't support
+  // it — the soft overlay handles the UX regardless.
+  useEffect(() => {
+    if (!scannerOpen) return;
+    const orient = (screen as any).orientation;
+    if (orient && typeof orient.lock === "function") {
+      orient.lock("landscape").catch(() => {
+        // Ignore — we fall back to the soft overlay prompt
+      });
+    }
+    return () => {
+      const o = (screen as any).orientation;
+      if (o && typeof o.unlock === "function") {
+        try { o.unlock(); } catch { /* ignore */ }
+      }
+    };
+  }, [scannerOpen]);
 
   const stopScanner = useCallback(() => {
     if (detectLoopRef.current !== null) {
@@ -542,6 +598,66 @@ const InspectionCheckIn = () => {
             {scannerMode === "zxing" ? "Scanning (compat mode)…" : "Scanning…"}
           </div>
         </div>
+
+        {/* Landscape nudge — VIN barcodes scan 3-5x faster sideways.
+            We show this soft prompt when the phone is in portrait, and
+            it auto-dismisses the moment the user rotates. On iOS where
+            orientation.lock() needs fullscreen, the prompt is the whole
+            UX; on Chrome Android the lock usually kicks in immediately
+            and the prompt never flashes. */}
+        {isPortrait && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6">
+            <div className="relative mb-6">
+              {/* Animated phone rotation icon */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 100 100"
+                className="w-24 h-24 text-primary"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect
+                  x="30"
+                  y="10"
+                  width="40"
+                  height="80"
+                  rx="6"
+                  className="origin-center"
+                  style={{
+                    animation: "vin-phone-rotate 2s ease-in-out infinite",
+                    transformOrigin: "50px 50px",
+                  }}
+                />
+                <circle cx="50" cy="80" r="2" fill="currentColor" />
+              </svg>
+              <style>{`
+                @keyframes vin-phone-rotate {
+                  0%, 20% { transform: rotate(0deg); }
+                  60%, 100% { transform: rotate(-90deg); }
+                }
+              `}</style>
+            </div>
+            <h3 className="text-white text-xl font-bold text-center mb-2">
+              Turn your phone sideways
+            </h3>
+            <p className="text-white/70 text-sm text-center max-w-xs leading-relaxed">
+              VIN barcodes scan much faster in landscape. Rotate your device
+              and we'll start scanning automatically.
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={closeScanner}
+              className="mt-8 text-white/70 hover:bg-white/10 hover:text-white"
+            >
+              <X className="w-4 h-4 mr-1.5" />
+              Cancel
+            </Button>
+          </div>
+        )}
 
         {scannerError && (
           <div className="absolute bottom-8 inset-x-6 bg-destructive/90 text-destructive-foreground rounded-2xl p-4 text-sm font-medium shadow-xl flex items-start gap-2">

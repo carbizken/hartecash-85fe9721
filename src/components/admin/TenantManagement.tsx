@@ -53,6 +53,7 @@ const EMPTY_FORM: TenantForm = {
 };
 
 const PLAN_PRICES: Record<string, number> = {
+  starter: 1495,
   standard: 1995,
   multi_store: 3495,
   group: 5995,
@@ -60,6 +61,7 @@ const PLAN_PRICES: Record<string, number> = {
 };
 
 const PLAN_LABELS: Record<string, string> = {
+  starter: "Starter ($1,495/mo)",
   standard: "Standard ($1,995/mo)",
   multi_store: "Multi-Store ($3,495/mo)",
   group: "Group ($5,995/mo)",

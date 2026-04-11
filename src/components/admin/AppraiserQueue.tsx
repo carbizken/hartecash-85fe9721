@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/contexts/TenantContext";
 import { useSiteConfig } from "@/hooks/useSiteConfig";
+import { isManagerRole } from "@/lib/adminConstants";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -128,11 +129,12 @@ const AppraiserQueue = ({ userRole = "", isAppraiser = false }: AppraiserQueuePr
   const [loading, setLoading] = useState(true);
 
   const autoRoute = Boolean((config as any).auto_route_appraiser_queue);
+  // Visibility: admins + any manager-tier role, OR anyone with the
+  // additive Appraiser credential regardless of their base role.
+  // Manager helper picks up used_car_manager, new_car_manager, gsm_gm
+  // from the canonical MANAGER_ROLES list.
   const canAccess =
-    userRole === "admin" ||
-    userRole === "gsm_gm" ||
-    userRole === "used_car_manager" ||
-    isAppraiser;
+    userRole === "admin" || isManagerRole(userRole) || isAppraiser;
 
   const fetchQueue = async () => {
     setLoading(true);

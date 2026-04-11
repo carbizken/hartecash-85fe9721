@@ -47,7 +47,7 @@ type BBValues = {
 
 type Stage = "entry" | "lookup-done" | "success";
 
-const ALLOWED_ROLES = ["admin", "sales_bdc", "used_car_manager", "gsm_gm"];
+const ALLOWED_ROLES = ["admin", "sales_bdc", "used_car_manager", "new_car_manager", "gsm_gm"];
 
 const ServiceQuickEntry = () => {
   const navigate = useNavigate();

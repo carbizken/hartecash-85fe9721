@@ -263,6 +263,7 @@ const AdminSectionRendererInner = (props: AdminSectionRendererProps) => {
                               <SelectContent>
                                 <SelectItem value="sales_bdc">Sales / BDC</SelectItem>
                                 <SelectItem value="used_car_manager">Used Car Manager</SelectItem>
+                                <SelectItem value="new_car_manager">New Car Manager</SelectItem>
                                 <SelectItem value="gsm_gm">GSM / GM</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
                               </SelectContent>

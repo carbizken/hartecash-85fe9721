@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
+import { isManagerRole } from "@/lib/adminConstants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -138,7 +139,7 @@ const PricingModelManager = ({ onModelChange, onRegisterSync, onRegisterSave, on
   const [confirmDeleteModelId, setConfirmDeleteModelId] = useState<string | null>(null);
 
   const isApprover = userRole === "gsm_gm" || userRole === "admin";
-  const isManager = userRole === "used_car_manager" || userRole === "gsm_gm" || userRole === "admin";
+  const isManager = isManagerRole(userRole) || userRole === "admin";
 
   useEffect(() => { fetchModels(); }, []);
 

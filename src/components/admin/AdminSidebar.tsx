@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { isManagerRole } from "@/lib/adminConstants";
 
 interface AdminSidebarProps {
   activeSection: string;
@@ -116,7 +117,7 @@ const AdminSidebar = ({
   // Permission helpers
   const isAllowed = (key: string) => allowedSections === null || allowedSections.includes(key);
   const isPlatformAdmin = canManageAccess && dealershipId === "default";
-  const isManager = userRole === "used_car_manager" || userRole === "gsm_gm" || canManageAccess;
+  const isManager = isManagerRole(userRole) || canManageAccess;
 
   // ── PIPELINE ── (All staff see Leads & Appointments; Performance is manager+)
   const pipelineItems: SidebarItem[] = [

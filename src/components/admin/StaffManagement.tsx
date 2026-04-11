@@ -47,6 +47,7 @@ const ROLE_COLORS: Record<string, string> = {
   admin: "bg-red-500/15 text-red-600 dark:text-red-400",
   gsm_gm: "bg-violet-500/15 text-violet-600 dark:text-violet-400",
   used_car_manager: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+  new_car_manager: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400",
   sales_bdc: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
   user: "bg-muted text-muted-foreground",
 };
@@ -63,8 +64,14 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "Set offered price & ACV",
     "Generate check requests",
   ],
+  new_car_manager: [
+    "Everything Sales/BDC can do",
+    "Set offered price & ACV",
+    "Generate check requests",
+    "Same acquisition authority as Used Car Manager",
+  ],
   gsm_gm: [
-    "Everything Used Car Manager can do",
+    "Everything Used / New Car Manager can do",
     "Final purchase approval",
     "Set manager-level statuses",
   ],
@@ -368,6 +375,7 @@ const StaffManagement = () => {
                 <SelectContent>
                   <SelectItem value="sales_bdc">Sales / BDC</SelectItem>
                   <SelectItem value="used_car_manager">Used Car Manager</SelectItem>
+                  <SelectItem value="new_car_manager">New Car Manager</SelectItem>
                   <SelectItem value="gsm_gm">GSM / GM</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>

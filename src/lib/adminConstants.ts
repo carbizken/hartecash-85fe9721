@@ -246,10 +246,15 @@ export const getTimeSlotsForDate = (dateStr: string) => {
 // dropdowns, badges, toasts, and the audit trail.
 //
 // Role hierarchy (least → most access):
-//   sales_bdc → used_car_manager → gsm_gm → admin → platform_admin
+//   sales_bdc → used_car_manager / new_car_manager → gsm_gm → admin → platform_admin
+//
+// Note: used_car_manager and new_car_manager sit at the same tier —
+// they differ only in which department they report to. Permission
+// checks should treat them identically everywhere.
 export const ROLE_LABELS_FULL: Record<string, string> = {
   sales_bdc: "BDC / Sales",
   used_car_manager: "UCM",
+  new_car_manager: "NCM",
   gsm_gm: "GSM / GM",
   admin: "Admin",
   platform_admin: "Super Admin",
@@ -262,12 +267,39 @@ export const ROLE_LABELS_FULL: Record<string, string> = {
 export const ROLE_LABELS_LONG: Record<string, string> = {
   sales_bdc: "Sales / BDC",
   used_car_manager: "Used Car Manager",
+  new_car_manager: "New Car Manager",
   gsm_gm: "GSM / GM",
   admin: "Admin",
   platform_admin: "Super Admin",
   inspector: "Inspector",
   appraiser: "Appraiser",
 };
+
+// Roles that sit at the "manager" tier — they get the same pricing,
+// queue, and appraisal access. Add any future manager-tier role here
+// and every permission check picks it up automatically.
+export const MANAGER_ROLES = [
+  "used_car_manager",
+  "new_car_manager",
+  "gsm_gm",
+] as const;
+
+// Roles allowed to see cost basis, the waterfall, and the full
+// appraisal tool. A strict superset of MANAGER_ROLES + admin.
+export const PRICING_ROLES = ["admin", ...MANAGER_ROLES] as const;
+
+// Roles allowed to approve the highest-stakes statuses (deal finalized,
+// check request submitted, purchase complete). GM-tier only.
+export const APPROVAL_ROLES = ["admin", "gsm_gm"] as const;
+
+export const isManagerRole = (role: string | null | undefined): boolean =>
+  !!role && (MANAGER_ROLES as readonly string[]).includes(role);
+
+export const isPricingRole = (role: string | null | undefined): boolean =>
+  !!role && (PRICING_ROLES as readonly string[]).includes(role);
+
+export const isApprovalRole = (role: string | null | undefined): boolean =>
+  !!role && (APPROVAL_ROLES as readonly string[]).includes(role);
 
 export const getRoleLabel = (role: string | null | undefined, variant: "short" | "long" = "short"): string => {
   if (!role) return "Unknown";

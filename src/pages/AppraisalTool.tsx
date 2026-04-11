@@ -27,6 +27,7 @@ import DealStatusBanner from "@/components/appraisal/DealStatusBanner";
 import DealMakerSection from "@/components/appraisal/DealMakerSection";
 import ManagementOverride from "@/components/appraisal/ManagementOverride";
 import { calculateOffer, type OfferSettings, type OfferRule, type OfferEstimate, type StrategyMode, calcHighMileagePenaltyPct, calcColorAdjustmentPct, DEFAULT_HIGH_MILEAGE_PENALTY, DEFAULT_COLOR_DESIRABILITY, DEFAULT_SEASONAL_ADJUSTMENT } from "@/lib/offerCalculator";
+import { isManagerRole } from "@/lib/adminConstants";
 import type { FormData, BBVehicle, BBAddDeduct } from "@/components/sell-form/types";
 import { formatGrade } from "@/lib/formatGrade";
 import ACVSheet from "@/components/offer/ACVSheet";
@@ -231,8 +232,10 @@ export default function AppraisalTool() {
         .limit(1)
         .maybeSingle();
       const role = (roleData as any)?.role || "";
-      const allowedRoles = ["admin", "gsm_gm", "used_car_manager"];
-      if (allowedRoles.includes(role)) {
+      // Pricing tier: admin + every manager-tier role (UCM, NCM, GSM/GM).
+      // Uses the canonical helper so adding new manager roles in the
+      // future propagates automatically.
+      if (role === "admin" || isManagerRole(role)) {
         setRoleCheckState("allowed");
       } else {
         setRoleCheckState("denied");

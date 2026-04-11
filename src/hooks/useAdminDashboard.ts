@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useStaffPermissions } from "@/hooks/useStaffPermissions";
 import { useTenant } from "@/contexts/TenantContext";
 import type { Submission, DealerLocation, Appointment } from "@/lib/adminConstants";
-import { ROLE_LABELS, PAGE_SIZE, getStatusLabel } from "@/lib/adminConstants";
+import { ROLE_LABELS, PAGE_SIZE, getStatusLabel, isPricingRole, isApprovalRole } from "@/lib/adminConstants";
 
 export interface PendingRequest {
   id: string;
@@ -69,8 +69,11 @@ export function useAdminDashboard() {
   const { toast } = useToast();
   const { tenant } = useTenant();
 
-  const canSetPrice = ["admin", "used_car_manager", "gsm_gm"].includes(userRole);
-  const canApprove = ["admin", "gsm_gm"].includes(userRole);
+  // Pricing + approval tiers come from the canonical helpers in
+  // adminConstants so adding a new manager-tier role (e.g.
+  // new_car_manager) automatically propagates everywhere.
+  const canSetPrice = isPricingRole(userRole);
+  const canApprove = isApprovalRole(userRole);
   const canDelete = userRole === "admin";
   const canManageAccess = userRole === "admin";
   const { allowedSections } = useStaffPermissions(userId, canManageAccess);

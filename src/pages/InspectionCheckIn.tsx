@@ -72,10 +72,15 @@ const InspectionCheckIn = () => {
   const [manualVin, setManualVin] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scannerError, setScannerError] = useState<string>("");
-  const [barcodeSupported, setBarcodeSupported] = useState<boolean>(true);
+  // scannerMode: "native" = Chromium BarcodeDetector; "zxing" = JS fallback
+  // used for every other browser (Safari desktop + iOS, Firefox, etc.)
+  const [scannerMode, setScannerMode] = useState<"native" | "zxing" | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const detectLoopRef = useRef<number | null>(null);
+  // Holds the ZXing reader instance when running the JS fallback so we
+  // can reset() it on stopScanner without re-importing the module.
+  const zxingReaderRef = useRef<{ reset: () => void } | null>(null);
 
   // Lookup
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -111,11 +116,6 @@ const InspectionCheckIn = () => {
     checkAuth();
   }, [navigate]);
 
-  // ── BarcodeDetector support check ──
-  useEffect(() => {
-    setBarcodeSupported(typeof window !== "undefined" && "BarcodeDetector" in window);
-  }, []);
-
   // ── Cleanup camera on unmount ──
   useEffect(() => {
     return () => {
@@ -129,6 +129,13 @@ const InspectionCheckIn = () => {
       cancelAnimationFrame(detectLoopRef.current);
       detectLoopRef.current = null;
     }
+    // Tell the ZXing reader to stop its own decode loop. Calling reset()
+    // also releases any internal references to the video element so GC
+    // can reclaim it.
+    if (zxingReaderRef.current) {
+      try { zxingReaderRef.current.reset(); } catch { /* ignore */ }
+      zxingReaderRef.current = null;
+    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
@@ -136,6 +143,7 @@ const InspectionCheckIn = () => {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    setScannerMode(null);
   }, []);
 
   const handleVinCaptured = useCallback(
@@ -184,65 +192,141 @@ const InspectionCheckIn = () => {
     [stopScanner, toast]
   );
 
+  // Try to extract a valid 17-char VIN substring from whatever the
+  // decoder returned (Code 39 scans often include start/stop delimiters
+  // or extra padding characters).
+  const extractVinFromBarcode = (raw: string): string | null => {
+    const cleaned = (raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (cleaned.length >= 17) {
+      for (let i = 0; i <= cleaned.length - 17; i++) {
+        const slice = cleaned.slice(i, i + 17);
+        if (isValidVin(slice)) return slice;
+      }
+    }
+    return null;
+  };
+
   const startScanner = async () => {
     setScannerError("");
-    if (!("BarcodeDetector" in window)) {
-      setBarcodeSupported(false);
-      setScannerError(
-        "Your browser doesn't support barcode scanning. Please enter the VIN manually below."
-      );
-      return;
-    }
     setScannerOpen(true);
+
+    // Step 1: open the camera. Both the native BarcodeDetector path
+    // and the ZXing fallback need a live <video> source, so we open
+    // the stream first and branch on the decoder afterwards.
+    let stream: MediaStream;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
         audio: false,
       });
-      streamRef.current = stream;
-      // Wait a tick so video element is mounted
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play().catch(() => {
-          /* autoplay may fail silently on some browsers */
-        });
-      }
-
-      const Detector = (window as any).BarcodeDetector;
-      const detector = new Detector({ formats: ["code_39", "code_128"] });
-
-      const detect = async () => {
-        if (!videoRef.current || !streamRef.current) return;
-        try {
-          const barcodes = await detector.detect(videoRef.current);
-          for (const barcode of barcodes) {
-            const raw = (barcode.rawValue || "").toString().toUpperCase();
-            // Some Code 39 scans include "I" delimiter or start/stop characters - strip
-            const cleaned = raw.replace(/[^A-Z0-9]/g, "");
-            // VIN could be surrounded by padding; look for a 17-char substring
-            if (cleaned.length >= 17) {
-              for (let i = 0; i <= cleaned.length - 17; i++) {
-                const slice = cleaned.slice(i, i + 17);
-                if (isValidVin(slice)) {
-                  handleVinCaptured(slice);
-                  return;
-                }
-              }
-            }
-          }
-        } catch (err) {
-          // Detector can throw transient errors - keep trying
-        }
-        detectLoopRef.current = requestAnimationFrame(detect);
-      };
-      detectLoopRef.current = requestAnimationFrame(detect);
     } catch (err: any) {
       console.error(err);
       setScannerError(
         err?.name === "NotAllowedError"
           ? "Camera permission denied. Please allow camera access or use manual entry."
+          : err?.name === "NotFoundError"
+          ? "No camera detected on this device. Use manual entry below."
+          : err?.name === "NotReadableError"
+          ? "Another app is using the camera. Close it and try again, or use manual entry."
           : "Could not start the camera. Please try manual entry."
+      );
+      stopScanner();
+      return;
+    }
+
+    streamRef.current = stream;
+    // Wait a tick so video element is mounted by the re-render
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      // iOS Safari requires playsInline + muted (already set in JSX)
+      // AND a play() call after srcObject is assigned.
+      await videoRef.current.play().catch(() => {
+        /* autoplay may fail silently; the user gesture that opened the
+         * scanner usually satisfies the autoplay policy */
+      });
+    }
+
+    // Step 2: pick the fastest decoder available.
+    // - Chrome/Edge on desktop + Android: native BarcodeDetector (zero download)
+    // - Everything else (Safari desktop + iOS, Firefox, all iOS browsers
+    //   because WebKit doesn't ship the Shape Detection API): dynamic
+    //   import of @zxing/browser as a pure-JS fallback. ZXing supports
+    //   Code 39 and Code 128, which is what VIN door-jamb stickers use.
+    if ("BarcodeDetector" in window) {
+      try {
+        setScannerMode("native");
+        const Detector = (window as any).BarcodeDetector;
+        const detector = new Detector({ formats: ["code_39", "code_128"] });
+
+        const detect = async () => {
+          if (!videoRef.current || !streamRef.current) return;
+          try {
+            const barcodes = await detector.detect(videoRef.current);
+            for (const barcode of barcodes) {
+              const candidate = extractVinFromBarcode(String(barcode.rawValue || ""));
+              if (candidate) {
+                handleVinCaptured(candidate);
+                return;
+              }
+            }
+          } catch {
+            // Detector can throw transient errors - keep trying
+          }
+          detectLoopRef.current = requestAnimationFrame(detect);
+        };
+        detectLoopRef.current = requestAnimationFrame(detect);
+        return;
+      } catch (err) {
+        // If the native detector constructor throws (rare), fall through
+        // to the ZXing path instead of dead-ending.
+        console.warn("Native BarcodeDetector failed, falling back to ZXing:", err);
+      }
+    }
+
+    // Pure-JS fallback via @zxing/browser. Dynamically imported so
+    // Chromium users never pay the download cost.
+    try {
+      setScannerMode("zxing");
+      const [{ BrowserMultiFormatReader }, { DecodeHintType, BarcodeFormat }] = await Promise.all([
+        import("@zxing/browser"),
+        import("@zxing/library"),
+      ]);
+
+      const hints = new Map();
+      hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+        BarcodeFormat.CODE_39,
+        BarcodeFormat.CODE_128,
+      ]);
+      hints.set(DecodeHintType.TRY_HARDER, true);
+
+      const reader = new BrowserMultiFormatReader(hints);
+      zxingReaderRef.current = reader as unknown as { reset: () => void };
+
+      if (!videoRef.current) {
+        throw new Error("Video element not mounted");
+      }
+
+      // decodeFromVideoElement attaches to the <video> we already have
+      // playing the MediaStream, so we don't hand ZXing a second device.
+      // The callback fires on every successful decode; we bail after
+      // the first valid VIN.
+      let handled = false;
+      await reader.decodeFromVideoElement(
+        videoRef.current,
+        (result, _err) => {
+          if (handled || !result) return;
+          const candidate = extractVinFromBarcode(result.getText());
+          if (candidate) {
+            handled = true;
+            handleVinCaptured(candidate);
+          }
+        }
+      );
+    } catch (err) {
+      console.error("ZXing fallback failed:", err);
+      setScannerError(
+        "Could not start the barcode scanner. Please enter the VIN manually below."
       );
       stopScanner();
     }
@@ -454,7 +538,8 @@ const InspectionCheckIn = () => {
             <X className="w-4 h-4 mr-1.5" /> Cancel
           </Button>
           <div className="pointer-events-auto px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-semibold border border-white/20 flex items-center gap-1.5">
-            <ScanLine className="w-3.5 h-3.5" /> Scanning...
+            <ScanLine className="w-3.5 h-3.5" />
+            {scannerMode === "zxing" ? "Scanning (compat mode)…" : "Scanning…"}
           </div>
         </div>
 
@@ -527,24 +612,17 @@ const InspectionCheckIn = () => {
                   </p>
                 </div>
               </div>
-              {barcodeSupported ? (
-                <Button
-                  onClick={startScanner}
-                  className="w-full h-16 text-base font-bold shadow-lg"
-                  size="lg"
-                >
-                  <ScanLine className="w-6 h-6 mr-2" />
-                  Scan VIN Barcode
-                </Button>
-              ) : (
-                <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-sm">
-                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>
-                    Your browser doesn't support barcode scanning. Please enter
-                    the VIN manually below.
-                  </span>
-                </div>
-              )}
+              <Button
+                onClick={startScanner}
+                className="w-full h-16 text-base font-bold shadow-lg"
+                size="lg"
+              >
+                <ScanLine className="w-6 h-6 mr-2" />
+                Scan VIN Barcode
+              </Button>
+              <p className="mt-2 text-[11px] text-muted-foreground text-center">
+                Works on Safari, Chrome, Firefox, and every iPhone browser.
+              </p>
               {scannerError && (
                 <div className="mt-3 flex items-start gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-sm">
                   <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />

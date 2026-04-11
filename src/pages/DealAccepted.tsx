@@ -35,6 +35,7 @@ interface DealSubmission {
   token: string;
   created_at: string | null;
   appointment_set: boolean;
+  offer_subject_to_inspection?: boolean | null;
 }
 
 interface AppointmentData {
@@ -548,6 +549,19 @@ const DealAccepted = () => {
             <p className="font-semibold text-card-foreground mt-1">{vehicleStr}</p>
             {s.mileage && (
               <p className="text-sm text-muted-foreground">{Number(s.mileage).toLocaleString()} miles · {s.overall_condition || "—"} condition</p>
+            )}
+            {(s.offer_subject_to_inspection ||
+              (s.offered_price != null && s.estimated_offer_high != null && s.offered_price > s.estimated_offer_high)) && (
+              <div className="mt-4 mx-auto max-w-xl text-left bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-start gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                <p className="text-xs text-amber-900 dark:text-amber-100 leading-relaxed">
+                  <strong>Subject to inspection.</strong> This offer is our best estimate
+                  based on the condition you described. The final number is confirmed at
+                  your in-person inspection — if the vehicle matches what you told us,
+                  the price is locked. If the condition turns out to be different, we'll
+                  walk you through any adjustment before anything is signed.
+                </p>
+              </div>
             )}
           </div>
         </motion.div>

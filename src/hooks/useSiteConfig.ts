@@ -38,6 +38,7 @@ export interface SiteConfig {
   use_animated_calculating: boolean;
   enable_dl_ocr: boolean;
   track_abandoned_leads: boolean;
+  auto_route_appraiser_queue: boolean;
   about_hero_headline: string;
   about_hero_subtext: string;
   about_story: string;
@@ -97,6 +98,7 @@ const DEFAULTS: SiteConfig = {
   use_animated_calculating: false,
   enable_dl_ocr: false,
   track_abandoned_leads: true,
+  auto_route_appraiser_queue: false,
   about_hero_headline: "Our Story",
   about_hero_subtext: "We're passionate about helping drivers get the most value for their vehicles — no haggling, no stress.",
   about_story: "",

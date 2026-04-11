@@ -29,11 +29,13 @@ interface AdminSidebarProps {
   pendingRequestCount: number;
   permissionRequestCount?: number;
   pricingAccessRequestCount?: number;
+  appraiserQueueCount?: number;
   allowedSections?: string[] | null;
   showRequestAccess?: boolean;
   onRequestAccess?: (sectionKey: string) => void;
   locationCount?: number;
   userRole?: string;
+  isAppraiser?: boolean;
   dealershipId?: string;
 }
 
@@ -70,11 +72,13 @@ const AdminSidebar = ({
   pendingRequestCount,
   permissionRequestCount = 0,
   pricingAccessRequestCount = 0,
+  appraiserQueueCount = 0,
   allowedSections = null,
   showRequestAccess = false,
   onRequestAccess,
   locationCount = 0,
   userRole = "",
+  isAppraiser = false,
   dealershipId = "default",
 }: AdminSidebarProps) => {
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -180,12 +184,25 @@ const AdminSidebar = ({
     isManager || userRole === "sales_bdc" || canManageAccess;
   const isCheckInStaff =
     isAcquisitionStaff || userRole === "inspector";
+  // Appraiser Queue is visible to UCM/GSM/Admin by default, and to any
+  // role that's been granted the Appraiser credential (including an
+  // inspector or sales rep that the dealer wants to loop in).
+  const canSeeAppraiserQueue = isManager || isAppraiser;
   const acquisitionItems: SidebarItem[] = [
     ...(isCheckInStaff
       ? [{ key: "inspection-checkin", label: "Inspection Check-In", icon: ScanLine }]
       : []),
     ...(isAcquisitionStaff
       ? [{ key: "service-quick-entry", label: "Service Quick Entry", icon: Zap }]
+      : []),
+    ...(canSeeAppraiserQueue
+      ? [{
+          key: "appraiser-queue",
+          label: "Appraiser Queue",
+          icon: Gauge,
+          badge: appraiserQueueCount > 0 ? String(appraiserQueueCount) : undefined,
+          badgeVariant: "destructive" as const,
+        }]
       : []),
     ...(isManager
       ? [
@@ -197,7 +214,7 @@ const AdminSidebar = ({
 
   // Locked sections for "Request Access"
   const allSectionKeys = [
-    "submissions", "accepted-appts", "executive",
+    "submissions", "accepted-appts", "executive", "appraiser-queue",
     "offer-settings", "form-config", "inspection-config", "photo-config",
     "depth-policies", "promotions", "notifications",
     "site-config", "locations", "testimonials", "embed-toolkit",

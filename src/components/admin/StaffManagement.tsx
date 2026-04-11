@@ -9,7 +9,7 @@ import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Shield, Info, Phone, Save, UserPlus, UserCog } from "lucide-react";
+import { Trash2, Shield, Info, Phone, Save, UserPlus, UserCog, Gauge } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,7 @@ interface StaffMember {
   phone_number?: string | null;
   profile_image_url?: string | null;
   location_id?: string | null;
+  is_appraiser?: boolean;
 }
 
 interface DealerLocation {
@@ -110,6 +111,20 @@ const StaffManagement = () => {
       toast({ title: "Error", description: "Failed to load staff.", variant: "destructive" });
     } else {
       const staffList = (data || []) as unknown as StaffMember[];
+      // Supplementary fetch: user_roles.is_appraiser for each staff row.
+      // The get_all_staff RPC doesn't know about this column yet, so we
+      // join it client-side by role_id.
+      if (staffList.length > 0) {
+        const roleIds = staffList.map(s => s.role_id);
+        const { data: appraiserData } = await (supabase as any)
+          .from("user_roles")
+          .select("id, is_appraiser")
+          .in("id", roleIds);
+        if (appraiserData) {
+          const map = new Map((appraiserData as any[]).map(r => [r.id, Boolean(r.is_appraiser)]));
+          staffList.forEach(s => { s.is_appraiser = map.get(s.role_id) ?? false; });
+        }
+      }
       setStaff(staffList);
       // Fetch individual sections for all staff
       const sectionMap: Record<string, string[]> = {};
@@ -140,6 +155,23 @@ const StaffManagement = () => {
       .eq("is_active", true)
       .order("sort_order");
     setLocations((data as any[] || []).map((l: any) => ({ id: l.id, name: l.name })));
+  };
+
+  const handleToggleAppraiser = async (member: StaffMember) => {
+    const next = !member.is_appraiser;
+    const { error } = await (supabase as any)
+      .from("user_roles")
+      .update({ is_appraiser: next })
+      .eq("id", member.role_id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    setStaff(prev => prev.map(s => s.role_id === member.role_id ? { ...s, is_appraiser: next } : s));
+    toast({
+      title: next ? "Appraiser credential granted" : "Appraiser credential removed",
+      description: `${member.email || "User"} ${next ? "can now see" : "no longer sees"} the Appraiser Queue.`,
+    });
   };
 
   const handleLocationChange = async (member: StaffMember, locationId: string) => {
@@ -518,6 +550,24 @@ const StaffManagement = () => {
                 )}
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={member.is_appraiser ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleToggleAppraiser(member)}
+                          className="gap-1 text-xs"
+                        >
+                          <Gauge className="w-3.5 h-3.5" />
+                          {member.is_appraiser ? "Appraiser" : "Not Appraiser"}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        {member.is_appraiser
+                          ? "This staff member has the Appraiser credential and can see the Appraiser Queue in addition to their base role permissions. Click to remove."
+                          : "Grant this staff member the Appraiser credential so they can see the Appraiser Queue. Does not change their base role."}
+                      </TooltipContent>
+                    </Tooltip>
                     {member.role !== "admin" && (
                       <Button
                         variant="outline"

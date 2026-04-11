@@ -49,6 +49,7 @@ const EquityMining = React.lazy(() => import("./EquityMining"));
 const WholesaleMarketplace = React.lazy(() => import("./WholesaleMarketplace"));
 const VautoIntegration = React.lazy(() => import("./VautoIntegration"));
 const IntegrationsStatus = React.lazy(() => import("./IntegrationsStatus"));
+const AppraiserQueue = React.lazy(() => import("./AppraiserQueue"));
 
 class AdminErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -115,6 +116,7 @@ interface AdminSectionRendererProps {
   auditLabel: string;
   userName: string;
   userRole: string;
+  isAppraiser?: boolean;
   userId: string | null;
   appointments: Appointment[];
   setAppointments: React.Dispatch<React.SetStateAction<Appointment[]>>;
@@ -396,6 +398,11 @@ const AdminSectionRendererInner = (props: AdminSectionRendererProps) => {
   const configSections = (
     <>
       {activeSection === "executive" && <ExecutiveKPIHub />}
+      {activeSection === "appraiser-queue" && (
+        <React.Suspense fallback={<AdminLoadingSkeleton />}>
+          <AppraiserQueue userRole={userRole} isAppraiser={props.isAppraiser} />
+        </React.Suspense>
+      )}
       {activeSection === "offer-settings" && (canManageAccess || userRole === "gsm_gm") && (
         <OfferSettings userId={userId || undefined} userRole={userRole} />
       )}

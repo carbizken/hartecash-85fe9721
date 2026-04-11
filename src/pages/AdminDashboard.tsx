@@ -39,11 +39,13 @@ const AdminDashboard = () => {
           pendingRequestCount={db.pendingRequests.length}
           permissionRequestCount={db.permissionRequestCount}
           pricingAccessRequestCount={db.pricingAccessRequestCount}
+          appraiserQueueCount={db.appraiserQueueCount}
           allowedSections={db.allowedSections}
           showRequestAccess={db.showRequestAccessToggle && !db.canManageAccess}
           onRequestAccess={() => db.setShowRequestAccessDialog(true)}
           locationCount={db.dealerLocations.length}
           userRole={db.userRole}
+          isAppraiser={db.isAppraiser}
           dealershipId={db.tenant.dealership_id}
         />
         <div className="flex-1 flex flex-col min-w-0">
@@ -100,6 +102,7 @@ const AdminDashboard = () => {
                 auditLabel={db.auditLabel}
                 userName={db.userName}
                 userRole={db.userRole}
+                isAppraiser={db.isAppraiser}
                 userId={db.userId}
                 appointments={db.appointments}
                 setAppointments={db.setAppointments}

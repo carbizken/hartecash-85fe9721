@@ -565,6 +565,36 @@ const SubmissionDetailSheet = ({
                     {[
                       { label: "Inspection", icon: ClipboardList, onClick: () => { window.location.href = `/inspection/${sub.id}`; } },
                       { label: "Appraisal", icon: Gauge, onClick: () => { window.location.href = `/appraisal/${sub.token}`; } },
+                      {
+                        label: (sub as any).needs_appraisal ? "In Queue" : "Send to Appraiser",
+                        icon: Gauge,
+                        onClick: async () => {
+                          const next = !(sub as any).needs_appraisal;
+                          const { error } = await (supabase as any)
+                            .from("submissions")
+                            .update({ needs_appraisal: next })
+                            .eq("id", sub.id);
+                          if (error) {
+                            toast({ title: "Failed", description: error.message, variant: "destructive" });
+                            return;
+                          }
+                          updateField({ needs_appraisal: next } as any);
+                          await supabase.from("activity_log").insert({
+                            submission_id: sub.id,
+                            action: next ? "Flagged for Appraiser Queue" : "Removed from Appraiser Queue",
+                            old_value: null,
+                            new_value: null,
+                            performed_by: auditLabel,
+                          });
+                          toast({
+                            title: next ? "Sent to Appraiser Queue" : "Removed from queue",
+                            description: next
+                              ? "A manager can now see this in the Appraiser Queue."
+                              : undefined,
+                          });
+                          fetchActivityLog(sub.id);
+                        },
+                      },
                       { label: "Print", icon: Printer, onClick: handlePrint },
                     ].map(action => (
                       <div key={action.label} className="flex flex-col items-center">

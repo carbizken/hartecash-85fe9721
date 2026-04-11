@@ -43,6 +43,7 @@ interface SiteConfig {
   use_animated_calculating: boolean;
   enable_dl_ocr: boolean;
   track_abandoned_leads: boolean;
+  auto_route_appraiser_queue: boolean;
   cta_offer_color: string;
   cta_accept_color: string;
   assign_customer_picks: boolean;
@@ -92,6 +93,7 @@ const DEFAULT_CONFIG: SiteConfig = {
   use_animated_calculating: false,
   enable_dl_ocr: false,
   track_abandoned_leads: true,
+  auto_route_appraiser_queue: false,
   cta_offer_color: "",
   cta_accept_color: "",
   assign_customer_picks: false,
@@ -819,6 +821,29 @@ const SiteConfiguration = ({ focusField }: { focusField?: string }) => {
               onCheckedChange={v => {
                 setConfig(prev => {
                   const next = { ...prev, track_abandoned_leads: v };
+                  setHasChanges(JSON.stringify(next) !== JSON.stringify(savedConfig));
+                  return next;
+                });
+              }}
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
+            <div className="flex-1 mr-3">
+              <Label className="text-sm font-semibold">AI Auto-Route to Appraiser Queue</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                When enabled, the Appraiser Queue automatically includes declined offers, walk-ins,
+                service-drive captures, and manual entries that don't have an ACV yet. When disabled,
+                the queue shows only submissions a manager explicitly flags with "Send to Appraiser".
+                Any offer the AI raises above the algorithmic baseline is automatically marked as
+                subject to physical inspection.
+              </p>
+            </div>
+            <Switch
+              checked={(config as any).auto_route_appraiser_queue}
+              onCheckedChange={v => {
+                setConfig(prev => {
+                  const next = { ...prev, auto_route_appraiser_queue: v };
                   setHasChanges(JSON.stringify(next) !== JSON.stringify(savedConfig));
                   return next;
                 });

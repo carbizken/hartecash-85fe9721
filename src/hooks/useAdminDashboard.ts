@@ -43,6 +43,8 @@ export function useAdminDashboard() {
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [userRole, setUserRole] = useState("");
+  const [isAppraiser, setIsAppraiser] = useState(false);
+  const [appraiserQueueCount, setAppraiserQueueCount] = useState(0);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -109,6 +111,22 @@ export function useAdminDashboard() {
       setSubmissions(data as any);
       setTotal(count || 0);
     }
+
+    // Appraiser Queue badge count — fetch in parallel-safe mode. This is a
+    // manager-flagged count only (not the AI auto-route expansion) because
+    // the sidebar badge is meant to signal "you have new manual work."
+    try {
+      const { count: queueCount } = await (supabase as any)
+        .from("submissions")
+        .select("id", { count: "exact", head: true })
+        .eq("dealership_id", tenant.dealership_id)
+        .eq("needs_appraisal", true)
+        .is("acv_value", null);
+      setAppraiserQueueCount(queueCount || 0);
+    } catch {
+      // Column may not exist yet pre-migration; silently ignore
+    }
+
     setLoading(false);
   }, [page, tenant.dealership_id, userRole, userEmail]);
 
@@ -150,7 +168,7 @@ export function useAdminDashboard() {
     }
     const { data: roleData } = await supabase
       .from("user_roles")
-      .select("role")
+      .select("role, is_appraiser")
       .eq("user_id", session.user.id)
       .limit(1)
       .maybeSingle();
@@ -160,6 +178,7 @@ export function useAdminDashboard() {
       return;
     }
     setUserRole(roleData.role);
+    setIsAppraiser(Boolean((roleData as any).is_appraiser));
     setUserId(session.user.id);
     const { data: profileData } = await supabase
       .from("profiles")
@@ -408,6 +427,8 @@ export function useAdminDashboard() {
     pendingRequests,
     appointments, setAppointments,
     userRole, userName,
+    isAppraiser,
+    appraiserQueueCount,
     showFilterPanel, setShowFilterPanel,
     activityLog,
     duplicateWarnings,

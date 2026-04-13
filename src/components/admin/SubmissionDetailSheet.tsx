@@ -252,12 +252,42 @@ const SubmissionDetailSheet = ({
   const { toast } = useToast();
   const { tenant } = useTenant();
   const [editState, setEditState] = useState<Submission | null>(null);
+  const [callHistory, setCallHistory] = useState<any[]>([]);
+
+  // Fetch voice call history when a submission is selected
+  useEffect(() => {
+    if (!selected?.id) { setCallHistory([]); return; }
+    let cancelled = false;
+    (async () => {
+      const { data: calls } = await (supabase as any)
+        .from("voice_call_log")
+        .select("id, status, outcome, duration_seconds, transcript, summary, recording_url, customer_name, created_at, attempt_number")
+        .eq("submission_id", selected.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (!cancelled && calls) setCallHistory(calls);
+    })();
+    return () => { cancelled = true; };
+  }, [selected?.id]);
 
   const sub = editState?.id === selected?.id ? editState : selected;
 
   const updateField = (updates: Partial<Submission>) => {
     if (!sub) return;
     setEditState({ ...sub, ...updates });
+  };
+
+  const outcomeColor = (outcome: string | null) => {
+    switch (outcome) {
+      case 'accepted': return 'bg-success/15 text-success border-success/30';
+      case 'appointment_scheduled': return 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30';
+      case 'wants_higher_offer': return 'bg-amber-500/15 text-amber-600 border-amber-500/30';
+      case 'callback_requested': return 'bg-blue-500/15 text-blue-600 border-blue-500/30';
+      case 'not_interested': return 'bg-muted text-muted-foreground border-border';
+      case 'voicemail_left': return 'bg-purple-500/15 text-purple-600 border-purple-500/30';
+      case 'opted_out': return 'bg-destructive/15 text-destructive border-destructive/30';
+      default: return 'bg-muted text-muted-foreground border-border';
+    }
   };
 
   const getDocsUrl = (token: string) => `${window.location.origin}/docs/${token}`;
@@ -1492,61 +1522,132 @@ const SubmissionDetailSheet = ({
             {/* Follow-Up Sequence */}
             <FollowUpPanel submissionId={sub.id} hasOffer={!!(sub.offered_price || sub.estimated_offer_high)} progressStatus={sub.progress_status} />
 
-            {/* Activity Log — Premium Timeline */}
-            <SectionCard icon={History} title="Activity Log" headerRight={
-              activityLog.length > 0 ? (
-                <span className="text-[10px] text-muted-foreground bg-muted/50 rounded-lg px-2 py-0.5 font-medium">{activityLog.length} events</span>
-              ) : undefined
-            }>
-              {activityLog.length > 0 ? (
-                <div className="relative max-h-64 overflow-y-auto pr-1">
-                  {/* Timeline line */}
-                  <div className="absolute left-[11px] top-3 bottom-3 w-[2px] bg-gradient-to-b from-primary/20 via-border/40 to-transparent rounded-full" />
-                  <div className="space-y-0">
-                    {activityLog.map((log, idx) => (
-                      <div key={log.id} className="relative flex items-start gap-4 py-3 group/timeline">
-                        {/* Timeline dot */}
-                        <div className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-                          idx === 0
-                            ? "bg-primary/15 border-2 border-primary shadow-[0_0_8px_rgba(var(--primary),0.15)]"
-                            : "bg-muted/60 border border-border/60 group-hover/timeline:border-primary/30 group-hover/timeline:bg-primary/5"
-                        }`}>
-                          <Clock className={`w-3 h-3 ${idx === 0 ? "text-primary" : "text-muted-foreground/60 group-hover/timeline:text-primary/60"} transition-colors`} />
+            {/* AI Call History */}
+            {callHistory.length > 0 && (
+              <SectionCard icon={Phone} title="AI Call History" headerRight={
+                <span className="text-[10px] text-muted-foreground">{callHistory.length} calls</span>
+              }>
+                <div className="space-y-3">
+                  {callHistory.map(call => (
+                    <div key={call.id} className="border border-border/30 rounded-xl overflow-hidden">
+                      {/* Header: outcome badge + duration + date */}
+                      <div className="flex items-center justify-between px-3 py-2 bg-muted/20">
+                        <div className="flex items-center gap-2">
+                          <Badge className={outcomeColor(call.outcome)}>{call.outcome?.replace(/_/g, ' ') || call.status}</Badge>
+                          {call.duration_seconds && <span className="text-xs text-muted-foreground">{Math.round(call.duration_seconds / 60)}m {Math.round(call.duration_seconds % 60)}s</span>}
+                          {call.attempt_number > 1 && <span className="text-[10px] text-muted-foreground">Attempt #{call.attempt_number}</span>}
                         </div>
-                        <div className="flex-1 min-w-0 -mt-0.5">
-                          <div className="flex items-baseline gap-2 flex-wrap">
-                            <span className={`font-semibold text-sm ${idx === 0 ? "text-card-foreground" : "text-card-foreground/80"}`}>{log.action}</span>
-                            {log.old_value && log.new_value && (
-                              <span className="text-xs text-muted-foreground">
-                                <span className="line-through opacity-60">{log.old_value}</span>
-                                <span className="mx-1 text-primary">→</span>
-                                <span className="font-medium text-card-foreground/80">{log.new_value}</span>
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground/70">
-                            {log.performed_by && (
-                              <span className="inline-flex items-center gap-1 capitalize bg-muted/40 rounded-md px-1.5 py-0.5">
-                                <Users className="w-2.5 h-2.5" />
-                                {log.performed_by.replace(/_/g, " ")}
-                              </span>
-                            )}
-                            <span>{new Date(log.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
-                          </div>
-                        </div>
+                        <span className="text-xs text-muted-foreground">{new Date(call.created_at).toLocaleString()}</span>
                       </div>
-                    ))}
-                  </div>
+
+                      {/* Summary */}
+                      {call.summary && (
+                        <div className="px-3 py-2 text-sm text-card-foreground border-b border-border/20">
+                          <p className="font-medium text-xs text-muted-foreground mb-1">Summary</p>
+                          {call.summary}
+                        </div>
+                      )}
+
+                      {/* Expandable Transcript */}
+                      {call.transcript && (
+                        <details className="group">
+                          <summary className="px-3 py-2 text-xs text-primary cursor-pointer hover:bg-muted/10 font-medium">
+                            View Full Transcript
+                          </summary>
+                          <div className="px-3 py-2 bg-muted/10 text-xs whitespace-pre-wrap font-mono leading-relaxed max-h-64 overflow-y-auto">
+                            {call.transcript}
+                          </div>
+                        </details>
+                      )}
+
+                      {/* Recording link */}
+                      {call.recording_url && (
+                        <div className="px-3 py-1.5 border-t border-border/20">
+                          <a href={call.recording_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                            <Phone className="w-3 h-3" /> Play Recording
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="text-center py-6">
-                  <div className="w-10 h-10 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-2">
-                    <History className="w-5 h-5 text-muted-foreground/40" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">No activity recorded yet</p>
-                </div>
-              )}
-            </SectionCard>
+              </SectionCard>
+            )}
+
+            {/* Activity Log — Premium Timeline */}
+            {(() => {
+              const mergedActivity = [
+                ...activityLog,
+                ...callHistory.map(c => ({
+                  id: `call-${c.id}`,
+                  action: `AI Call: ${c.outcome?.replace(/_/g, ' ') || c.status}`,
+                  old_value: null,
+                  new_value: c.summary || `${Math.round((c.duration_seconds || 0) / 60)}m call`,
+                  performed_by: 'Voice AI',
+                  created_at: c.created_at,
+                }))
+              ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+              return (
+                <SectionCard icon={History} title="Activity Log" headerRight={
+                  mergedActivity.length > 0 ? (
+                    <span className="text-[10px] text-muted-foreground bg-muted/50 rounded-lg px-2 py-0.5 font-medium">{mergedActivity.length} events</span>
+                  ) : undefined
+                }>
+                  {mergedActivity.length > 0 ? (
+                    <div className="relative max-h-64 overflow-y-auto pr-1">
+                      {/* Timeline line */}
+                      <div className="absolute left-[11px] top-3 bottom-3 w-[2px] bg-gradient-to-b from-primary/20 via-border/40 to-transparent rounded-full" />
+                      <div className="space-y-0">
+                        {mergedActivity.map((log, idx) => (
+                          <div key={log.id} className="relative flex items-start gap-4 py-3 group/timeline">
+                            {/* Timeline dot */}
+                            <div className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                              idx === 0
+                                ? "bg-primary/15 border-2 border-primary shadow-[0_0_8px_rgba(var(--primary),0.15)]"
+                                : "bg-muted/60 border border-border/60 group-hover/timeline:border-primary/30 group-hover/timeline:bg-primary/5"
+                            }`}>
+                              <Clock className={`w-3 h-3 ${idx === 0 ? "text-primary" : "text-muted-foreground/60 group-hover/timeline:text-primary/60"} transition-colors`} />
+                            </div>
+                            <div className="flex-1 min-w-0 -mt-0.5">
+                              <div className="flex items-baseline gap-2 flex-wrap">
+                                <span className={`font-semibold text-sm ${idx === 0 ? "text-card-foreground" : "text-card-foreground/80"}`}>{log.action}</span>
+                                {log.old_value && log.new_value && (
+                                  <span className="text-xs text-muted-foreground">
+                                    <span className="line-through opacity-60">{log.old_value}</span>
+                                    <span className="mx-1 text-primary">→</span>
+                                    <span className="font-medium text-card-foreground/80">{log.new_value}</span>
+                                  </span>
+                                )}
+                                {!log.old_value && log.new_value && (
+                                  <span className="text-xs text-muted-foreground font-medium">{log.new_value}</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground/70">
+                                {log.performed_by && (
+                                  <span className="inline-flex items-center gap-1 capitalize bg-muted/40 rounded-md px-1.5 py-0.5">
+                                    <Users className="w-2.5 h-2.5" />
+                                    {log.performed_by.replace(/_/g, " ")}
+                                  </span>
+                                )}
+                                <span>{new Date(log.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <div className="w-10 h-10 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-2">
+                        <History className="w-5 h-5 text-muted-foreground/40" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">No activity recorded yet</p>
+                    </div>
+                  )}
+                </SectionCard>
+              );
+            })()}
           </div>
           {/* ── END RIGHT COLUMN ── */}
         </div>

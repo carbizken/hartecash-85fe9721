@@ -270,6 +270,19 @@ serve(async (req) => {
           continue;
         }
 
+        // ── Send warm-up SMS ──
+        if (sub.phone) {
+          await supabase.functions.invoke("send-notification", {
+            body: {
+              trigger_key: "voice_warmup_sms",
+              submission_id: sub.id,
+            }
+          }).catch(() => {});
+
+          // Brief delay to let SMS arrive before call
+          await new Promise(r => setTimeout(r, 3000));
+        }
+
         // ── Launch the call ──
         try {
           const fnUrl = `${supabaseUrl}/functions/v1/launch-voice-call`;

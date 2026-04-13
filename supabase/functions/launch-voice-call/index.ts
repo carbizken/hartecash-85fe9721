@@ -354,8 +354,8 @@ serve(async (req) => {
           ? Number(submission.offered_price)
           : null,
         bump_offered: bump_amount ? maxBump : null,
-        consent_verified: true,
-        tcpa_disclosure_given: true,
+        consent_verified: false,
+        tcpa_disclosure_given: false,
         metadata: {
           customer_timezone: customerTz,
           template_vars: templateVars,

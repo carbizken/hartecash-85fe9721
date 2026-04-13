@@ -9,6 +9,7 @@ export interface TemplateDefaults {
   email_subject: string;
   email_body: string;
   sms_body: string;
+  channels?: string[];
 }
 
 export const DEFAULT_TEMPLATES: Record<string, TemplateDefaults> = {
@@ -144,6 +145,37 @@ export const DEFAULT_TEMPLATES: Record<string, TemplateDefaults> = {
       "Hi {{customer_name}},\n\nYour inspection appointment has been rescheduled.\n\nNew Date: {{appointment_date}}\nNew Time: {{appointment_time}}\nLocation: {{location}}\nVehicle: {{vehicle}}\n\nIf you need to make changes, please contact us.\n\nBest regards,\n{{dealership_name}}",
     sms_body:
       "Hi {{customer_name}}, your appointment has been rescheduled to {{appointment_date}} at {{appointment_time}} at {{location}}. — {{dealership_name}}",
+  },
+
+  /* ───── Voice AI triggers ───── */
+  voice_warmup_sms: {
+    email_subject: "",
+    email_body: "",
+    sms_body:
+      "Hey {{customer_name}}, this is {{dealership_name}}. We have a cash offer ready for your {{vehicle_info}}. We'll give you a quick call shortly to discuss. Reply STOP to opt out.",
+    channels: ["sms"],
+  },
+  customer_voicemail_followup: {
+    email_subject: "We tried to reach you about your {{vehicle_info}}",
+    email_body:
+      "Hi {{customer_name}},\n\nWe just tried to give you a call about your {{vehicle_info}}. We have an offer of {{offer_amount}} ready for you.\n\nView your offer: {{offer_link}}\n\nReply to this email or call us anytime.",
+    sms_body:
+      "Hey {{customer_name}}, we just tried to reach you about your {{vehicle_info}}. Your ${{offer_amount}} offer is waiting: {{offer_link}}",
+    channels: ["sms", "email"],
+  },
+  customer_missed_call_text: {
+    email_subject: "",
+    email_body: "",
+    sms_body:
+      "Hey {{customer_name}}, this is {{dealership_name}}. We have a ${{offer_amount}} cash offer for your {{vehicle_info}}. Tap here to view: {{offer_link}}",
+    channels: ["sms"],
+  },
+  customer_callback_confirmation: {
+    email_subject: "",
+    email_body: "",
+    sms_body:
+      "Thanks for chatting, {{customer_name}}! We'll call you back as requested. In the meantime, your ${{offer_amount}} offer is here: {{offer_link}}",
+    channels: ["sms"],
   },
 };
 

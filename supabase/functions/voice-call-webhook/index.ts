@@ -22,18 +22,27 @@ function determineOutcome(
   // Check for opt-out first (highest priority)
   if (
     text.includes("stop calling") ||
+    (text.includes("stop") && !text.includes("stop by")) ||
     text.includes("remove me") ||
     text.includes("do not call") ||
+    text.includes("don't call") ||
     text.includes("take me off") ||
     text.includes("opt out") ||
+    text.includes("unsubscribe") ||
     text.includes("stop contacting")
   ) {
     return "opted_out";
   }
 
-  // Check for acceptance
+  // Check for "already sold" before acceptance
+  if (text.includes("already sold") || text.includes("already got rid of")) {
+    return "already_sold";
+  }
+
+  // Check for acceptance (but not negated)
   if (
     (text.includes("accept") || text.includes("i'll take it") || text.includes("deal")) &&
+    !text.includes("don't accept") && !text.includes("do not accept") && !text.includes("i don't") &&
     (text.includes("yes") ||
       text.includes("sounds good") ||
       text.includes("let's do it") ||
@@ -79,7 +88,9 @@ function determineOutcome(
     text.includes("call back") ||
     text.includes("let me think") ||
     text.includes("need to talk to") ||
-    text.includes("get back to you")
+    text.includes("get back to you") ||
+    text.includes("not right now") ||
+    text.includes("maybe later")
   ) {
     return "callback_requested";
   }
@@ -89,7 +100,6 @@ function determineOutcome(
     text.includes("not interested") ||
     text.includes("no thanks") ||
     text.includes("no thank you") ||
-    text.includes("already sold") ||
     text.includes("not selling") ||
     text.includes("changed my mind")
   ) {
@@ -311,6 +321,27 @@ serve(async (req) => {
         });
       } catch (e) {
         console.error("Failed to send accepted notification:", e);
+      }
+    }
+
+    // ── Post-call SMS follow-up based on outcome ──
+    if (callLog.submission_id) {
+      const smsKey =
+        outcome === "appointment_scheduled" ? "customer_appointment_sms" :
+        outcome === "voicemail_left" ? "customer_voicemail_followup" :
+        outcome === "callback_requested" ? "customer_callback_confirmation" :
+        null;
+
+      if (smsKey) {
+        supabase.functions.invoke("send-notification", {
+          body: { trigger_key: smsKey, submission_id: callLog.submission_id },
+        }).catch(console.error);
+      }
+
+      if (callStatus === "no_answer") {
+        supabase.functions.invoke("send-notification", {
+          body: { trigger_key: "customer_missed_call_text", submission_id: callLog.submission_id },
+        }).catch(console.error);
       }
     }
 

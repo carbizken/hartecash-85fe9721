@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/contexts/TenantContext";
 import { useToast } from "@/hooks/use-toast";
@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Phone, Settings, TrendingUp, Clock, DollarSign,
   PhoneCall, PhoneOff, CheckCircle, AlertTriangle, Loader2,
+  Plus, Pause, Play, ChevronDown, ChevronRight, Megaphone, List,
 } from "lucide-react";
 
 /* ── types & defaults ──────────────────────────────── */
@@ -66,6 +69,12 @@ const VoiceAICampaigns = () => {
     estimatedCost: 0,
   });
 
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [showNewCampaign, setShowNewCampaign] = useState(false);
+  const [newCampaign, setNewCampaign] = useState({ name: "", target: "", max_calls_per_day: 25 });
+  const [callLog, setCallLog] = useState<any[]>([]);
+  const [expandedCall, setExpandedCall] = useState<string | null>(null);
+
   /* ── fetch config + KPIs on mount ── */
   useEffect(() => {
     const fetchData = async () => {
@@ -108,6 +117,14 @@ const VoiceAICampaigns = () => {
         estimatedCost: parseFloat((total * 0.09 * 3).toFixed(2)),
       });
 
+      // Fetch campaigns & call log in parallel
+      const [campRes, logRes] = await Promise.all([
+        (supabase as any).from("voice_campaigns").select("*").eq("dealership_id", dealershipId).order("created_at", { ascending: false }),
+        (supabase as any).from("voice_call_log").select("*").eq("dealership_id", dealershipId).order("created_at", { ascending: false }).limit(30),
+      ]);
+      if (campRes.data) setCampaigns(campRes.data);
+      if (logRes.data) setCallLog(logRes.data);
+
       setLoading(false);
     };
 
@@ -143,6 +160,40 @@ const VoiceAICampaigns = () => {
 
   const updateConfig = <K extends keyof VoiceAIConfig>(key: K, value: VoiceAIConfig[K]) =>
     setConfig((prev) => ({ ...prev, [key]: value }));
+
+  /* ── campaign actions ── */
+  const handleCreateCampaign = async () => {
+    if (!newCampaign.name || !newCampaign.target) return;
+    const { data, error } = await (supabase as any).from("voice_campaigns").insert({
+      dealership_id: dealershipId, name: newCampaign.name, target: newCampaign.target,
+      max_calls_per_day: newCampaign.max_calls_per_day, status: "draft",
+    }).select().single();
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setCampaigns((prev) => [data, ...prev]);
+    setNewCampaign({ name: "", target: "", max_calls_per_day: 25 });
+    setShowNewCampaign(false);
+    toast({ title: "Campaign created", description: `"${data.name}" is ready to activate.` });
+  };
+
+  const toggleCampaignStatus = async (c: any) => {
+    const next = c.status === "active" ? "paused" : "active";
+    await (supabase as any).from("voice_campaigns").update({ status: next }).eq("id", c.id);
+    setCampaigns((prev) => prev.map((x) => (x.id === c.id ? { ...x, status: next } : x)));
+  };
+
+  const STATUS_COLORS: Record<string, string> = {
+    active: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    paused: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    draft: "bg-muted text-muted-foreground border-border",
+    completed: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  };
+
+  const OUTCOME_COLORS: Record<string, string> = {
+    accepted: "bg-emerald-500/10 text-emerald-600", appointment_scheduled: "bg-emerald-600/10 text-emerald-700",
+    wants_higher_offer: "bg-amber-500/10 text-amber-600", callback_requested: "bg-blue-500/10 text-blue-600",
+    not_interested: "bg-muted text-muted-foreground", voicemail_left: "bg-purple-500/10 text-purple-600",
+    opted_out: "bg-red-500/10 text-red-600",
+  };
 
   /* ── loading state ── */
   if (loading) {
@@ -299,7 +350,140 @@ const VoiceAICampaigns = () => {
         <KPICard icon={DollarSign} label="Est. Cost" value={`$${kpis.estimatedCost.toLocaleString()}`} accent="amber" />
       </div>
 
-      {/* Part 2 will add: campaigns table + call log */}
+      {/* ── Section A: Campaigns Table ── */}
+      <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="bg-gradient-to-r from-muted/60 via-muted/30 to-transparent px-6 py-4 border-b border-border/40 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-primary"><Megaphone className="w-4 h-4" /></span>
+            <div>
+              <h3 className="text-sm font-bold text-foreground/90 tracking-tight">Active Campaigns</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Manage outbound calling campaigns</p>
+            </div>
+          </div>
+          <Button size="sm" className="gap-1.5" onClick={() => setShowNewCampaign(true)}><Plus className="w-3.5 h-3.5" />New Campaign</Button>
+        </div>
+        <div className="p-6">
+          {campaigns.length === 0 ? (
+            <div className="text-center py-10">
+              <Megaphone className="w-8 h-8 text-muted-foreground/40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground mb-3">No campaigns yet</p>
+              <Button variant="outline" size="sm" onClick={() => setShowNewCampaign(true)}>Create Campaign</Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b border-border/40 text-xs text-muted-foreground">
+                  <th className="text-left py-2 pr-4 font-medium">Name</th><th className="text-left py-2 pr-4 font-medium">Status</th>
+                  <th className="text-right py-2 pr-4 font-medium">Calls</th><th className="text-right py-2 pr-4 font-medium">Connected</th>
+                  <th className="text-right py-2 pr-4 font-medium">Converted</th><th className="text-left py-2 pr-4 font-medium">Created</th>
+                  <th className="text-right py-2 font-medium">Actions</th>
+                </tr></thead>
+                <tbody>{campaigns.map((c) => (
+                  <tr key={c.id} className="border-b border-border/20 last:border-0">
+                    <td className="py-2.5 pr-4 font-medium text-foreground">{c.name}</td>
+                    <td className="py-2.5 pr-4"><Badge variant="outline" className={`text-[11px] ${STATUS_COLORS[c.status] ?? ""}`}>{c.status}</Badge></td>
+                    <td className="py-2.5 pr-4 text-right text-muted-foreground">{c.total_calls ?? 0}</td>
+                    <td className="py-2.5 pr-4 text-right text-muted-foreground">{c.connected ?? 0}</td>
+                    <td className="py-2.5 pr-4 text-right text-muted-foreground">{c.converted ?? 0}</td>
+                    <td className="py-2.5 pr-4 text-muted-foreground">{c.created_at ? new Date(c.created_at).toLocaleDateString() : "—"}</td>
+                    <td className="py-2.5 text-right">
+                      {(c.status === "active" || c.status === "paused") && (
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => toggleCampaignStatus(c)}>
+                          {c.status === "active" ? <><Pause className="w-3 h-3" />Pause</> : <><Play className="w-3 h-3" />Resume</>}
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* New Campaign Dialog */}
+      <Dialog open={showNewCampaign} onOpenChange={setShowNewCampaign}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>New Campaign</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Campaign Name</label>
+              <Input placeholder="e.g. April Offer Follow-Up" value={newCampaign.name} onChange={(e) => setNewCampaign((p) => ({ ...p, name: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Target Audience</label>
+              <Select value={newCampaign.target} onValueChange={(v) => setNewCampaign((p) => ({ ...p, target: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select target..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="offer_not_accepted_2_14d">Offer Not Accepted (2-14 days)</SelectItem>
+                  <SelectItem value="accepted_no_appointment">Accepted No Appointment</SelectItem>
+                  <SelectItem value="stale_leads_30d">Stale Leads (30+ days)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Max Calls Per Day</label>
+              <Input type="number" min={1} max={200} value={newCampaign.max_calls_per_day} onChange={(e) => setNewCampaign((p) => ({ ...p, max_calls_per_day: Number(e.target.value) }))} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewCampaign(false)}>Cancel</Button>
+            <Button onClick={handleCreateCampaign} disabled={!newCampaign.name || !newCampaign.target}>Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Section B: Recent Call Log ── */}
+      <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="bg-gradient-to-r from-muted/60 via-muted/30 to-transparent px-6 py-4 border-b border-border/40 flex items-center gap-3">
+          <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600"><List className="w-4 h-4" /></span>
+          <div>
+            <h3 className="text-sm font-bold text-foreground/90 tracking-tight">Recent Calls</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Last 30 outbound AI calls</p>
+          </div>
+        </div>
+        <div className="p-6">
+          {callLog.length === 0 ? (
+            <div className="text-center py-10">
+              <PhoneOff className="w-8 h-8 text-muted-foreground/40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No calls yet</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b border-border/40 text-xs text-muted-foreground">
+                  <th className="w-6" /><th className="text-left py-2 pr-4 font-medium">Customer</th>
+                  <th className="text-left py-2 pr-4 font-medium">Vehicle</th><th className="text-left py-2 pr-4 font-medium">Outcome</th>
+                  <th className="text-right py-2 pr-4 font-medium">Duration</th><th className="text-left py-2 font-medium">Date</th>
+                </tr></thead>
+                <tbody>{callLog.map((cl) => {
+                  const isOpen = expandedCall === cl.id;
+                  return (
+                    <Fragment key={cl.id}>
+                      <tr className="border-b border-border/20 last:border-0 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setExpandedCall(isOpen ? null : cl.id)}>
+                        <td className="py-2.5 pr-1 text-muted-foreground">{isOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}</td>
+                        <td className="py-2.5 pr-4 font-medium text-foreground">{cl.customer_name ?? "Unknown"}</td>
+                        <td className="py-2.5 pr-4 text-muted-foreground">{cl.vehicle ?? "—"}</td>
+                        <td className="py-2.5 pr-4"><Badge variant="secondary" className={`text-[11px] ${OUTCOME_COLORS[cl.outcome] ?? ""}`}>{(cl.outcome ?? "unknown").replace(/_/g, " ")}</Badge></td>
+                        <td className="py-2.5 pr-4 text-right text-muted-foreground">{cl.duration_seconds ? `${Math.floor(cl.duration_seconds / 60)}:${String(cl.duration_seconds % 60).padStart(2, "0")}` : "—"}</td>
+                        <td className="py-2.5 text-muted-foreground">{cl.created_at ? new Date(cl.created_at).toLocaleDateString() : "—"}</td>
+                      </tr>
+                      {isOpen && (
+                        <tr className="border-b border-border/20">
+                          <td colSpan={6} className="px-6 py-3 bg-muted/20">
+                            {cl.summary && <p className="text-xs font-medium text-foreground mb-1.5">{cl.summary}</p>}
+                            {cl.transcript ? <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">{cl.transcript}</p> : <p className="text-xs text-muted-foreground italic">No transcript available</p>}
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })}</tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

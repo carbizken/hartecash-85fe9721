@@ -1,6 +1,6 @@
 # Autocurb.io
 
-**The Operating System for Dealer-Direct Vehicle Acquisition.**
+**The operating system for dealer-direct vehicle acquisition.**
 
 Autocurb.io turns a dealership's website, service drive, BDC, sales floor, and
 used-car manager into a single acquisition engine — from the customer's first
